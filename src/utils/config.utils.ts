@@ -27,4 +27,5 @@ if (environment === "development") {
  */
 export const ActiveConfig = {
     ENV: process.env.ENV ?? "development",
+    DATABASE_URL: process.env.DATABASE_URL ?? "",
 };

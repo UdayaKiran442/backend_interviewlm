@@ -1,12 +1,14 @@
+import { CreateCompanyError, CreateCompanyInDBError } from "../exceptions/company.exceptions";
+import { CreateHRInDBError } from "../exceptions/hr.exceptions";
 import { createCompanyInDB } from "../repository/company/company.repository";
 import { createHRInDB } from "../repository/hr/hr.repository";
 import { ICompanySchema } from "../routes/company.route";
 
-export async function createCompany(payload: ICompanySchema){
+export async function createCompany(payload: ICompanySchema) {
     try {
         const company = await createCompanyInDB(payload);
         // TODO: send email invite to hr, run functions in background
-        const hr = await createHRInDB({
+        await createHRInDB({
             companyId: company?.companyId ?? '',
             name: payload.hrName,
             email: payload.hrEmail,
@@ -15,6 +17,9 @@ export async function createCompany(payload: ICompanySchema){
         })
         return company;
     } catch (error) {
-        
+        if (error instanceof CreateCompanyInDBError || error instanceof CreateHRInDBError) {
+            throw error;
+        }
+        throw new CreateCompanyError('Failed to create company', { cause: (error as Error).cause });
     }
 }

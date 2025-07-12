@@ -1,3 +1,4 @@
+import { CreateHRInDBError } from "../../exceptions/hr.exceptions";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { hr } from "../schema";
@@ -16,6 +17,6 @@ export async function createHRInDB(payload: { companyId: string, name: string, e
         }
         await db.insert(hr).values(insertPayload)
     } catch (error) {
-
+        throw new CreateHRInDBError('Failed to create HR in DB', { cause: (error as Error).cause });
     }
 }

@@ -1,6 +1,6 @@
-import { CreateJobInDBError } from "../exceptions/job.exceptions";
+import { CreateJobInDBError, CreateJobError } from "../exceptions/job.exceptions";
 import { createJobInDB } from "../repository/job/job.repository";
-import { ICreateJobSchema } from "../routes/job.route";
+import { ICreateJobSchema } from "../routes/v1/job.route";
 import { createRoundInDB } from "../repository/rounds/rounds.repository";
 import { CreateRoundInDBError } from "../exceptions/round.exceptions";
 
@@ -40,5 +40,6 @@ export async function createJob(payload: ICreateJobSchema) {
         if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError) {
             throw error;
         }
+        throw new CreateJobError('Failed to create job', { cause: (error as Error).cause });
     }
 }

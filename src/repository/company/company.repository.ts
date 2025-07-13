@@ -1,5 +1,5 @@
 import { CreateCompanyInDBError } from "../../exceptions/company.exceptions";
-import { ICompanySchema } from "../../routes/company.route";
+import { ICompanySchema } from "../../routes/v1/company.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { company } from "../schema";

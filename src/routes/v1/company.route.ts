@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import z from "zod";
-import { createCompany } from "../controller/company.controller";
-import { CreateCompanyError, CreateCompanyInDBError } from "../exceptions/company.exceptions";
-import { CreateHRInDBError } from "../exceptions/hr.exceptions";
+import { createCompany } from "../../controller/company.controller";
+import { CreateCompanyError, CreateCompanyInDBError } from "../../exceptions/company.exceptions";
+import { CreateHRInDBError } from "../../exceptions/hr.exceptions";
 
 const companyRoute = new Hono();
 

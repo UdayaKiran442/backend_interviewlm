@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import z from "zod";
-import { CreateJobInDBError } from "../exceptions/job.exceptions";
-import { CreateRoundInDBError } from "../exceptions/round.exceptions";
-import { createJob } from "../controller/job.controller";
+import { CreateJobError, CreateJobInDBError } from "../../exceptions/job.exceptions";
+import { CreateRoundInDBError } from "../../exceptions/round.exceptions";
+import { createJob } from "../../controller/job.controller";
 
 const jobRoute = new Hono();
 
@@ -42,9 +42,10 @@ jobRoute.post('/create', async (c) => {
             const errMessage = JSON.parse(error.message)
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
-        if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError) {
+        if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError || error instanceof CreateJobError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
     }
 })
 

@@ -2,7 +2,7 @@ import { CreateCompanyError, CreateCompanyInDBError } from "../exceptions/compan
 import { CreateHRInDBError } from "../exceptions/hr.exceptions";
 import { createCompanyInDB } from "../repository/company/company.repository";
 import { createHRInDB } from "../repository/hr/hr.repository";
-import { ICompanySchema } from "../routes/company.route";
+import { ICompanySchema } from "../routes/v1/company.route";
 
 export async function createCompany(payload: ICompanySchema) {
     try {

@@ -8,6 +8,20 @@
       "when": 1752318218126,
       "tag": "0000_new_lord_tyger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752395363385,
+      "tag": "0001_sturdy_havok",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752397398959,
+      "tag": "0002_bent_energizer",
+      "breakpoints": true
     }
   ]
 }

@@ -1,19 +1,10 @@
 import { generateNanoId } from "../../utils/nanoid.utils";
-import { IRound } from "../schema";
 import db from "../db";
 import { rounds } from "../schema";
 import { CreateRoundInDBError } from "../../exceptions/round.exceptions";
+import { ICreatRoundInDB } from "../../types/types";
 
-export async function createRoundInDB(payload: {
-    jobId: string,
-    roundNumber: number,
-    roundType: string,
-    questionType: string,
-    duration: number,
-    difficulty: string,
-    roundDescription: string | undefined,
-    isAI: boolean,
-}[]) {
+export async function createRoundInDB(payload: ICreatRoundInDB) {
     try {
         const insertPayload = payload.map((round) => {
             return {

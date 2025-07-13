@@ -2,8 +2,9 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { jobs } from "../schema";
 import { CreateJobInDBError } from "../../exceptions/job.exceptions";
+import { ICreatJobInDB } from "../../types/types";
 
-export async function createJobInDB(payload: { hrId: string, jobTitle: string, jobDescription: string, department: string, package: string | undefined, maximumApplications: number | undefined, companyName: string, location: string }) {
+export async function createJobInDB(payload: ICreatJobInDB) {
     try {
         const insertPayload = {
             jobId: `job-${generateNanoId()}`,
@@ -13,8 +14,7 @@ export async function createJobInDB(payload: { hrId: string, jobTitle: string, j
             department: payload.department,
             package: payload.package,
             maximumApplications: payload.maximumApplications,
-            companyName: payload.companyName,
-            location: payload.location,
+            companyId: payload.companyId,
         }
         await db.insert(jobs).values(insertPayload)
         return insertPayload;

@@ -18,8 +18,7 @@ export const hr = pgTable('hr', {
 export const jobs = pgTable('jobs', {
     jobId: varchar('jobId').primaryKey(),
     hrId: varchar('hrId').notNull(),
-    companyName: varchar('companyName').notNull(),
-    location: varchar('location').notNull(),
+    companyId: varchar('companyId').notNull(),
     jobTitle: varchar('jobTitle').notNull(),
     jobDescription: varchar('jobDescription').notNull(),
     department: varchar('department').notNull(),

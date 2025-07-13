@@ -7,8 +7,7 @@ import { createJob } from "../controller/job.controller";
 const jobRoute = new Hono();
 
 const CreateJobSchema = z.object({
-    companyName: z.string(),
-    location: z.string(),
+    companyId: z.string(),
     jobTitle: z.string(),
     jobDescription: z.string(),
     department: z.string(),

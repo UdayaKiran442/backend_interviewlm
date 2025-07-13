@@ -8,12 +8,11 @@ export async function createJob(payload: ICreateJobSchema) {
     try {
         // create job
         const newJob = await createJobInDB({
-            companyName: payload.companyName,
+            companyId: payload.companyId,
             department: payload.department,
             hrId: payload.hrId,
             jobDescription: payload.jobDescription,
             jobTitle: payload.jobTitle,
-            location: payload.location,
             maximumApplications: payload.maximumApplications,
             package: payload.package,
         })

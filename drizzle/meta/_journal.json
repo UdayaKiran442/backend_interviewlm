@@ -22,6 +22,13 @@
       "when": 1752397398959,
       "tag": "0002_bent_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1752402178408,
+      "tag": "0003_long_maximus",
+      "breakpoints": true
     }
   ]
 }

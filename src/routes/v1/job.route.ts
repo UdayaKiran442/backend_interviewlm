@@ -28,10 +28,12 @@ export type ICreateJobSchema = z.infer<typeof CreateJobSchema> & { hrId: string 
 
 jobRoute.post('/create', async (c) => {
     try {
+        // validate request body
         const validation = CreateJobSchema.safeParse(await c.req.json())
         if (!validation.success) {
             throw validation.error;
         }
+        // call create job controller
         const res = await createJob({
             ...validation.data,
             hrId: "VofeF3rFUHbcjVZeTamp8"

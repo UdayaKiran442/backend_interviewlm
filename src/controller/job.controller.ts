@@ -18,6 +18,7 @@ export async function createJob(payload: ICreateJobSchema) {
         })
 
         // add rounds in db
+        // TODO: Future run this in background if possible
         const newRounds = await createRoundInDB(payload.rounds.map((round) => {
             return {
                 jobId: newJob.jobId,

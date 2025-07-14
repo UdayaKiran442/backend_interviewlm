@@ -1,3 +1,9 @@
+/**
+ * ICreatRoundInDB
+ * 
+ * @description This type is input payload used to create a round in the database
+ */
+
 export type ICreatRoundInDB = {
 	jobId: string;
 	roundNumber: number;
@@ -9,6 +15,11 @@ export type ICreatRoundInDB = {
 	isAI: boolean;
 }[];
 
+/**
+ * ICreatJobInDB
+ * 
+ * @description This type is input payload used to create a job in the database
+ */
 export type ICreatJobInDB = {
 	hrId: string;
 	jobTitle: string;

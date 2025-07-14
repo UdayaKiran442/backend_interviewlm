@@ -1,4 +1,5 @@
-import { CreateHRInDBError } from "../../exceptions/hr.exceptions";
+import { eq } from "drizzle-orm";
+import { CreateHRInDBError, GetHRFromDBError } from "../../exceptions/hr.exceptions";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { hr } from "../schema";
@@ -6,7 +7,7 @@ import { hr } from "../schema";
 export async function createHRInDB(payload: { companyId: string, name: string, email: string, phone: string, isOrgAdmin: boolean }) {
     try {
         const insertPayload = {
-            hrId: generateNanoId(),
+            hrId: `hr-${generateNanoId()}`,
             companyId: payload.companyId,
             name: payload.name,
             email: payload.email,
@@ -20,3 +21,4 @@ export async function createHRInDB(payload: { companyId: string, name: string, e
         throw new CreateHRInDBError('Failed to create HR in DB', { cause: (error as Error).cause });
     }
 }
+

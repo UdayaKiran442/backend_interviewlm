@@ -1,18 +1,18 @@
-export class CreateHRInDBError extends Error {
+export class CreateJobInDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "CreateHRInDBError";
+        this.name = "CreateJobInDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class GetHRFromDBError extends Error {
+export class CreateJobError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "GetHRFromDBError";
+        this.name = "CreateJobError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }

@@ -1,0 +1,1 @@
+ALTER TABLE "rounds" ALTER COLUMN "duration" SET DATA TYPE integer;

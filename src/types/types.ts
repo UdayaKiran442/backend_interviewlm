@@ -1,0 +1,20 @@
+export type ICreatRoundInDB = {
+	jobId: string;
+	roundNumber: number;
+	roundType: string;
+	questionType: string;
+	duration: number;
+	difficulty: string;
+	roundDescription: string | undefined;
+	isAI: boolean;
+}[];
+
+export type ICreatJobInDB = {
+	hrId: string;
+	jobTitle: string;
+	jobDescription: string;
+	department: string;
+	package: string | undefined;
+	maximumApplications: number | undefined;
+	companyId: string;
+};

@@ -22,3 +22,10 @@ export async function createHRInDB(payload: { companyId: string, name: string, e
     }
 }
 
+export async function getHRFromDB(hrId: string) {
+    try {
+        return await db.select().from(hr).where(eq(hr.hrId, hrId))
+    } catch (error) {
+        throw new GetHRFromDBError('Failed to get HR from DB', { cause: (error as Error).cause });
+    }
+}

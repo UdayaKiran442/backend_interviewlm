@@ -1,8 +1,11 @@
-import { CreateJobInDBError, CreateJobError } from "../exceptions/job.exceptions";
-import { createJobInDB } from "../repository/job/job.repository";
-import { ICreateJobSchema } from "../routes/v1/job.route";
+import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdError, CloseJobError } from "../exceptions/job.exceptions";
+import { closeJobInDB, createJobInDB, getJobById } from "../repository/job/job.repository";
+import { ICloseJobSchema, ICreateJobSchema } from "../routes/v1/job.route";
 import { createRoundInDB } from "../repository/rounds/rounds.repository";
 import { CreateRoundInDBError } from "../exceptions/round.exceptions";
+import { getHRFromDB } from "../repository/hr/hr.repository";
+import { NotFoundError, UnauthorizedError } from "../exceptions/common.exceptions";
+import { GetHRFromDBError } from "../exceptions/hr.exceptions";
 
 export async function createJob(payload: ICreateJobSchema) {
     try {
@@ -42,5 +45,37 @@ export async function createJob(payload: ICreateJobSchema) {
             throw error;
         }
         throw new CreateJobError('Failed to create job', { cause: (error as Error).cause });
+    }
+}
+
+export async function closeJob(payload: ICloseJobSchema) {
+    try {
+        // Fetch job and HR details
+        const [job, hr] = await Promise.all([
+            getJobById(payload.jobId),
+            getHRFromDB(payload.hrId),
+        ]);
+
+        if (job.length === 0) {
+            throw new NotFoundError('Job not found');
+        }
+        if (hr.length === 0) {
+            throw new NotFoundError('HR not found');
+        }
+
+        const isOrgAdminOfSameCompany = hr[0].isOrgAdmin && job[0].companyId === hr[0].companyId;
+        const isJobOwner = job[0].hrId === payload.hrId;
+
+        // Only job added by HR or org admin of same company can close the job
+        if (!isOrgAdminOfSameCompany && !isJobOwner) {
+            throw new UnauthorizedError('You are not authorized to close this job');
+        }
+
+        await closeJobInDB(payload.jobId);
+    } catch (error) {
+        if (error instanceof NotFoundError || error instanceof UnauthorizedError || error instanceof CloseJobInDBError || error instanceof GetJobByIdError || error instanceof GetHRFromDBError) {
+            throw error;
+        }
+        throw new CloseJobError('Failed to close job', { cause: (error as Error).cause });
     }
 }

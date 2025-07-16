@@ -71,6 +71,7 @@ export const candidates = pgTable('candidates', {
     willingToRelocate: boolean('willingToRelocate'),
     isOpenToRemote: boolean('isOpenToRemote'),
     resumeLink: varchar('resumeLink'),
+    resumeText: varchar('resumeText'),
     acceptedTermsAndConditions: boolean('acceptedTermsAndConditions'),
     receiveUpdatesOnApplication: boolean('receiveUpdatesOnApplication'),
     isOnboardingCompleted: boolean('isOnboardingCompleted').default(false),

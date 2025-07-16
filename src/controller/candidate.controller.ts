@@ -43,6 +43,7 @@ export async function onboardingCandidate(payload: IOnboardingSchema) {
         if (candidate.length === 0) {
             throw new NotFoundError('Candidate not found');
         }
+        // TODO: upload resume to cloud storage and extract text from it.
         await updateCandidateInDB(payload);
     } catch (error) {
         if (error instanceof GetCandidateByIDFromDBError || error instanceof UpdateCandidateInDBError) {

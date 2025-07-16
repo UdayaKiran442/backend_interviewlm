@@ -43,6 +43,13 @@
       "when": 1752665356069,
       "tag": "0005_sticky_mesmero",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1752666555277,
+      "tag": "0006_furry_xorn",
+      "breakpoints": true
     }
   ]
 }

@@ -61,7 +61,8 @@ const OnboardingSchema = z.object({
 })
 
 export type IOnboardingSchema = z.infer<typeof OnboardingSchema> & {
-    candidateId: string
+    candidateId: string;
+    resumeText?: string;
 }
 
 

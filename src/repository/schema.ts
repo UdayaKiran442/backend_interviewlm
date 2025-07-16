@@ -1,4 +1,4 @@
-import { pgTable, boolean, varchar, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, boolean, varchar, integer, timestamp, json, index } from "drizzle-orm/pg-core";
 
 export const company = pgTable('company', {
     companyId: varchar('companyId').primaryKey(),
@@ -44,5 +44,40 @@ export const rounds = pgTable('rounds', {
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
+
+export const users = pgTable('users', {
+    userId: varchar('userId').primaryKey(),
+    email: varchar('email').notNull().unique(),
+    roles: json('roles').notNull(),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}, (users) => ({
+    usersEmailIdx: index('users_email_idx').on(users.email)
+}))
+
+export const candidates = pgTable('candidates', {
+    candidateId: varchar('candidateId').primaryKey(),
+    firstName: varchar('firstName'),
+    middleName: varchar('middleName'),
+    lastName: varchar('lastName'),
+    email: varchar('email').notNull().unique(),
+    phone: varchar('phone'),
+    location: varchar('location'),
+    linkedInProfile: varchar('linkedInProfile'),
+    githubProfile: varchar('githubProfile'),
+    portfolio: varchar('portfolio'),
+    experience: json('experience'),
+    workAuthorization: varchar('workAuthorization'),
+    willingToRelocate: boolean('willingToRelocate'),
+    isOpenToRemote: varchar('isOpenToRemote'),
+    resumeLink: varchar('resumeLink'),
+    acceptedTermsAndConditions: boolean('acceptedTermsAndConditions'),
+    receiveUpdatesOnApplication: boolean('receiveUpdatesOnApplication'),
+    isOnboardingCompleted: boolean('isOnboardingCompleted').default(false),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}, (candidates) => ({
+    candidatesEmailIdx: index('candidates_email_idx').on(candidates.email)
+}))
 
 export type IRound = typeof rounds;

@@ -69,7 +69,7 @@ export const candidates = pgTable('candidates', {
     experience: json('experience'),
     workAuthorization: varchar('workAuthorization'),
     willingToRelocate: boolean('willingToRelocate'),
-    isOpenToRemote: varchar('isOpenToRemote'),
+    isOpenToRemote: boolean('isOpenToRemote'),
     resumeLink: varchar('resumeLink'),
     acceptedTermsAndConditions: boolean('acceptedTermsAndConditions'),
     receiveUpdatesOnApplication: boolean('receiveUpdatesOnApplication'),
@@ -81,3 +81,4 @@ export const candidates = pgTable('candidates', {
 }))
 
 export type IRound = typeof rounds;
+export type ICandidate = typeof candidates;

@@ -1,8 +1,8 @@
 import db from "../db";
 import { candidates } from "../schema";
 import { eq } from "drizzle-orm";
-import { GetCandidateByEmailFromDBError, AddCandidateInDBError } from "../../exceptions/candidate.exceptions";
-import { ILoginSchema } from "../../routes/v1/candidate.route";
+import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, UpdateCandidateInDBError } from "../../exceptions/candidate.exceptions";
+import { ILoginSchema, IOnboardingSchema } from "../../routes/v1/candidate.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 
 export async function getCandidateByEmailFromDB(email: string){
@@ -10,6 +10,27 @@ export async function getCandidateByEmailFromDB(email: string){
         return await db.select().from(candidates).where(eq(candidates.email, email))
     } catch (error) {
         throw new GetCandidateByEmailFromDBError('Failed to get candidate by email from DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function getCandidateByIDFromDB(candidateId: string){
+    try {
+        return await db.select().from(candidates).where(eq(candidates.candidateId, candidateId))
+    } catch (error) {
+        throw new GetCandidateByIDFromDBError('Failed to get candidate by ID from DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function updateCandidateInDB(payload: IOnboardingSchema) {
+    try {
+        const updatePayload = {
+            ...payload,
+            isOnboardingCompleted: true,
+            updatedAt: new Date(),
+        }
+        await db.update(candidates).set(updatePayload).where(eq(candidates.candidateId, payload.candidateId))
+    } catch (error) {
+        throw new UpdateCandidateInDBError('Failed to update candidate in DB', { cause: (error as Error).cause });
     }
 }
 

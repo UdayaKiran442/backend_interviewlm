@@ -1,6 +1,9 @@
+import { AddCandidateInDBError, GetCandidateByEmailFromDBError } from "../exceptions/candidate.exceptions";
+import { AddUserInDBError, GetUserByEmailFromDBError } from "../exceptions/user.exceptions";
 import { addCandidateInDB, getCandidateByEmailFromDB } from "../repository/candidate/candidate.repository";
 import { addUserInDB, getUserByEmailFromDB } from "../repository/users/users.repository";
 import { ILoginSchema } from "../routes/v1/candidate.route";
+import { LoginCandidateError } from "../exceptions/candidate.exceptions";
 
 export async function loginCandidate(payload: ILoginSchema) {
     try {
@@ -24,6 +27,9 @@ export async function loginCandidate(payload: ILoginSchema) {
         }
         return candidate;
     } catch (error) {
-        
+        if(error instanceof GetUserByEmailFromDBError || error instanceof AddUserInDBError || error instanceof GetCandidateByEmailFromDBError || error instanceof AddCandidateInDBError) {
+            throw error;
+        }
+        throw new LoginCandidateError('Failed to login candidate', { cause: (error as Error).cause });
     }
 }

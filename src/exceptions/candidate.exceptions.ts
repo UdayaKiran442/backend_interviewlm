@@ -17,3 +17,13 @@ export class AddCandidateInDBError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class LoginCandidateError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "LoginCandidateError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}

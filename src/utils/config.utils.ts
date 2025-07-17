@@ -29,4 +29,5 @@ export const ActiveConfig = {
     ENV: process.env.ENV ?? "development",
     DATABASE_URL: process.env.DATABASE_URL ?? "",
     GCP_BUCKET_NAME: process.env.GCP_BUCKET_NAME ?? "",
+    LLAMAINDEX_API: process.env.LLAMAINDEX_API ?? "",
 };

@@ -6,6 +6,8 @@ import { AddUserInDBError, GetUserByEmailFromDBError } from "../exceptions/user.
 
 import { addCandidateInDB, getCandidateByEmailFromDB, getCandidateByIDFromDB, updateCandidateInDB } from "../repository/candidate/candidate.repository";
 import { addUserInDB, getUserByEmailFromDB } from "../repository/users/users.repository";
+import { parsePDF } from "../services/llamaindex.service";
+import { ParsePDFError } from "../exceptions/llamaindex.exceptions";
 
 export async function loginCandidate(payload: ILoginSchema) {
     try {
@@ -39,6 +41,9 @@ export async function loginCandidate(payload: ILoginSchema) {
 export async function onboardingCandidate(payload: IOnboardingSchema) {
     try {
         // update the candidate table
+        if (payload.resumeLink) {
+            payload.resumeText = await parsePDF(payload.resumeLink);
+        }
         const candidate = await getCandidateByIDFromDB(payload.candidateId);
         if (candidate.length === 0) {
             throw new NotFoundError('Candidate not found');
@@ -46,7 +51,7 @@ export async function onboardingCandidate(payload: IOnboardingSchema) {
         // TODO: upload resume to cloud storage and extract text from it.
         await updateCandidateInDB(payload);
     } catch (error) {
-        if (error instanceof GetCandidateByIDFromDBError || error instanceof UpdateCandidateInDBError) {
+        if (error instanceof GetCandidateByIDFromDBError || error instanceof UpdateCandidateInDBError || error instanceof ParsePDFError) {
             throw error;
         }
         throw new UpdateCandidateError('Failed to update candidate', { cause: (error as Error).cause });

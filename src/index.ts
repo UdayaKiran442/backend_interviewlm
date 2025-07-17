@@ -8,6 +8,7 @@ app.get('/', (c) => {
   return c.text(`Hello Hono! ${ActiveConfig.ENV}`)
 })
 
+// v1 router
 app.route('/v1', v1Router)
 
 export default app

@@ -1,49 +1,60 @@
-export class CreateJobInDBError extends Error {
+export class GetCandidateByEmailFromDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "CreateJobInDBError";
+        this.name = "GetCandidateByEmailFromDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class CreateJobError extends Error {
+export class AddCandidateInDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "CreateJobError";
+        this.name = "AddCandidateInDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class GetJobByIdError extends Error {
+export class LoginCandidateError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "GetJobByIdError";
+        this.name = "LoginCandidateError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class CloseJobInDBError extends Error {
+export class GetCandidateByIDFromDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "CloseJobInDBError";
+        this.name = "GetCandidateByIDFromDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class CloseJobError extends Error {
+export class UpdateCandidateInDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "CloseJobError";
+        this.name = "UpdateCandidateInDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class UpdateCandidateError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "UpdateCandidateError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+    

@@ -1,0 +1,2 @@
+ALTER TABLE "application_timeline" ADD COLUMN "createdAt" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "application_timeline" ADD COLUMN "updatedAt" timestamp DEFAULT now() NOT NULL;

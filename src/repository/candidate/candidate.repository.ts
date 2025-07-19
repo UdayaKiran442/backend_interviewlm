@@ -49,4 +49,11 @@ export async function addCandidateInDB(payload: ILoginSchema) {
         throw new AddCandidateInDBError('Failed to add candidate in DB', { cause: (error as Error).cause });
     }
 }
-    
+
+export async function updateCandidateJobsInDB(payload: {candidateId: string, jobs: string[]}) {
+    try {
+        await db.update(candidates).set({jobs: payload.jobs}).where(eq(candidates.candidateId, payload.candidateId))
+    } catch (error) {
+        
+    }
+}    

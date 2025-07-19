@@ -3,6 +3,7 @@ import db from "../db";
 import { rounds } from "../schema";
 import { CreateRoundInDBError } from "../../exceptions/round.exceptions";
 import { ICreatRoundInDB } from "../../types/types";
+import { eq } from "drizzle-orm";
 
 export async function createRoundInDB(payload: ICreatRoundInDB) {
     try {
@@ -25,5 +26,12 @@ export async function createRoundInDB(payload: ICreatRoundInDB) {
         return insertPayload;
     } catch (error) {
         throw new CreateRoundInDBError('Failed to create round in DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function getRoundsByJobIdFromDB(jobId: string) {
+    try {
+        return await db.select().from(rounds).where(eq(rounds.jobId, jobId))
+    } catch (error) {
     }
 }

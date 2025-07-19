@@ -50,6 +50,20 @@
       "when": 1752666555277,
       "tag": "0006_furry_xorn",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1752908199304,
+      "tag": "0007_far_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1752908473032,
+      "tag": "0008_lethal_black_tom",
+      "breakpoints": true
     }
   ]
 }

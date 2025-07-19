@@ -43,7 +43,9 @@ export const rounds = pgTable('rounds', {
     isAI: boolean('isAI').notNull(),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-})
+}, (rounds) => ({
+    roundsJobIdIndex: index('rounds_job_id_idx').on(rounds.jobId)
+}))
 
 export const users = pgTable('users', {
     userId: varchar('userId').primaryKey(),
@@ -72,6 +74,7 @@ export const candidates = pgTable('candidates', {
     isOpenToRemote: boolean('isOpenToRemote'),
     resumeLink: varchar('resumeLink'),
     resumeText: varchar('resumeText'),
+    jobs: json('jobs').notNull().default([]),
     acceptedTermsAndConditions: boolean('acceptedTermsAndConditions'),
     receiveUpdatesOnApplication: boolean('receiveUpdatesOnApplication'),
     isOnboardingCompleted: boolean('isOnboardingCompleted').default(false),
@@ -80,6 +83,34 @@ export const candidates = pgTable('candidates', {
 }, (candidates) => ({
     candidatesEmailIdx: index('candidates_email_idx').on(candidates.email)
 }))
+
+export const applications = pgTable('applications', {
+    applicationId: varchar('applicationId').primaryKey(),
+    candidateId: varchar("candidateId").notNull(),
+    jobId: varchar('jobId').notNull(),
+    resumeLink: varchar('resumeLink').notNull(),
+    coverLetterLink: varchar('coverLetterLink'),
+    status: varchar('status').notNull(), // enum -> applied, rejected, accepted
+    currentRound: varchar('currentRound').notNull(), // id of round
+    resumeText: varchar('resumeText').notNull(),
+    coverLetterText: varchar('coverLetterText'),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}, (applications) => ({
+    applicationJobIdIndex: index('application_job_id_idx').on(applications.jobId),
+    applicationCandidateIdIndex: index('application_candidate_id_idx').on(applications.candidateId)
+}))
+
+export const applicationTimeline = pgTable('application_timeline', {
+    applicationTimelineId: varchar('applicationTimelineId').primaryKey(),
+    applicationId: varchar('applicationId').notNull(),
+    roundId: varchar('roundId'),
+    title: varchar('title').notNull(),
+    description: varchar('description'),
+    status: varchar('status').notNull(),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
 
 export type IRound = typeof rounds;
 export type ICandidate = typeof candidates;

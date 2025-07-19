@@ -25,9 +25,9 @@ export async function createJobInDB(payload: ICreatJobInDB) {
     }
 }
 
-export async function getJobById(jobId: string) {
+export async function getJobByIdFromDB(jobId: string) {
     try {
-       return await db.select().from(jobs).where(eq(jobs.jobId, jobId))
+        return await db.select().from(jobs).where(eq(jobs.jobId, jobId))
     } catch (error) {
         throw new GetJobByIdError('Failed to get job by id', { cause: (error as Error).cause });
     }
@@ -35,9 +35,15 @@ export async function getJobById(jobId: string) {
 
 export async function closeJobInDB(jobId: string) {
     try {
-        await db.update(jobs).set({ isJobOpen: false }).where(eq(jobs.jobId, jobId))
+        await db.update(jobs).set({ isJobOpen: false, updatedAt: new Date() }).where(eq(jobs.jobId, jobId))
     } catch (error) {
         throw new CloseJobInDBError('Failed to close job', { cause: (error as Error).cause });
     }
 }
-    
+
+export async function updateJobApplicationsCountInDB(payload: {jobId: string, count: number}) {
+    try {
+        await db.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
+    } catch (error) {
+    }
+}

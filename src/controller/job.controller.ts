@@ -1,5 +1,5 @@
 import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdError, CloseJobError } from "../exceptions/job.exceptions";
-import { closeJobInDB, createJobInDB, getJobById } from "../repository/job/job.repository";
+import { closeJobInDB, createJobInDB, getJobByIdFromDB } from "../repository/job/job.repository";
 import { ICloseJobSchema, ICreateJobSchema } from "../routes/v1/job.route";
 import { createRoundInDB } from "../repository/rounds/rounds.repository";
 import { CreateRoundInDBError } from "../exceptions/round.exceptions";
@@ -52,7 +52,7 @@ export async function closeJob(payload: ICloseJobSchema) {
     try {
         // Fetch job and HR details
         const [job, hr] = await Promise.all([
-            getJobById(payload.jobId),
+            getJobByIdFromDB(payload.jobId),
             getHRFromDB(payload.hrId),
         ]);
 

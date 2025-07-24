@@ -22,7 +22,7 @@ candidateRouter.post('/login', async (c) => {
         }
         const payload = validation.data
         const candidate = await loginCandidate(payload)
-        return c.json({ success: true, message: 'Candidate logged in', candidate }, 200)
+        return c.json({ success: true, message: 'Candidate logged in', candidate, role: 'candidate' }, 200)
     } catch (error) {
         if (error instanceof z.ZodError) {
             const errMessage = JSON.parse(error.message)

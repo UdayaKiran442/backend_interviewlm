@@ -71,6 +71,13 @@
       "when": 1753442387789,
       "tag": "0009_foamy_blur",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1753447591458,
+      "tag": "0010_smart_mulholland_black",
+      "breakpoints": true
     }
   ]
 }

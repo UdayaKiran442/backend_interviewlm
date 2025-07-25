@@ -119,6 +119,7 @@ export const resumeScreening = pgTable('resume_screening', {
     candidateId: varchar('candidateId').notNull(),
     matchScore: real('matchScore').notNull(),
     feedback: json('feedback'),
+    status: varchar('status').notNull().default('pending'), // enum -> pending, rejected, accepted
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })

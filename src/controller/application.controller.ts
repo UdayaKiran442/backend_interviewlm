@@ -5,15 +5,19 @@ import { addApplicationToDB, checkIfCandidateHasAlreadyAppliedForJob } from "../
 import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { getCandidateByIDFromDB, updateCandidateJobsInDB } from "../repository/candidate/candidate.repository";
 import { closeJobInDB, getJobByIdFromDB, updateJobApplicationsCountInDB } from "../repository/job/job.repository";
+import { insertScreeningResultsToDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
 import { IApplyJobSchema } from "../routes/v1/applicatons.route";
+import { queryVectorEmbeddings } from "../services/pinecone.service";
+import { ActiveConfig } from "../utils/config.utils";
+import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 
 export async function applyJob(payload: IApplyJobSchema) {
     try {
         const [job, rounds, application] = await Promise.all([
             getJobByIdFromDB(payload.jobId),
             getRoundsByJobIdFromDB(payload.jobId),
-            checkIfCandidateHasAlreadyAppliedForJob({ candidateId: payload.candidateId, jobId: payload.jobId })
+            checkIfCandidateHasAlreadyAppliedForJob({ candidateId: payload.candidateId, jobId: payload.jobId }),
         ])
 
         // check if the job exists
@@ -66,6 +70,28 @@ export async function applyJob(payload: IApplyJobSchema) {
                 status: "pending",
                 description: "Your resume is under review.",
                 roundId: newApplication.currentRound,
+            })
+            // // TODO: run in background
+            const resumeEmbeddings = await upsertVectorEmbeddings({
+                indexName: ActiveConfig.RESUME_INDEX,
+                text: payload.resumeText,
+                metadata: {
+                    applicationId: newApplication.applicationId,
+                    resumeText: payload.resumeText,
+                    jobId: payload.jobId,
+                }
+            })
+            const matchScore = await queryVectorEmbeddings({
+                indexName: ActiveConfig.JD_INDEX,
+                vector: resumeEmbeddings ?? [],
+                jobId: payload.jobId
+            })
+            // add in resume screening table
+            await insertScreeningResultsToDB({
+                applicationId: newApplication.applicationId,
+                candidateId: payload.candidateId,
+                jobId: payload.jobId,
+                matchScore: matchScore?.matches[0].score ?? 0,
             })
         }
         // check maximum applications and close job if limit is reached

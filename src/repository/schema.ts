@@ -1,4 +1,4 @@
-import { pgTable, boolean, varchar, integer, timestamp, json, index } from "drizzle-orm/pg-core";
+import { pgTable, boolean, varchar, integer, timestamp, json, index, real } from "drizzle-orm/pg-core";
 
 export const company = pgTable('company', {
     companyId: varchar('companyId').primaryKey(),
@@ -112,5 +112,17 @@ export const applicationTimeline = pgTable('application_timeline', {
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
+export const resumeScreening = pgTable('resume_screening', {
+    screeningId: varchar('screeningId').primaryKey(),
+    applicationId: varchar('applicationId').notNull(),
+    jobId: varchar('jobId').notNull(),
+    candidateId: varchar('candidateId').notNull(),
+    matchScore: real('matchScore').notNull(),
+    feedback: json('feedback'),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
 export type IRound = typeof rounds;
 export type ICandidate = typeof candidates;
+export type IResumeScreening = typeof resumeScreening;

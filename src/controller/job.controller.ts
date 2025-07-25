@@ -6,18 +6,32 @@ import { CreateRoundInDBError } from "../exceptions/round.exceptions";
 import { getHRFromDB } from "../repository/hr/hr.repository";
 import { NotFoundError, UnauthorizedError } from "../exceptions/common.exceptions";
 import { GetHRFromDBError } from "../exceptions/hr.exceptions";
+import { generateEmbeddings } from "../services/openai.service";
+import { ActiveConfig } from "../utils/config.utils";
+import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 
 export async function createJob(payload: ICreateJobSchema) {
     try {
-        // create job
-        const newJob = await createJobInDB({
-            companyId: payload.companyId,
-            department: payload.department,
-            hrId: payload.hrId,
-            jobDescription: payload.jobDescription,
-            jobTitle: payload.jobTitle,
-            maximumApplications: payload.maximumApplications,
-            package: payload.package,
+        // create job and generate embeddings for job description
+        const [newJob] = await Promise.all([
+            createJobInDB({
+                companyId: payload.companyId,
+                department: payload.department,
+                hrId: payload.hrId,
+                jobDescription: payload.jobDescription,
+                jobTitle: payload.jobTitle,
+                maximumApplications: payload.maximumApplications,
+                package: payload.package,
+            })
+        ])
+
+        // TODO: run in background
+        await upsertVectorEmbeddings({
+            indexName: ActiveConfig.JD_INDEX,
+            text: payload.jobDescription,
+            metadata: {
+                jobId: newJob.jobId,
+            }
         })
 
         // add rounds in db

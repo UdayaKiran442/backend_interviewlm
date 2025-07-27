@@ -1,38 +1,29 @@
-export class JobAlreadyAppliedError extends Error {
+
+export class FetchScreeningResumesError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "JobAlreadyAppliedError";
+        this.name = "FetchScreeningResumesError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class ApplyJobError extends Error {
+export class InsertScreeningResultsToDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "ApplyJobError";
+        this.name = "InsertScreeningResultsToDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class AddApplicationToDBError extends Error {
+export class GetScreeningResumesFromDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "AddApplicationToDBError";
-        if (options?.cause) this.cause = options.cause;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-export class CheckCandidateAppliedInDBError extends Error {
-    public cause?: unknown;
-    constructor(message: string, options?: { cause?: unknown }) {
-        super(message);
-        this.name = "CheckCandidateAppliedInDBError";
+        this.name = "GetScreeningResumesFromDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }

@@ -1,0 +1,1 @@
+ALTER TABLE "resume_screening" ADD COLUMN "status" varchar DEFAULT 'pending' NOT NULL;

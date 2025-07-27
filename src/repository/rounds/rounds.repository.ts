@@ -1,7 +1,7 @@
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { rounds } from "../schema";
-import { CreateRoundInDBError } from "../../exceptions/round.exceptions";
+import { CreateRoundInDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
 import { ICreatRoundInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
 
@@ -33,5 +33,6 @@ export async function getRoundsByJobIdFromDB(jobId: string) {
     try {
         return await db.select().from(rounds).where(eq(rounds.jobId, jobId))
     } catch (error) {
+        throw new GetRoundsByJobIdFromDBError('Failed to get rounds by job id', { cause: (error as Error).cause });
     }
 }

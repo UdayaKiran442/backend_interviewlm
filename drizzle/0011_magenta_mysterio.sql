@@ -1,0 +1,1 @@
+ALTER TABLE "applications" ADD COLUMN "skills" json NOT NULL;

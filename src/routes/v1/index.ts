@@ -4,6 +4,7 @@ import jobRoute from "./job.route";
 import candidateRoute from "./candidate.route";
 import serviceRoute from "./service.route";
 import applicationsRoute from "./applicatons.route";
+import screeningRoute from "./screening.route";
 
 const v1Router = new Hono();
 
@@ -12,5 +13,6 @@ v1Router.route('/job', jobRoute)
 v1Router.route('/candidate', candidateRoute)
 v1Router.route('/service', serviceRoute)
 v1Router.route('/applications', applicationsRoute)
+v1Router.route('/screening', screeningRoute)
 
 export default v1Router;

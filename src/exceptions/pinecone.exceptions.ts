@@ -1,39 +1,30 @@
-export class JobAlreadyAppliedError extends Error {
+export class UpsertVectorEmbeddingsServiceError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "JobAlreadyAppliedError";
+        this.name = "UpsertVectorEmbeddingsServiceError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class ApplyJobError extends Error {
+export class QueryVectorEmbeddingsServiceError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "ApplyJobError";
+        this.name = "QueryVectorEmbeddingsServiceError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class AddApplicationToDBError extends Error {
+export class UpsertVectorEmbeddingsError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "AddApplicationToDBError";
+        this.name = "UpsertVectorEmbeddingsError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
-
-export class CheckCandidateAppliedInDBError extends Error {
-    public cause?: unknown;
-    constructor(message: string, options?: { cause?: unknown }) {
-        super(message);
-        this.name = "CheckCandidateAppliedInDBError";
-        if (options?.cause) this.cause = options.cause;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
+    

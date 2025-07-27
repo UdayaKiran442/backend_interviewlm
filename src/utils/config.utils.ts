@@ -30,4 +30,10 @@ export const ActiveConfig = {
     DATABASE_URL: process.env.DATABASE_URL ?? "",
     GCP_BUCKET_NAME: process.env.GCP_BUCKET_NAME ?? "",
     LLAMAINDEX_API: process.env.LLAMAINDEX_API ?? "",
+    RESUME_VECTOR_DB: process.env.RESUME_VECTOR_DB ?? "",
+    JD_VECTOR_DB: process.env.JD_VECTOR_DB ?? "",
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
+    PINECONE_API_KEY: process.env.PINECONE_API_KEY ?? "",
+    RESUME_INDEX: process.env.RESUME_INDEX ?? "",
+    JD_INDEX: process.env.JD_INDEX ?? "",
 };

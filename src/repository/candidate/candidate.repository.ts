@@ -1,7 +1,7 @@
 import db from "../db";
 import { candidates } from "../schema";
 import { eq } from "drizzle-orm";
-import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, UpdateCandidateInDBError } from "../../exceptions/candidate.exceptions";
+import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, UpdateCandidateInDBError, UpdateCandidateJobsInDBError } from "../../exceptions/candidate.exceptions";
 import { ILoginSchema, IOnboardingSchema } from "../../routes/v1/candidate.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 
@@ -54,6 +54,6 @@ export async function updateCandidateJobsInDB(payload: {candidateId: string, job
     try {
         await db.update(candidates).set({jobs: payload.jobs}).where(eq(candidates.candidateId, payload.candidateId))
     } catch (error) {
-        
+        throw new UpdateCandidateJobsInDBError('Failed to update candidate jobs in DB', { cause: (error as Error).cause });
     }
 }    

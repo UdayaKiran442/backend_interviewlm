@@ -4,6 +4,8 @@ import { CloseJobError, CloseJobInDBError, CreateJobError, CreateJobInDBError } 
 import { CreateRoundInDBError } from "../../exceptions/round.exceptions";
 import { closeJob, createJob } from "../../controller/job.controller";
 import { NotFoundError, UnauthorizedError } from "../../exceptions/common.exceptions";
+import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
+import { GenerateEmbeddingsServiceError } from "../../exceptions/openai.exceptions";
 
 const jobRoute = new Hono();
 
@@ -45,7 +47,7 @@ jobRoute.post('/create', async (c) => {
             const errMessage = JSON.parse(error.message)
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
-        if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError || error instanceof CreateJobError) {
+        if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError || error instanceof CreateJobError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

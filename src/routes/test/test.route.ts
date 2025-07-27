@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { generateEmbeddings, generateResumeSummary } from "../../services/openai.service";
-import { queryVectorEmbeddings, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
+import { generateEmbeddingsService, generateResumeSummary } from "../../services/openai.service";
+import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 
 const testRouter = new Hono()
@@ -61,8 +61,8 @@ Bus Booking API                                                                 
 Education
 Bachelor of Technology - Computer Science
 BML Munjal University, Gurugram`;
-        const resumeEmbeddings = await generateEmbeddings(resumeText)
-        const matchScore = await queryVectorEmbeddings({
+        const resumeEmbeddings = await generateEmbeddingsService(resumeText)
+        const matchScore = await queryVectorEmbeddingsService({
             indexName: ActiveConfig.JD_INDEX,
             vector: resumeEmbeddings ?? [],
             jobId: "job-wxQ8EagEnzcb8JURSvYH1"
@@ -131,7 +131,7 @@ Bachelor of Technology - Computer Science
 BML Munjal University, Gurugram`;
     try {
         const resumeSummary = await generateResumeSummary(resumeText)
-        const resumeEmbeddings = await generateEmbeddings(resumeSummary.summary)
+        const resumeEmbeddings = await generateEmbeddingsService(resumeSummary.summary)
         await upsertVectorEmbeddingsService({
             indexName: ActiveConfig.RESUME_INDEX,
             vector: resumeEmbeddings ?? [],

@@ -1,5 +1,6 @@
 import { Pinecone } from '@pinecone-database/pinecone'
 import { ActiveConfig } from '../utils/config.utils'
+import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsServiceError } from '../exceptions/pinecone.exceptions'
 
 const pinecone = new Pinecone({
     apiKey: ActiveConfig.PINECONE_API_KEY,
@@ -16,11 +17,11 @@ export async function upsertVectorEmbeddingsService(payload: { indexName: string
             }
         ])
     } catch (error) {
-        console.log(error)
+        throw new UpsertVectorEmbeddingsServiceError('Failed to upsert vector embeddings', { cause: (error as Error).cause });
     }
 }
 
-export async function queryVectorEmbeddings(payload: { indexName: string, vector: number[], jobId: string }) {
+export async function queryVectorEmbeddingsService(payload: { indexName: string, vector: number[], jobId: string }) {
     try {
         const index = pinecone.index(payload.indexName)
         return await index.query({
@@ -32,7 +33,7 @@ export async function queryVectorEmbeddings(payload: { indexName: string, vector
             topK: 10,
         })
     } catch (error) {
-
+        throw new QueryVectorEmbeddingsServiceError('Failed to query vector embeddings', { cause: (error as Error).cause });
     }
 }
 

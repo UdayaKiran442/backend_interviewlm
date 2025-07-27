@@ -6,9 +6,11 @@ import { CreateRoundInDBError } from "../exceptions/round.exceptions";
 import { getHRFromDB } from "../repository/hr/hr.repository";
 import { NotFoundError, UnauthorizedError } from "../exceptions/common.exceptions";
 import { GetHRFromDBError } from "../exceptions/hr.exceptions";
-import { generateEmbeddings } from "../services/openai.service";
+import { generateEmbeddingsService } from "../services/openai.service";
 import { ActiveConfig } from "../utils/config.utils";
 import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
+import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
+import { GenerateEmbeddingsServiceError } from "../exceptions/openai.exceptions";
 
 export async function createJob(payload: ICreateJobSchema) {
     try {
@@ -55,7 +57,7 @@ export async function createJob(payload: ICreateJobSchema) {
             rounds: newRounds,
         }
     } catch (error) {
-        if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError) {
+        if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError) {
             throw error;
         }
         throw new CreateJobError('Failed to create job', { cause: (error as Error).cause });

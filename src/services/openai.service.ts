@@ -1,11 +1,12 @@
 import OpenAI from "openai";
 import { ActiveConfig } from "../utils/config.utils";
+import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
 
 const openai = new OpenAI({
     apiKey: ActiveConfig.OPENAI_API_KEY,
 })
 
-export async function generateEmbeddings(text: string) {
+export async function generateEmbeddingsService(text: string) {
     try {
         const embeddings = await openai.embeddings.create({
             model: "text-embedding-3-small",
@@ -13,7 +14,7 @@ export async function generateEmbeddings(text: string) {
         })
         return embeddings.data[0].embedding
     } catch (error) {
-        console.log(error)
+        throw new GenerateEmbeddingsServiceError('Failed to generate embeddings', { cause: (error as Error).cause });
     }
 }
 
@@ -57,6 +58,6 @@ Return output in **valid JSON** format like:
         })
         return JSON.parse(response.choices[0].message.content ?? "");
     } catch (error) {
-
+        throw new GenerateResumeSummaryServiceError('Failed to generate resume summary', { cause: (error as Error).cause });
     }
 }

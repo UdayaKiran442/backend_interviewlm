@@ -57,3 +57,13 @@ export class JobClosedError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class UpdateJobApplicationsCountInDBError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "UpdateJobApplicationsCountInDBError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}

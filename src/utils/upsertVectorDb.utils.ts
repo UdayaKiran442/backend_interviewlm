@@ -1,9 +1,11 @@
-import { generateEmbeddings } from "../services/openai.service";
+import { GenerateEmbeddingsServiceError } from "../exceptions/openai.exceptions";
+import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
+import { generateEmbeddingsService } from "../services/openai.service";
 import { upsertVectorEmbeddingsService } from "../services/pinecone.service";
 
 export async function upsertVectorEmbeddings(payload: { indexName: string, text: string, metadata: any }) {
     try {
-        const embeddings = await generateEmbeddings(payload.text);
+        const embeddings = await generateEmbeddingsService(payload.text);
         if (embeddings) {
             await upsertVectorEmbeddingsService({
                 indexName: payload.indexName,
@@ -13,6 +15,9 @@ export async function upsertVectorEmbeddings(payload: { indexName: string, text:
         }
         return embeddings
     } catch (error) {
-        console.log(error)
+        if (error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError) {
+            throw error;
+        }
+        throw new UpsertVectorEmbeddingsError('Failed to upsert vector embeddings', { cause: (error as Error).cause });
     }
 }

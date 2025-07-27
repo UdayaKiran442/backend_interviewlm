@@ -3,7 +3,7 @@ import db from "../db";
 import { IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { applications, candidates, resumeScreening } from "../schema";
-import { GetScreeningResumesFromDBError } from "../../exceptions/round.exceptions";
+import { GetScreeningResumesFromDBError, InsertScreeningResultsToDBError } from "../../exceptions/screening.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
     try {
@@ -18,7 +18,7 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
         }
         await db.insert(resumeScreening).values(insertPayload)
     } catch (error) {
-
+        throw new InsertScreeningResultsToDBError('Failed to insert screening results to DB', { cause: (error as Error).cause });
     }
 }
 

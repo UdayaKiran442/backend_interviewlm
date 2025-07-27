@@ -1,7 +1,13 @@
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../exceptions/applications.exceptions";
 import { ApplyJobError, JobAlreadyAppliedError } from "../exceptions/applications.exceptions";
+import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
+import { UpdateCandidateJobsInDBError } from "../exceptions/candidate.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
-import { CloseJobInDBError, JobClosedError } from "../exceptions/job.exceptions";
+import { CloseJobInDBError, GetJobByIdError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../exceptions/job.exceptions";
+import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
+import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
+import { GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
+import { InsertScreeningResultsToDBError } from "../exceptions/screening.exceptions";
 import { addApplicationToDB, checkCandidateAppliedInDB } from "../repository/application/application.repository";
 import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { getCandidateByIDFromDB, updateCandidateJobsInDB } from "../repository/candidate/candidate.repository";
@@ -10,7 +16,7 @@ import { insertScreeningResultsToDB } from "../repository/resumeScreening/resume
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
 import { IApplyJobSchema } from "../routes/v1/applicatons.route";
 import { generateResumeSummary } from "../services/openai.service";
-import { queryVectorEmbeddings } from "../services/pinecone.service";
+import { queryVectorEmbeddingsService } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
 import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 
@@ -89,7 +95,7 @@ export async function applyJob(payload: IApplyJobSchema) {
                     jobId: payload.jobId,
                 }
             })
-            const matchScore = await queryVectorEmbeddings({
+            const matchScore = await queryVectorEmbeddingsService({
                 indexName: ActiveConfig.JD_INDEX,
                 vector: resumeEmbeddings ?? [],
                 jobId: payload.jobId
@@ -108,7 +114,7 @@ export async function applyJob(payload: IApplyJobSchema) {
         }
         return newApplication;
     } catch (error) {
-        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError) {
+        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
             throw error;
         }
         throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).cause });

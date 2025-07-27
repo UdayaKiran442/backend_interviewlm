@@ -1,6 +1,7 @@
 import { generateNanoId } from "../../utils/nanoid.utils"
 import db from "../db"
 import { applicationTimeline } from "../schema"
+import { AddApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
 
 export async function addApplicationTimelineToDB(payload: { applicationId: string, roundId?: string, title: string, description?: string, status: string }) {
     try {
@@ -16,6 +17,6 @@ export async function addApplicationTimelineToDB(payload: { applicationId: strin
         }
         await db.insert(applicationTimeline).values(insertPayload)
     } catch (error) {
-
+        throw new AddApplicationTimelineToDBError('Failed to add application timeline to DB', { cause: (error as Error).cause });
     }
 }

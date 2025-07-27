@@ -1,7 +1,7 @@
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { jobs } from "../schema";
-import { CloseJobInDBError, CreateJobInDBError } from "../../exceptions/job.exceptions";
+import { CloseJobInDBError, CreateJobInDBError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
 import { ICreatJobInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
 import { GetJobByIdError } from "../../exceptions/job.exceptions";
@@ -45,5 +45,6 @@ export async function updateJobApplicationsCountInDB(payload: {jobId: string, co
     try {
         await db.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
     } catch (error) {
+        throw new UpdateJobApplicationsCountInDBError('Failed to update job applications count', { cause: (error as Error).cause });
     }
 }

@@ -1,30 +1,30 @@
-
-export class FetchScreeningResumesError extends Error {
+export class UpsertVectorEmbeddingsServiceError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "FetchScreeningResumesError";
+        this.name = "UpsertVectorEmbeddingsServiceError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class InsertScreeningResultsToDBError extends Error {
+export class QueryVectorEmbeddingsServiceError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "InsertScreeningResultsToDBError";
+        this.name = "QueryVectorEmbeddingsServiceError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class GetScreeningResumesFromDBError extends Error {
+export class UpsertVectorEmbeddingsError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "GetScreeningResumesFromDBError";
+        this.name = "UpsertVectorEmbeddingsError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }
 }
+    

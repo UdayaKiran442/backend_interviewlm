@@ -94,6 +94,7 @@ export const applications = pgTable('applications', {
     currentRound: varchar('currentRound').notNull(), // id of round
     resumeText: varchar('resumeText').notNull(),
     coverLetterText: varchar('coverLetterText'),
+    skills: json('skills').notNull(),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }, (applications) => ({

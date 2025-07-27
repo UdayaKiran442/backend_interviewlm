@@ -1,23 +1,26 @@
+import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../exceptions/applications.exceptions";
 import { ApplyJobError, JobAlreadyAppliedError } from "../exceptions/applications.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
 import { CloseJobInDBError, JobClosedError } from "../exceptions/job.exceptions";
-import { addApplicationToDB, checkIfCandidateHasAlreadyAppliedForJob } from "../repository/application/application.repository";
+import { addApplicationToDB, checkCandidateAppliedInDB } from "../repository/application/application.repository";
 import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { getCandidateByIDFromDB, updateCandidateJobsInDB } from "../repository/candidate/candidate.repository";
 import { closeJobInDB, getJobByIdFromDB, updateJobApplicationsCountInDB } from "../repository/job/job.repository";
 import { insertScreeningResultsToDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
 import { IApplyJobSchema } from "../routes/v1/applicatons.route";
+import { generateResumeSummary } from "../services/openai.service";
 import { queryVectorEmbeddings } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
 import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 
 export async function applyJob(payload: IApplyJobSchema) {
     try {
-        const [job, rounds, application] = await Promise.all([
+        const [job, rounds, application, resumeSummary] = await Promise.all([
             getJobByIdFromDB(payload.jobId),
             getRoundsByJobIdFromDB(payload.jobId),
-            checkIfCandidateHasAlreadyAppliedForJob({ candidateId: payload.candidateId, jobId: payload.jobId }),
+            checkCandidateAppliedInDB({ candidateId: payload.candidateId, jobId: payload.jobId }),
+            generateResumeSummary(payload.resumeText)
         ])
 
         // check if the job exists
@@ -38,6 +41,9 @@ export async function applyJob(payload: IApplyJobSchema) {
         // set current round
         if (rounds && rounds.length > 0) {
             payload.currentRoundId = rounds[0].roundId
+        }
+        if (resumeSummary.skills.length > 0) {
+            payload.skills = resumeSummary.skills
         }
 
         // apply to job
@@ -71,13 +77,15 @@ export async function applyJob(payload: IApplyJobSchema) {
                 description: "Your resume is under review.",
                 roundId: newApplication.currentRound,
             })
-            // // TODO: run in background
+            // TODO: run in background
             const resumeEmbeddings = await upsertVectorEmbeddings({
                 indexName: ActiveConfig.RESUME_INDEX,
-                text: payload.resumeText,
+                text: resumeSummary.summary,
                 metadata: {
                     applicationId: newApplication.applicationId,
                     resumeText: payload.resumeText,
+                    summary: resumeSummary.summary,
+                    skills: resumeSummary.skills,
                     jobId: payload.jobId,
                 }
             })
@@ -100,7 +108,7 @@ export async function applyJob(payload: IApplyJobSchema) {
         }
         return newApplication;
     } catch (error) {
-        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError) {
+        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError) {
             throw error;
         }
         throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).cause });

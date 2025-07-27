@@ -1,6 +1,9 @@
-import { generateNanoId } from "../../utils/nanoid.utils";
+import { and, eq, gte } from "drizzle-orm";
 import db from "../db";
-import { resumeScreening } from "../schema";
+import { IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
+import { generateNanoId } from "../../utils/nanoid.utils";
+import { applications, candidates, resumeScreening } from "../schema";
+import { GetScreeningResumesFromDBError } from "../../exceptions/round.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
     try {
@@ -16,5 +19,17 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
         await db.insert(resumeScreening).values(insertPayload)
     } catch (error) {
 
+    }
+}
+
+export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesSchema) {
+    try {
+        let query = db.select().from(resumeScreening).where(eq(resumeScreening.jobId, payload.jobId));
+        if (payload.matchScore) {
+            query = db.select().from(resumeScreening).where(and(eq(resumeScreening.jobId, payload.jobId), gte(resumeScreening.matchScore, payload.matchScore)));
+        }
+        return await query.leftJoin(candidates, eq(resumeScreening.candidateId, candidates.candidateId));
+    } catch (error) {
+        throw new GetScreeningResumesFromDBError('Failed to get screening resumes from DB', { cause: (error as Error).cause });
     }
 }

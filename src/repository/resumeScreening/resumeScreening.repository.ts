@@ -1,8 +1,8 @@
-import { and, eq, gte, inArray, SQL } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import db from "../db";
 import { IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
-import { applications, candidates, resumeScreening } from "../schema";
+import { candidates, resumeScreening } from "../schema";
 import { GetScreeningResumesFromDBError, InsertScreeningResultsToDBError } from "../../exceptions/screening.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
@@ -22,7 +22,7 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
     }
 }
 
-export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesSchema, applicationIds?: string[]) {
+export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesSchema) {
     try {
         const selectedFields = {
             screeningId: resumeScreening.screeningId,
@@ -46,10 +46,6 @@ export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesS
         // Conditionally add more filters to the conditions array.
         if (payload.matchScore) {
             conditions.push(gte(resumeScreening.matchScore, payload.matchScore));
-        }
-
-        if (applicationIds && applicationIds.length > 0) {
-            conditions.push(inArray(resumeScreening.applicationId, applicationIds));
         }
 
         // Build the query by applying all conditions at once.

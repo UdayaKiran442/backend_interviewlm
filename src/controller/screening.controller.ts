@@ -19,13 +19,20 @@ export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchem
                 jobId: payload.jobId,
                 vector: promptEmbeddings ?? [],
             })
-            const applicationIds = queryResponse?.matches?.map((match) => match.metadata?.applicationId) as string[] | undefined
-            const filteredResumes = await getScreeningResumesFromDB(payload, applicationIds)
+            const filteredResumes = await getScreeningResumesFromDB(payload)
             // replace matchScore with score from queryResponse
+            // Build a map from applicationId to score
+            const matchScoreMap = new Map<string | number | true | string[], number>();
+            queryResponse?.matches?.forEach((match) => {
+                if (match.metadata?.applicationId) {
+                    matchScoreMap.set(match.metadata.applicationId, match?.score ?? 0);
+                }
+            });
+
+            // Assign matchScore using the map
             filteredResumes?.forEach((resume) => {
-                const matchScore = queryResponse?.matches?.find((match) => match.metadata?.applicationId === resume.applicationId)?.score
-                resume.matchScore = matchScore ?? 0
-            })
+                resume.matchScore = matchScoreMap.get(resume.applicationId) ?? 0;
+            });
             return filteredResumes
         }
         return await getScreeningResumesFromDB(payload);

@@ -9,8 +9,6 @@ import { QueryVectorEmbeddingsServiceError } from "../exceptions/pinecone.except
 
 export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchema) {
     try {
-        // call db function
-        const resumes = await getScreeningResumesFromDB(payload)
         if (payload.prompt) {
             // convert prompt to vector embeddings
             const promptEmbeddings = await generateEmbeddingsService(payload.prompt);
@@ -21,8 +19,8 @@ export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchem
                 jobId: payload.jobId,
                 vector: promptEmbeddings ?? [],
             })
-            const applicationIds = queryResponse?.matches?.map((match) => match.metadata?.applicationId)
-            const filteredResumes = resumes?.filter((resume) => applicationIds?.includes(resume.applicationId))
+            const applicationIds = queryResponse?.matches?.map((match) => match.metadata?.applicationId) as string[] | undefined
+            const filteredResumes = await getScreeningResumesFromDB(payload, applicationIds)
             // replace matchScore with score from queryResponse
             filteredResumes?.forEach((resume) => {
                 const matchScore = queryResponse?.matches?.find((match) => match.metadata?.applicationId === resume.applicationId)?.score
@@ -30,7 +28,7 @@ export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchem
             })
             return filteredResumes
         }
-        return resumes;
+        return await getScreeningResumesFromDB(payload);
     } catch (error) {
         if (error instanceof GenerateEmbeddingsServiceError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof GetScreeningResumesFromDBError) {
             throw error;

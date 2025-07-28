@@ -22,7 +22,13 @@ export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchem
                 vector: promptEmbeddings ?? [],
             })
             const applicationIds = queryResponse?.matches?.map((match) => match.metadata?.applicationId)
-            return resumes?.filter((resume) => applicationIds?.includes(resume.resume_screening.applicationId))
+            const filteredResumes = resumes?.filter((resume) => applicationIds?.includes(resume.applicationId))
+            // replace matchScore with score from queryResponse
+            filteredResumes?.forEach((resume) => {
+                const matchScore = queryResponse?.matches?.find((match) => match.metadata?.applicationId === resume.applicationId)?.score
+                resume.matchScore = matchScore ?? 0
+            })
+            return filteredResumes
         }
         return resumes;
     } catch (error) {

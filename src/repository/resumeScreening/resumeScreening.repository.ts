@@ -24,9 +24,37 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
 
 export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesSchema) {
     try {
-        let query = db.select().from(resumeScreening).where(eq(resumeScreening.jobId, payload.jobId));
+        let query = db.select({
+            screeningId: resumeScreening.screeningId,
+            applicationId: resumeScreening.applicationId,
+            jobId: resumeScreening.jobId,
+            candidateId: resumeScreening.candidateId,
+            matchScore: resumeScreening.matchScore,
+            feedback: resumeScreening.feedback,
+            status: resumeScreening.status,
+            createdAt: resumeScreening.createdAt,
+            firstName: candidates.firstName,
+            lastName: candidates.lastName,
+            email: candidates.email,
+            phone: candidates.phone,
+            location: candidates.location,
+        }).from(resumeScreening).where(eq(resumeScreening.jobId, payload.jobId));
         if (payload.matchScore) {
-            query = db.select().from(resumeScreening).where(and(eq(resumeScreening.jobId, payload.jobId), gte(resumeScreening.matchScore, payload.matchScore)));
+            query = db.select({
+                screeningId: resumeScreening.screeningId,
+                applicationId: resumeScreening.applicationId,
+                jobId: resumeScreening.jobId,
+                candidateId: resumeScreening.candidateId,
+                matchScore: resumeScreening.matchScore,
+                feedback: resumeScreening.feedback,
+                status: resumeScreening.status,
+                createdAt: resumeScreening.createdAt,
+                firstName: candidates.firstName,
+                lastName: candidates.lastName,
+                email: candidates.email,
+                phone: candidates.phone,
+                location: candidates.location,
+            }).from(resumeScreening).where(and(eq(resumeScreening.jobId, payload.jobId), gte(resumeScreening.matchScore, payload.matchScore)));
         }
         return await query.leftJoin(candidates, eq(resumeScreening.candidateId, candidates.candidateId));
     } catch (error) {

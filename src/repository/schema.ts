@@ -123,7 +123,12 @@ export const resumeScreening = pgTable('resume_screening', {
     status: varchar('status').notNull().default('pending'), // enum -> pending, rejected, accepted
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-})
+}, (resumeScreening) => ({
+    resumeScreeningApplicationIdIndex: index('resume_screening_application_id_idx').on(resumeScreening.applicationId),
+    resumeScreeningJobIdIndex: index('resume_screening_job_id_idx').on(resumeScreening.jobId),
+    resumeScreeningCandidateIdIndex: index('resume_screening_candidate_id_idx').on(resumeScreening.candidateId),
+    resumeScreeningMatchScoreIndex: index('resume_screening_match_score_idx').on(resumeScreening.matchScore)
+}))
 
 export type IRound = typeof rounds;
 export type ICandidate = typeof candidates;

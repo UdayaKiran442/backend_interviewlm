@@ -2,7 +2,7 @@ import { and, eq, gte } from "drizzle-orm";
 import db from "../db";
 import { IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
-import { candidates, resumeScreening } from "../schema";
+import { applications, candidates, resumeScreening } from "../schema";
 import { GetScreeningResumesFromDBError, InsertScreeningResultsToDBError } from "../../exceptions/screening.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
@@ -32,12 +32,14 @@ export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesS
             matchScore: resumeScreening.matchScore,
             feedback: resumeScreening.feedback,
             status: resumeScreening.status,
-            createdAt: resumeScreening.createdAt,
+            appliedAt: resumeScreening.createdAt,
             firstName: candidates.firstName,
             lastName: candidates.lastName,
             email: candidates.email,
             phone: candidates.phone,
+            experience: candidates.experience,
             location: candidates.location,
+            skills: applications.skills,
         };
 
         // Start with the base condition for the WHERE clause.
@@ -53,7 +55,8 @@ export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesS
             .select(selectedFields)
             .from(resumeScreening)
             .where(and(...conditions))
-            .leftJoin(candidates, eq(resumeScreening.candidateId, candidates.candidateId));
+            .leftJoin(candidates, eq(resumeScreening.candidateId, candidates.candidateId))
+            .leftJoin(applications, eq(resumeScreening.applicationId, applications.applicationId));
 
     } catch (error) {
         throw new GetScreeningResumesFromDBError('Failed to get screening resumes from DB', { cause: (error as Error).cause });

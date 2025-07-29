@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import z from "zod";
-import { fetchScreeningResumes } from "../../controller/screening.controller";
-import { GenerateEmbeddingsServiceError } from "../../exceptions/openai.exceptions";
+import { fetchResumeScreeningDetails, fetchScreeningResumes } from "../../controller/screening.controller";
+import { GenerateEmbeddingsServiceError, GenerateResumeFeedbackServiceError } from "../../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
-import { FetchScreeningResumesError, GetScreeningResumesFromDBError } from "../../exceptions/screening.exceptions";
+import { FetchResumeScreeningDetailsError, FetchScreeningResumesError, GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, UpdateFeedbackInDBError } from "../../exceptions/screening.exceptions";
+import { NotFoundError } from "../../exceptions/common.exceptions";
 
 const screeningRoute = new Hono()
 
@@ -33,6 +34,36 @@ screeningRoute.post('/fetch/resumes', async (c) => {
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
         if (error instanceof GenerateEmbeddingsServiceError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof FetchScreeningResumesError || error instanceof GetScreeningResumesFromDBError) {
+            return c.json({ success: false, message: error.message, error: error.cause }, 400)
+        }
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
+    }
+})
+
+const FetchResumeScreeningDetailsSchema = z.object({
+    screeningId: z.string(),
+})
+
+export type IFetchResumeScreeningDetailsSchema = z.infer<typeof FetchResumeScreeningDetailsSchema> & { hrId: string }
+
+screeningRoute.post('/fetch/details', async (c) => {
+    try {
+        const validation = FetchResumeScreeningDetailsSchema.safeParse(await c.req.json())
+        if (!validation.success) {
+            throw validation.error
+        }
+        const payload = {
+            ...validation.data,
+            hrId: "VofeF3rFUHbcjVZeTamp8"
+        }
+        const res = await fetchResumeScreeningDetails(payload)
+        return c.json({ success: true, message: 'Resume screening details fetched', res }, 200)
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            const errMessage = JSON.parse(error.message)
+            return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
+        }
+        if (error instanceof FetchResumeScreeningDetailsError || error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateFeedbackInDBError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

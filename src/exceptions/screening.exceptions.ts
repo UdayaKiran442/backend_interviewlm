@@ -28,3 +28,33 @@ export class GetScreeningResumesFromDBError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class FetchResumeScreeningDetailsError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "FetchResumeScreeningDetailsError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+export class GetResumeScreeningDetailsFromDBError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "GetResumeScreeningDetailsFromDBError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+export class UpdateFeedbackInDBError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "UpdateFeedbackInDBError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}

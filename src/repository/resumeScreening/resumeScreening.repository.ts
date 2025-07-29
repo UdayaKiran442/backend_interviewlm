@@ -1,9 +1,9 @@
 import { and, eq, gte } from "drizzle-orm";
 import db from "../db";
-import { IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
+import { IFetchResumeScreeningDetailsSchema, IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
-import { applications, candidates, resumeScreening } from "../schema";
-import { GetScreeningResumesFromDBError, InsertScreeningResultsToDBError } from "../../exceptions/screening.exceptions";
+import { applications, candidates, jobs, resumeScreening } from "../schema";
+import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateFeedbackInDBError } from "../../exceptions/screening.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
     try {
@@ -60,5 +60,32 @@ export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesS
 
     } catch (error) {
         throw new GetScreeningResumesFromDBError('Failed to get screening resumes from DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function getResumeScreeningDetailsFromDB(payload: IFetchResumeScreeningDetailsSchema) {
+    try {
+        return await db.select({
+            screeningId: resumeScreening.screeningId,
+            applicationId: resumeScreening.applicationId,
+            jobId: resumeScreening.jobId,
+            candidateId: resumeScreening.candidateId,
+            matchScore: resumeScreening.matchScore,
+            feedback: resumeScreening.feedback,
+            status: resumeScreening.status,
+            appliedAt: resumeScreening.createdAt,
+            jobDescription: jobs.jobDescription,
+            resumeText: applications.resumeText,
+        }).from(resumeScreening).where(eq(resumeScreening.screeningId, payload.screeningId)).leftJoin(jobs, eq(resumeScreening.jobId, jobs.jobId)).leftJoin(applications, eq(resumeScreening.applicationId, applications.applicationId))
+    } catch (error) {
+        throw new GetResumeScreeningDetailsFromDBError('Failed to get resume screening details from DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function updateFeedbackInDB(payload:{screeningId: string, feedback: object}){
+    try {
+        await db.update(resumeScreening).set({feedback: payload.feedback, updatedAt: new Date()}).where(eq(resumeScreening.screeningId, payload.screeningId))
+    } catch (error) {
+        throw new UpdateFeedbackInDBError('Failed to update feedback in DB', { cause: (error as Error).cause });
     }
 }

@@ -44,7 +44,8 @@ export const rounds = pgTable('rounds', {
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }, (rounds) => ({
-    roundsJobIdIndex: index('rounds_job_id_idx').on(rounds.jobId)
+    roundsJobIdIndex: index('rounds_job_id_idx').on(rounds.jobId),
+    roundsRoundNumberIndex: index('rounds_round_number_idx').on(rounds.roundNumber)
 }))
 
 export const users = pgTable('users', {
@@ -111,7 +112,10 @@ export const applicationTimeline = pgTable('application_timeline', {
     status: varchar('status').notNull(),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-})
+}, (applicationTimeline) => ({
+    applicationIdIdx: index('application_id_idx').on(applicationTimeline.applicationId),
+    roundIdIdx: index('round_id_idx').on(applicationTimeline.roundId)
+}))
 
 export const resumeScreening = pgTable('resume_screening', {
     screeningId: varchar('screeningId').primaryKey(),

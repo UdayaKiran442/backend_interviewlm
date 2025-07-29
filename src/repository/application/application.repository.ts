@@ -3,7 +3,7 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { applications } from "../schema";
 import { and, eq } from "drizzle-orm";
-import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../../exceptions/applications.exceptions";
+import { AddApplicationToDBError, CheckCandidateAppliedInDBError, UpdateApplicationRoundToDBError, UpdateApplicationStatusInDBError } from "../../exceptions/applications.exceptions";
 
 export async function addApplicationToDB(payload: IApplyJobSchema) {
     try {
@@ -33,5 +33,21 @@ export async function checkCandidateAppliedInDB(payload: { candidateId: string, 
         return await db.select().from(applications).where(and(eq(applications.candidateId, payload.candidateId), eq(applications.jobId, payload.jobId)))
     } catch (error) {
         throw new CheckCandidateAppliedInDBError('Failed to check if candidate has already applied for job', { cause: (error as Error).cause });
+    }
+}
+
+export async function updateApplicationRoundToDB(payload: { applicationId: string, roundId: string}) {
+    try {
+        await db.update(applications).set({currentRound: payload.roundId, updatedAt: new Date()}).where(eq(applications.applicationId, payload.applicationId))
+    } catch (error) {
+        throw new UpdateApplicationRoundToDBError('Failed to update application round to DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function updateApplicationStatusInDB(payload: {applicationId: string, status: string}){
+    try {
+        await db.update(applications).set({status: payload.status, updatedAt: new Date()}).where(eq(applications.applicationId, payload.applicationId))
+    } catch (error) {
+        throw new UpdateApplicationStatusInDBError('Failed to update application status in DB', { cause: (error as Error).cause });
     }
 }

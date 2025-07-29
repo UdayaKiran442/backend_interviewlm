@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { generateEmbeddingsService, generateResumeSummary } from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
+import { generateNanoId } from "../../utils/nanoid.utils";
 
 const testRouter = new Hono()
 
@@ -154,6 +155,16 @@ BML Munjal University, Gurugram`;
         // return c.json({ queryResponse })
     } catch (error) {
 
+    }
+})
+
+testRouter.get('/v2', async (c) => {
+    try {
+        const nanodId = `round-${generateNanoId()}`
+        return c.json({ success: true, message: 'Applications fetched', nanodId }, 200)
+    } catch (error) {
+       
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
     }
 })
 

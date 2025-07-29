@@ -1,0 +1,1 @@
+CREATE INDEX "rounds_round_number_idx" ON "rounds" USING btree ("roundNumber");

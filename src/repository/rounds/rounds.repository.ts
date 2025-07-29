@@ -1,9 +1,9 @@
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { rounds } from "../schema";
-import { CreateRoundInDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
+import { CreateRoundInDBError, GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
 import { ICreatRoundInDB } from "../../types/types";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function createRoundInDB(payload: ICreatRoundInDB) {
     try {
@@ -29,10 +29,21 @@ export async function createRoundInDB(payload: ICreatRoundInDB) {
     }
 }
 
-export async function getRoundsByJobIdFromDB(jobId: string) {
+export async function getRoundsByJobIdFromDB(jobId: string, roundNumber?: number) {
     try {
+        if (roundNumber) {
+            return await db.select().from(rounds).where(and(eq(rounds.jobId, jobId), eq(rounds.roundNumber, roundNumber)))
+        }
         return await db.select().from(rounds).where(eq(rounds.jobId, jobId))
     } catch (error) {
         throw new GetRoundsByJobIdFromDBError('Failed to get rounds by job id', { cause: (error as Error).cause });
+    }
+}
+
+export async function getRoundByIdFromDB(roundId: string) {
+    try {
+        return await db.select().from(rounds).where(eq(rounds.roundId, roundId))
+    } catch (error) {
+        throw new GetRoundByIdFromDBError('Failed to get round by id', { cause: (error as Error).cause });
     }
 }

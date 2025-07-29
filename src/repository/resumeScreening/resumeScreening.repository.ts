@@ -3,7 +3,7 @@ import db from "../db";
 import { IFetchResumeScreeningDetailsSchema, IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { applications, candidates, jobs, resumeScreening } from "../schema";
-import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateFeedbackInDBError } from "../../exceptions/screening.exceptions";
+import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateFeedbackInDBError, UpdateScreeningStatusInDBError } from "../../exceptions/screening.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
     try {
@@ -89,3 +89,12 @@ export async function updateFeedbackInDB(payload:{screeningId: string, feedback:
         throw new UpdateFeedbackInDBError('Failed to update feedback in DB', { cause: (error as Error).cause });
     }
 }
+
+export async function updateScreeningStatusInDB(payload:{screeningId: string, status: string}){
+    try {
+        await db.update(resumeScreening).set({status: payload.status, updatedAt: new Date()}).where(eq(resumeScreening.screeningId, payload.screeningId))
+    } catch (error) {
+        throw new UpdateScreeningStatusInDBError('Failed to update screening status in DB', { cause: (error as Error).cause });
+    }
+}
+    

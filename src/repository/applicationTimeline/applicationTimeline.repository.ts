@@ -1,7 +1,8 @@
 import { generateNanoId } from "../../utils/nanoid.utils"
 import db from "../db"
 import { applicationTimeline } from "../schema"
-import { AddApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
+import { AddApplicationTimelineToDBError, UpdateApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
+import { and, eq } from "drizzle-orm";
 
 export async function addApplicationTimelineToDB(payload: { applicationId: string, roundId?: string, title: string, description?: string, status: string }) {
     try {
@@ -20,3 +21,20 @@ export async function addApplicationTimelineToDB(payload: { applicationId: strin
         throw new AddApplicationTimelineToDBError('Failed to add application timeline to DB', { cause: (error as Error).cause });
     }
 }
+
+export async function updateApplicationTimelineToDB(payload: { applicationId: string, roundId: string, title: string, description?: string, status: string }) {
+    try {
+        const updatedPayload = {
+            applicationId: payload.applicationId,
+            roundId: payload.roundId,
+            title: payload.title,
+            description: payload.description,
+            status: payload.status,
+            updatedAt: new Date(),
+        }
+        await db.update(applicationTimeline).set(updatedPayload).where(and(eq(applicationTimeline.applicationId,payload.applicationId), eq(applicationTimeline.roundId, payload.roundId)))
+    } catch (error) {
+        throw new UpdateApplicationTimelineToDBError('Failed to update application timeline to DB', { cause: (error as Error).cause });
+    }
+}
+    

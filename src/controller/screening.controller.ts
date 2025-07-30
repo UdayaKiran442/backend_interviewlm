@@ -1,6 +1,6 @@
 import { IFetchResumeScreeningDetailsSchema, IFetchScreeningResumesSchema } from "../routes/v1/screening.route";
-import { FetchResumeScreeningDetailsError, FetchScreeningResumesError, GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, UpdateFeedbackInDBError } from "../exceptions/screening.exceptions";
-import { getResumeScreeningDetailsFromDB, getScreeningResumesFromDB, updateFeedbackInDB } from "../repository/resumeScreening/resumeScreening.repository";
+import { FetchResumeScreeningDetailsError, FetchScreeningResumesError, GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, UpdateResumeScreeningInDBError } from "../exceptions/screening.exceptions";
+import { getResumeScreeningDetailsFromDB, getScreeningResumesFromDB, updateResumeScreeningInDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { generateEmbeddingsService, generateResumeFeedbackService } from "../services/openai.service";
 import { queryVectorEmbeddingsService } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
@@ -61,7 +61,7 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
                 resumeText: resumeScreeningDetails[0].resumeText ?? ''
             })
             // TODO: update feedback in db in background
-            await updateFeedbackInDB({
+            await updateResumeScreeningInDB({
                 screeningId: resumeScreeningDetails[0].screeningId,
                 feedback: feedback
             })
@@ -71,7 +71,7 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
         // if present return details
         return resumeScreeningDetails[0];
     } catch (error) {
-        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateFeedbackInDBError) {
+        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError) {
             throw error
         }
         throw new FetchResumeScreeningDetailsError('Failed to fetch resume screening details', { cause: (error as Error).cause });

@@ -49,21 +49,12 @@ export class GetResumeScreeningDetailsFromDBError extends Error {
     }
 }
 
-export class UpdateFeedbackInDBError extends Error {
-    public cause?: unknown;
-    constructor(message: string, options?: { cause?: unknown }) {
-        super(message);
-        this.name = "UpdateFeedbackInDBError";
-        if (options?.cause) this.cause = options.cause;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
 
-export class UpdateScreeningStatusInDBError extends Error {
+export class UpdateResumeScreeningInDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "UpdateScreeningStatusInDBError";
+        this.name = "UpdateResumeScreeningInDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }

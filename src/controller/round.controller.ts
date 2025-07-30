@@ -2,13 +2,13 @@ import { UpdateApplicationRoundToDBError, UpdateApplicationStatusInDBError } fro
 import { UpdateApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
 import { GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
-import { UpdateScreeningStatusInDBError } from "../exceptions/screening.exceptions";
+import { UpdateResumeScreeningInDBError } from "../exceptions/screening.exceptions";
 import { updateApplicationRoundToDB, updateApplicationStatusInDB } from "../repository/application/application.repository";
 import { updateApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
-import { updateScreeningStatusInDB } from "../repository/resumeScreening/resumeScreening.repository";
+import { updateResumeScreeningInDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundByIdFromDB, getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
 import { IQualifyCandidateSchema } from "../routes/v1/round.router";
-
+import { QualifyCandidateError } from "../exceptions/round.exceptions";
 
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
@@ -41,7 +41,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     roundId: nextRound[0].roundId
                 }),
                 // update in resume screening table
-                updateScreeningStatusInDB({
+                updateResumeScreeningInDB({
                     screeningId: payload.screeningId,
                     status: payload.isQualified ? 'qualified' : 'rejected'
                 })
@@ -59,8 +59,9 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 
         }
     } catch (error) {
-        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateApplicationRoundToDBError || error instanceof UpdateScreeningStatusInDBError || error instanceof UpdateApplicationStatusInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateApplicationRoundToDBError || error instanceof UpdateApplicationStatusInDBError || error instanceof UpdateResumeScreeningInDBError) {
             throw error
         }
+        throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).cause });
     }
 }

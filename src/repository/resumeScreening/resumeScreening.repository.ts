@@ -3,7 +3,7 @@ import db from "../db";
 import { IFetchResumeScreeningDetailsSchema, IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { applications, candidates, jobs, resumeScreening } from "../schema";
-import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateFeedbackInDBError, UpdateScreeningStatusInDBError } from "../../exceptions/screening.exceptions";
+import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 
 export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
     try {
@@ -82,19 +82,22 @@ export async function getResumeScreeningDetailsFromDB(payload: IFetchResumeScree
     }
 }
 
-export async function updateFeedbackInDB(payload:{screeningId: string, feedback: object}){
+export async function updateResumeScreeningInDB(payload: {
+    screeningId: string,
+    applicationId?: string,
+    jobId?: string,
+    candidateId?: string,
+    matchScore?: number,
+    feedback?: object,
+    status?: string,
+}){
     try {
-        await db.update(resumeScreening).set({feedback: payload.feedback, updatedAt: new Date()}).where(eq(resumeScreening.screeningId, payload.screeningId))
+        const updatedPayload = {
+            ...payload,
+            updatedAt: new Date()
+        }
+        await db.update(resumeScreening).set(updatedPayload).where(eq(resumeScreening.screeningId, payload.screeningId))
     } catch (error) {
-        throw new UpdateFeedbackInDBError('Failed to update feedback in DB', { cause: (error as Error).cause });
+        throw new UpdateResumeScreeningInDBError('Failed to update resume screening in DB', { cause: (error as Error).cause });
     }
 }
-
-export async function updateScreeningStatusInDB(payload:{screeningId: string, status: string}){
-    try {
-        await db.update(resumeScreening).set({status: payload.status, updatedAt: new Date()}).where(eq(resumeScreening.screeningId, payload.screeningId))
-    } catch (error) {
-        throw new UpdateScreeningStatusInDBError('Failed to update screening status in DB', { cause: (error as Error).cause });
-    }
-}
-    

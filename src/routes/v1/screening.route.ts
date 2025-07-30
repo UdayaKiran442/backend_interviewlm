@@ -3,7 +3,7 @@ import z from "zod";
 import { fetchResumeScreeningDetails, fetchScreeningResumes } from "../../controller/screening.controller";
 import { GenerateEmbeddingsServiceError, GenerateResumeFeedbackServiceError } from "../../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
-import { FetchResumeScreeningDetailsError, FetchScreeningResumesError, GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, UpdateFeedbackInDBError } from "../../exceptions/screening.exceptions";
+import { FetchResumeScreeningDetailsError, FetchScreeningResumesError, GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError } from "../../exceptions/screening.exceptions";
 import { NotFoundError } from "../../exceptions/common.exceptions";
 
 const screeningRoute = new Hono()
@@ -63,7 +63,7 @@ screeningRoute.post('/fetch/details', async (c) => {
             const errMessage = JSON.parse(error.message)
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
-        if (error instanceof FetchResumeScreeningDetailsError || error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateFeedbackInDBError) {
+        if (error instanceof FetchResumeScreeningDetailsError || error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

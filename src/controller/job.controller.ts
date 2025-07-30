@@ -11,6 +11,9 @@ import { ActiveConfig } from "../utils/config.utils";
 import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError } from "../exceptions/openai.exceptions";
+import vectorEmbeddingsQueue from "../services/bullmq/queue/vectorEmbeddings.queue";
+import worker from "../services/bullmq/workers/vectorEmbeddings.worker";
+import { VECTOR_EMBEDDINGS_QUEUE } from "../constants/constants";
 
 export async function createJob(payload: ICreateJobSchema) {
     try {
@@ -27,13 +30,20 @@ export async function createJob(payload: ICreateJobSchema) {
             })
         ])
 
-        // TODO: run in background
-        await upsertVectorEmbeddings({
+        vectorEmbeddingsQueue.add(VECTOR_EMBEDDINGS_QUEUE, {
             indexName: ActiveConfig.JD_INDEX,
-            text: payload.jobDescription,
-            metadata: {
-                jobId: newJob.jobId,
-            }
+            jobDescription: payload.jobDescription,
+            jobId: newJob.jobId,
+        })
+        worker.on('progress', () => {
+            console.log('Job progress')
+        })
+        worker.on('completed', () => {
+            console.log('Job completed')
+        })
+        worker.on('failed', (job, error) => {
+            console.log('Job failed', job, error)
+            throw new UpsertVectorEmbeddingsError('Failed to upsert vector embeddings', { cause: error })
         })
 
         // add rounds in db

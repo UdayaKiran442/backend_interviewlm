@@ -36,4 +36,6 @@ export const ActiveConfig = {
     PINECONE_API_KEY: process.env.PINECONE_API_KEY ?? "",
     RESUME_INDEX: process.env.RESUME_INDEX ?? "",
     JD_INDEX: process.env.JD_INDEX ?? "",
+    REDIS_URL: process.env.REDIS_URL ?? "",
+    REDIS_TOKEN: process.env.REDIS_TOKEN ?? "",
 };

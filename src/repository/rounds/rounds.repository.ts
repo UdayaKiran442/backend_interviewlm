@@ -4,9 +4,11 @@ import { rounds } from "../schema";
 import { CreateRoundInDBError, GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
 import { ICreatRoundInDB } from "../../types/types";
 import { and, eq } from "drizzle-orm";
+import { dbTx } from "../db.types";
 
-export async function createRoundInDB(payload: ICreatRoundInDB) {
+export async function createRoundInDB(payload: ICreatRoundInDB, tx?: dbTx) {
     try {
+        const dbConnection = tx || db;
         const insertPayload = payload.map((round) => {
             return {
                 roundId: `round-${generateNanoId()}`,
@@ -22,7 +24,7 @@ export async function createRoundInDB(payload: ICreatRoundInDB) {
                 updatedAt: new Date(),
             }
         })
-        await db.insert(rounds).values(insertPayload)
+        await dbConnection.insert(rounds).values(insertPayload)
         return insertPayload;
     } catch (error) {
         throw new CreateRoundInDBError('Failed to create round in DB', { cause: (error as Error).cause });

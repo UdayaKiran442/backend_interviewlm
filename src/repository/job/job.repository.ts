@@ -5,9 +5,11 @@ import { CloseJobInDBError, CreateJobInDBError, UpdateJobApplicationsCountInDBEr
 import { ICreatJobInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
 import { GetJobByIdError } from "../../exceptions/job.exceptions";
+import { dbTx } from "../db.types";
 
-export async function createJobInDB(payload: ICreatJobInDB) {
+export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
     try {
+        const dbConnection = tx || db;
         const insertPayload = {
             jobId: `job-${generateNanoId()}`,
             hrId: payload.hrId,
@@ -18,7 +20,7 @@ export async function createJobInDB(payload: ICreatJobInDB) {
             maximumApplications: payload.maximumApplications,
             companyId: payload.companyId,
         }
-        await db.insert(jobs).values(insertPayload)
+        await dbConnection.insert(jobs).values(insertPayload)
         return insertPayload;
     } catch (error) {
         throw new CreateJobInDBError('Failed to create job in DB', { cause: (error as Error).cause });

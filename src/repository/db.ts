@@ -1,10 +1,12 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
 
 import { ActiveConfig } from "../utils/config.utils";
 
-const sql = neon(ActiveConfig.DATABASE_URL);
-const db = drizzle(sql);
+const pool = new Pool({
+    connectionString: ActiveConfig.DATABASE_URL,
+});
+const db = drizzle({client: pool});
 
 export default db;
 

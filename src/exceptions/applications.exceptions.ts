@@ -38,21 +38,11 @@ export class CheckCandidateAppliedInDBError extends Error {
     }
 }
 
-export class UpdateApplicationRoundToDBError extends Error {
+export class UpdateApplicationInDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "UpdateApplicationRoundToDBError";
-        if (options?.cause) this.cause = options.cause;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-export class UpdateApplicationStatusInDBError extends Error {
-    public cause?: unknown;
-    constructor(message: string, options?: { cause?: unknown }) {
-        super(message);
-        this.name = "UpdateApplicationRoundToDBError";
+        this.name = "UpdateApplicationInDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }

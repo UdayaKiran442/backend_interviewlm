@@ -3,9 +3,9 @@ import z from "zod";
 import { qualifyCandidate } from "../../controller/round.controller";
 import { GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
 import { UpdateApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
-import { UpdateApplicationRoundToDBError, UpdateApplicationStatusInDBError } from "../../exceptions/applications.exceptions";
 import { UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 import { NotFoundError } from "../../exceptions/common.exceptions";
+import { UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
 
 const roundRouter = new Hono();
 
@@ -39,7 +39,7 @@ roundRouter.post('/qualify/candidate', async (c) => {
         if (error instanceof NotFoundError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 404)
         }
-        if (error instanceof GetRoundByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateApplicationRoundToDBError || error instanceof UpdateApplicationStatusInDBError || error instanceof UpdateResumeScreeningInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

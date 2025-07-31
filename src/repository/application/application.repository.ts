@@ -4,9 +4,11 @@ import db from "../db";
 import { applications } from "../schema";
 import { and, eq } from "drizzle-orm";
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
+import { dbTx } from "../db.types";
 
-export async function addApplicationToDB(payload: IApplyJobSchema) {
+export async function addApplicationToDB(payload: IApplyJobSchema, tx?: dbTx) {
     try {
+        const dbConnection = tx || db;
         const insertPayload = {
             applicationId: `application-${generateNanoId()}`,
             candidateId: payload.candidateId,
@@ -21,7 +23,7 @@ export async function addApplicationToDB(payload: IApplyJobSchema) {
             createdAt: new Date(),
             updatedAt: new Date(),
         }
-        await db.insert(applications).values(insertPayload)
+        await dbConnection.insert(applications).values(insertPayload)
         return insertPayload;
     } catch (error) {
         throw new AddApplicationToDBError('Failed to add application to DB', { cause: (error as Error).cause });
@@ -48,13 +50,14 @@ export async function updateApplicationInDB(payload: {
     resumeText?: string,
     coverLetterText?: string,
     skills?: string[],
-}){
+}, tx?: dbTx){
     try {
+        const dbConnection = tx || db;
         const updatedPayload = {
             ...payload,
             updatedAt: new Date(),
         }
-        await db.update(applications).set(updatedPayload).where(eq(applications.applicationId, payload.applicationId))
+        await dbConnection.update(applications).set(updatedPayload).where(eq(applications.applicationId, payload.applicationId))
     } catch (error) {
         throw new UpdateApplicationInDBError('Failed to update application in DB', { cause: (error as Error).cause });
     }

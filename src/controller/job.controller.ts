@@ -11,51 +11,55 @@ import { ActiveConfig } from "../utils/config.utils";
 import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError } from "../exceptions/openai.exceptions";
+import db from "../repository/db";
 
 export async function createJob(payload: ICreateJobSchema) {
     try {
         // create job and generate embeddings for job description
-        const [newJob] = await Promise.all([
-            createJobInDB({
-                companyId: payload.companyId,
-                department: payload.department,
-                hrId: payload.hrId,
-                jobDescription: payload.jobDescription,
-                jobTitle: payload.jobTitle,
-                maximumApplications: payload.maximumApplications,
-                package: payload.package,
+        const result = db.transaction(async (tx: any) => {
+            const [newJob] = await Promise.all([
+                createJobInDB({
+                    companyId: payload.companyId,
+                    department: payload.department,
+                    hrId: payload.hrId,
+                    jobDescription: payload.jobDescription,
+                    jobTitle: payload.jobTitle,
+                    maximumApplications: payload.maximumApplications,
+                    package: payload.package,
+                }, tx)
+            ])
+
+            // TODO: run in background
+            await upsertVectorEmbeddings({
+                indexName: ActiveConfig.JD_INDEX,
+                text: payload.jobDescription,
+                metadata: {
+                    jobId: newJob.jobId,
+                }
             })
-        ])
 
-        // TODO: run in background
-        await upsertVectorEmbeddings({
-            indexName: ActiveConfig.JD_INDEX,
-            text: payload.jobDescription,
-            metadata: {
-                jobId: newJob.jobId,
-            }
-        })
+            // add rounds in db
+            // TODO: Future run this in background if possible
+            const newRounds = await createRoundInDB(payload.rounds.map((round) => {
+                return {
+                    jobId: newJob.jobId,
+                    roundNumber: round.roundNumber,
+                    roundType: round.roundType,
+                    questionType: round.questionType,
+                    duration: round.duration,
+                    difficulty: round.difficulty,
+                    roundDescription: round.roundDescription,
+                    isAI: round.isAI,
+                }
+            }, tx))
 
-        // add rounds in db
-        // TODO: Future run this in background if possible
-        const newRounds = await createRoundInDB(payload.rounds.map((round) => {
+            // return job
             return {
-                jobId: newJob.jobId,
-                roundNumber: round.roundNumber,
-                roundType: round.roundType,
-                questionType: round.questionType,
-                duration: round.duration,
-                difficulty: round.difficulty,
-                roundDescription: round.roundDescription,
-                isAI: round.isAI,
+                job: newJob,
+                rounds: newRounds,
             }
-        }))
-
-        // return job
-        return {
-            job: newJob,
-            rounds: newRounds,
-        }
+        });
+        return result;
     } catch (error) {
         if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError) {
             throw error;

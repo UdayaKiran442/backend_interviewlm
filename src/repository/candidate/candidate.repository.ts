@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, UpdateCandidateInDBError, UpdateCandidateJobsInDBError } from "../../exceptions/candidate.exceptions";
 import { ILoginSchema, IOnboardingSchema } from "../../routes/v1/candidate.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
+import { dbTx } from "../db.types";
 
 export async function getCandidateByEmailFromDB(email: string){
     try {
@@ -13,9 +14,10 @@ export async function getCandidateByEmailFromDB(email: string){
     }
 }
 
-export async function getCandidateByIDFromDB(candidateId: string){
+export async function getCandidateByIDFromDB(candidateId: string, tx?: dbTx){
     try {
-        return await db.select().from(candidates).where(eq(candidates.candidateId, candidateId))
+        const dbConnection = tx || db;
+        return await dbConnection.select().from(candidates).where(eq(candidates.candidateId, candidateId))
     } catch (error) {
         throw new GetCandidateByIDFromDBError('Failed to get candidate by ID from DB', { cause: (error as Error).cause });
     }
@@ -50,9 +52,10 @@ export async function addCandidateInDB(payload: ILoginSchema) {
     }
 }
 
-export async function updateCandidateJobsInDB(payload: {candidateId: string, jobs: string[]}) {
+export async function updateCandidateJobsInDB(payload: {candidateId: string, jobs: string[]}, tx?: dbTx) {
     try {
-        await db.update(candidates).set({jobs: payload.jobs}).where(eq(candidates.candidateId, payload.candidateId))
+        const dbConnection = tx || db;
+        await dbConnection.update(candidates).set({jobs: payload.jobs}).where(eq(candidates.candidateId, payload.candidateId))
     } catch (error) {
         throw new UpdateCandidateJobsInDBError('Failed to update candidate jobs in DB', { cause: (error as Error).cause });
     }

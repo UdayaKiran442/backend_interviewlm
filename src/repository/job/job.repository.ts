@@ -43,9 +43,10 @@ export async function closeJobInDB(jobId: string) {
     }
 }
 
-export async function updateJobApplicationsCountInDB(payload: {jobId: string, count: number}) {
+export async function updateJobApplicationsCountInDB(payload: {jobId: string, count: number}, tx?: dbTx) {
     try {
-        await db.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
+        const dbConnection = tx || db;
+        await dbConnection.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
     } catch (error) {
         throw new UpdateJobApplicationsCountInDBError('Failed to update job applications count', { cause: (error as Error).cause });
     }

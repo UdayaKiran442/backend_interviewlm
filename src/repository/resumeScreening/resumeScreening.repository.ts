@@ -4,9 +4,11 @@ import { IFetchResumeScreeningDetailsSchema, IFetchScreeningResumesSchema } from
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { applications, candidates, jobs, resumeScreening } from "../schema";
 import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
+import { dbTx } from "../db.types";
 
-export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }) {
+export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }, tx?: dbTx) {
     try {
+        const dbConnection = tx || db;
         const insertPayload = {
             screeningId: `screening-${generateNanoId()}`,
             applicationId: payload.applicationId,
@@ -16,7 +18,7 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
             createdAt: new Date(),
             updatedAt: new Date(),
         }
-        await db.insert(resumeScreening).values(insertPayload)
+        await dbConnection.insert(resumeScreening).values(insertPayload)
     } catch (error) {
         throw new InsertScreeningResultsToDBError('Failed to insert screening results to DB', { cause: (error as Error).cause });
     }
@@ -90,13 +92,14 @@ export async function updateResumeScreeningInDB(payload: {
     matchScore?: number,
     feedback?: object,
     status?: string,
-}){
+}, tx?: dbTx){
     try {
+        const dbConnection = tx || db;
         const updatedPayload = {
             ...payload,
             updatedAt: new Date()
         }
-        await db.update(resumeScreening).set(updatedPayload).where(eq(resumeScreening.screeningId, payload.screeningId))
+        await dbConnection.update(resumeScreening).set(updatedPayload).where(eq(resumeScreening.screeningId, payload.screeningId))
     } catch (error) {
         throw new UpdateResumeScreeningInDBError('Failed to update resume screening in DB', { cause: (error as Error).cause });
     }

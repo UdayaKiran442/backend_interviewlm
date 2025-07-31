@@ -1,0 +1,43 @@
+# Docker Compose file version
+version: '3.8'
+
+# Define the services (containers) for your application
+services:
+  # Development service
+  dev:
+    # Build configuration
+    build:
+      platform: linux/amd64
+      context: .
+      dockerfile: Dockerfile
+      # Specify which stage from the Dockerfile to build
+      target: development
+    # Port mapping: host_port:container_port
+    ports:
+      - "3000:3000"
+    # Mount the current directory into the container's /src directory.
+    # This enables hot-reloading when you change files on your host machine.
+    volumes:
+      - .:/src
+    # Load environment variables from a .env.development file
+    env_file:
+      - .env.development
+    # Name for the container for easier identification
+    container_name: interviewlm_dev
+
+  # Production service
+  prod:
+    build:
+      platform: linux/amd64
+      context: .
+      dockerfile: Dockerfile
+      # Specify the production stage from the Dockerfile
+      target: production
+    ports:
+      - "8080:3000" # Map to a different host port like 8080 to avoid conflicts
+    env_file:
+      - .env.production
+    # We do NOT mount a volume here because the code is already
+    # copied into the image in the 'production' Dockerfile stage.
+    container_name: interviewlm_prod
+

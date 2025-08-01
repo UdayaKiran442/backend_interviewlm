@@ -1,0 +1,1 @@
+CREATE INDEX "jobs_hr_id_idx" ON "jobs" USING btree ("hrId");

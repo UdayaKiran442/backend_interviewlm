@@ -33,7 +33,9 @@ export const jobs = pgTable('jobs', {
     isScreeningDone: boolean('isScreeningDone').notNull().default(false),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-})
+}, (jobs) => ({
+    jobsHrIdIndex: index('jobs_hr_id_idx').on(jobs.hrId),
+}))
 
 export const rounds = pgTable('rounds', {
     roundId: varchar('roundId').primaryKey(),

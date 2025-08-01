@@ -1,7 +1,7 @@
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { jobs } from "../schema";
-import { CloseJobInDBError, CreateJobInDBError, UpdateJobApplicationsCountInDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
+import { CloseJobInDBError, CreateJobInDBError, GetJobsByHRFromDBError, UpdateJobApplicationsCountInDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
 import { ICreatJobInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
 import { GetJobByIdError } from "../../exceptions/job.exceptions";
@@ -64,3 +64,12 @@ export async function updateJobInDB(payload: { jobId: string, hrId?: string, job
         throw new UpdateJobInDBError('Failed to update job in DB', { cause: (error as Error).cause });
     }
 }
+
+export async function getJobsByHRFromDB(hrId: string) {
+    try {
+        return await db.select().from(jobs).where(eq(jobs.hrId, hrId))
+    } catch (error) {
+        throw new GetJobsByHRFromDBError('Failed to get jobs by HR', { cause: (error as Error).cause });
+    }
+}
+    

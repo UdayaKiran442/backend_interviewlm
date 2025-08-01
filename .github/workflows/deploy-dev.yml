@@ -12,9 +12,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        run: | 
-          echo GCP_REGION=${{ secrets.GCP_REGION }}
 
+      - name: Echo GCP Region
+        run: echo GCP_REGION=${{ secrets.GCP_REGION }}
+        
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:

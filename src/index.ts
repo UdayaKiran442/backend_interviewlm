@@ -6,7 +6,7 @@ import testRouter from './routes/test/test.route'
 const app = new Hono()
 
 app.get('/', (c) => {
-  return c.text(`Hello Hono! ${ActiveConfig.ENV}`)
+  return c.text(`Hello Hono ${ActiveConfig.ENV}`)
 })
 
 // v1 router

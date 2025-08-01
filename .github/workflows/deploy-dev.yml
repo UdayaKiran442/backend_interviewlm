@@ -15,7 +15,7 @@ jobs:
 
       - name: Echo GCP Region
         run: echo GCP_REGION=${{ secrets.GCP_REGION }}
-        
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
@@ -28,16 +28,16 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/interviewlm-backend/interviewlm-dev:$GITHUB_SHA .
+          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/interviewlm-backend/interviewlm-dev1:latest .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/interviewlm-backend/interviewlm-dev:$GITHUB_SHA
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/interviewlm-backend/interviewlm-dev1:latest
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy interviewlm-dev \
-            --image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/interviewlm-backend/interviewlm-dev:$GITHUB_SHA \
+            --image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/interviewlm-backend/interviewlm-dev1:latest \
             --region=${{ secrets.GCP_REGION }} \
             --platform=managed \
             --allow-unauthenticated \

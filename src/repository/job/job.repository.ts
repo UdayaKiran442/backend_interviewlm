@@ -1,7 +1,7 @@
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { jobs } from "../schema";
-import { CloseJobInDBError, CreateJobInDBError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
+import { CloseJobInDBError, CreateJobInDBError, UpdateJobApplicationsCountInDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
 import { ICreatJobInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
 import { GetJobByIdError } from "../../exceptions/job.exceptions";
@@ -49,5 +49,18 @@ export async function updateJobApplicationsCountInDB(payload: {jobId: string, co
         await dbConnection.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
     } catch (error) {
         throw new UpdateJobApplicationsCountInDBError('Failed to update job applications count', { cause: (error as Error).cause });
+    }
+}
+
+export async function updateJobInDB(payload: { jobId: string, hrId?: string, jobTitle?: string, jobDescription?: string, department?: string, package?: string, maximumApplications?: number, companyId?: string, applications?: number, inProgress?: number, rejected?: number, interviewing?: number, hired?: number, isJobOpen?: boolean, isScreeningDone?: boolean}, tx?: dbTx) {
+    try {
+        const dbConnection = tx || db;
+        const updatedPayload = {
+            ...payload,
+            updatedAt: new Date()
+        }
+        await dbConnection.update(jobs).set(updatedPayload).where(eq(jobs.jobId, payload.jobId))
+    } catch (error) {
+        throw new UpdateJobInDBError('Failed to update job in DB', { cause: (error as Error).cause });
     }
 }

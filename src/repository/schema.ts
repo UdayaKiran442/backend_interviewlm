@@ -24,7 +24,11 @@ export const jobs = pgTable('jobs', {
     department: varchar('department').notNull(),
     package: varchar('package'),
     maximumApplications: integer('maximumApplications'),
-    applications: integer('applications').notNull().default(0),
+    applications: integer('applications').notNull().default(0), // total applications
+    inProgress: integer('inProgress').notNull().default(0), // applications that have done resume screening
+    rejected: integer('rejected').notNull().default(0), // applications that have been rejected
+    interviewing: integer('interviewing').notNull().default(0), // applications that are in interview process
+    hired: integer('hired').notNull().default(0), // applications that have been hired
     isJobOpen: boolean('isJobOpen').notNull().default(true),
     isScreeningDone: boolean('isScreeningDone').notNull().default(false),
     createdAt: timestamp('createdAt').notNull().defaultNow(),

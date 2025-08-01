@@ -10,13 +10,18 @@ import { QualifyCandidateError } from "../exceptions/round.exceptions";
 import { updateApplicationInDB } from "../repository/application/application.repository";
 import { UpdateApplicationInDBError } from "../exceptions/applications.exceptions";
 import db from "../repository/db";
+import { getJobByIdFromDB, updateJobInDB } from "../repository/job/job.repository";
+import { GetJobByIdError, UpdateJobInDBError } from "../exceptions/job.exceptions";
 
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
     try {
         const result = db.transaction(async (tx: any) => {
             // get round details of roundId
-            const round = await getRoundByIdFromDB(payload.roundId);
+            const [round, job] = await Promise.all([
+                getRoundByIdFromDB(payload.roundId),
+                getJobByIdFromDB(payload.jobId)
+            ])
             if (round.length === 0) {
                 throw new NotFoundError('Round not found')
             }
@@ -59,7 +64,15 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     updateResumeScreeningInDB({
                         screeningId: payload.screeningId,
                         status: payload.isQualified ? 'qualified' : 'rejected'
-                    }, tx)
+                    }, tx),
+                    // if qualified update inProgress count in job table
+                    payload.isQualified ? updateJobInDB({
+                        jobId: job[0].jobId,
+                        inProgress: job[0].inProgress + 1
+                    }) : updateJobInDB({
+                        jobId: job[0].jobId,
+                        rejected: job[0].rejected + 1
+                    })
                 ])
                 if (!payload.isQualified) {
                     // update application status to rejected
@@ -76,7 +89,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
             return;
         })
     } catch (error) {
-        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError) {
             throw error
         }
         throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).cause });

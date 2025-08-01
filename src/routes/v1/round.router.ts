@@ -6,6 +6,7 @@ import { UpdateApplicationTimelineToDBError } from "../../exceptions/application
 import { UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 import { NotFoundError } from "../../exceptions/common.exceptions";
 import { UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
+import { GetJobByIdError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
 
 const roundRouter = new Hono();
 
@@ -39,7 +40,7 @@ roundRouter.post('/qualify/candidate', async (c) => {
         if (error instanceof NotFoundError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 404)
         }
-        if (error instanceof GetRoundByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

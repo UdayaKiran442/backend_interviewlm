@@ -106,6 +106,13 @@
       "when": 1753804033564,
       "tag": "0014_neat_ikaris",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1754043380783,
+      "tag": "0015_warm_tarantula",
+      "breakpoints": true
     }
   ]
 }

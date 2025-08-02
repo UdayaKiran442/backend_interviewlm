@@ -47,3 +47,24 @@ export class UpdateApplicationInDBError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class GetApplicationsByJobIdFromDBError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "GetApplicationsByJobIdFromDBError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+export class GetApplicationsForJobError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "GetApplicationsForJobError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+    

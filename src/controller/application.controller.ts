@@ -1,4 +1,4 @@
-import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../exceptions/applications.exceptions";
+import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplicationsByJobIdFromDBError, GetApplicationsForJobError } from "../exceptions/applications.exceptions";
 import { ApplyJobError, JobAlreadyAppliedError } from "../exceptions/applications.exceptions";
 import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { UpdateCandidateJobsInDBError } from "../exceptions/candidate.exceptions";
@@ -8,14 +8,14 @@ import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } fro
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
 import { InsertScreeningResultsToDBError } from "../exceptions/screening.exceptions";
-import { addApplicationToDB, checkCandidateAppliedInDB } from "../repository/application/application.repository";
+import { addApplicationToDB, checkCandidateAppliedInDB, getApplicationsByJobIdFromDB } from "../repository/application/application.repository";
 import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { getCandidateByIDFromDB, updateCandidateJobsInDB } from "../repository/candidate/candidate.repository";
 import db from "../repository/db";
 import { closeJobInDB, getJobByIdFromDB, updateJobApplicationsCountInDB } from "../repository/job/job.repository";
 import { insertScreeningResultsToDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
-import { IApplyJobSchema } from "../routes/v1/applicatons.route";
+import { IApplyJobSchema, IGetApplicationsForJobSchema } from "../routes/v1/applicatons.route";
 import { generateResumeSummary } from "../services/openai.service";
 import { queryVectorEmbeddingsService } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
@@ -122,5 +122,17 @@ export async function applyJob(payload: IApplyJobSchema) {
             throw error;
         }
         throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).cause });
+    }
+}
+
+export async function getApplicationsForJob(payload: IGetApplicationsForJobSchema) {
+    try {
+        const result = await getApplicationsByJobIdFromDB(payload.jobId)
+        return result;
+    } catch (error) {
+        if (error instanceof GetApplicationsByJobIdFromDBError) {
+            throw error;
+        }
+        throw new GetApplicationsForJobError('Failed to get applications for job', { cause: (error as Error).cause });
     }
 }

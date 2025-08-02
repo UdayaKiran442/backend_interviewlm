@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import z from "zod";
-import { applyJob } from "../../controller/application.controller";
+import { applyJob, getApplicationsForJob } from "../../controller/application.controller";
 import { NotFoundError } from "../../exceptions/common.exceptions";
 import { CloseJobInDBError, GetJobByIdError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
-import { ApplyJobError, JobAlreadyAppliedError } from "../../exceptions/applications.exceptions";
+import { ApplyJobError, GetApplicationsForJobError, JobAlreadyAppliedError } from "../../exceptions/applications.exceptions";
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../../exceptions/applications.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } from "../../exceptions/openai.exceptions";
@@ -49,6 +49,37 @@ applicationsRoute.post("/job/apply", async (c) => {
         if (error instanceof NotFoundError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 404)
         }
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
+    }
+})
+
+const GetApplicationsForJobSchema = z.object({
+    jobId: z.string(),
+})
+
+export type IGetApplicationsForJobSchema = z.infer<typeof GetApplicationsForJobSchema> & { hrId: string }
+
+applicationsRoute.post("/job", async (c) => {
+    try {
+        const validation = GetApplicationsForJobSchema.safeParse(await c.req.json())
+        if (!validation.success) {
+            throw validation.error;
+        }
+        const payload = {
+            ...validation.data,
+            hrId: "VofeF3rFUHbcjVZeTamp8"
+        }
+        const res = await getApplicationsForJob(payload)
+        return c.json({ success: true, message: 'Applications fetched', res }, 200)
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            const errMessage = JSON.parse(error.message)
+            return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
+        }
+        if (error instanceof GetApplicationsForJobError) {
+            return c.json({ success: false, message: error.message, error: error.cause }, 400)
+        }
+        console.log(error)
         return c.json({ success: false, message: 'Something went wrong' }, 500)
     }
 })

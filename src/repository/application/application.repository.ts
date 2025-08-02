@@ -3,7 +3,7 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { applications } from "../schema";
 import { and, eq } from "drizzle-orm";
-import { AddApplicationToDBError, CheckCandidateAppliedInDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
+import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplicationsByJobIdFromDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
 import { dbTx } from "../db.types";
 
 export async function addApplicationToDB(payload: IApplyJobSchema, tx?: dbTx) {
@@ -62,3 +62,13 @@ export async function updateApplicationInDB(payload: {
         throw new UpdateApplicationInDBError('Failed to update application in DB', { cause: (error as Error).cause });
     }
 }
+
+export async function getApplicationsByJobIdFromDB(jobId: string) {
+    try {
+        return await db.select().from(applications).where(eq(applications.jobId, jobId))
+    } catch (error) {
+        console.log(error)
+        throw new GetApplicationsByJobIdFromDBError('Failed to get applications by job id from DB', { cause: (error as Error).cause });
+    }
+}
+    

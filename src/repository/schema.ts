@@ -115,7 +115,7 @@ export const applicationTimeline = pgTable('application_timeline', {
     roundId: varchar('roundId'),
     title: varchar('title').notNull(),
     description: varchar('description'),
-    status: varchar('status').notNull(),
+    status: varchar('status').notNull(), // status of the timeline
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }, (applicationTimeline) => ({
@@ -131,7 +131,7 @@ export const resumeScreening = pgTable('resume_screening', {
     roundId: varchar('roundId').notNull(),
     roundResultId: varchar('roundResultId'),
     matchScore: real('matchScore').notNull(),
-    status: varchar('status').notNull().default('pending'), // enum -> pending, rejected, accepted
+    status: varchar('status').notNull().default('pending'), // enum -> pending, completed
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }, (resumeScreening) => ({

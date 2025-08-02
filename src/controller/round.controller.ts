@@ -71,7 +71,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     // update in resume screening table
                     updateResumeScreeningInDB({
                         screeningId: payload.screeningId,
-                        status: payload.isQualified ? 'qualified' : 'rejected'
+                        status: 'completed'
                     }, tx),
                     // if qualified update inProgress count in job table
                     payload.isQualified ? updateJobInDB({

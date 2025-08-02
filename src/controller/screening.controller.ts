@@ -9,6 +9,7 @@ import { QueryVectorEmbeddingsServiceError } from "../exceptions/pinecone.except
 import { NotFoundError } from "../exceptions/common.exceptions";
 import { getRoundResultFromDB, insertRoundResultsToDB } from "../repository/roundResults/roundResults.repository";
 import db from "../repository/db";
+import { GetRoundResultFromDBError, InsertRoundResultsToDBError } from "../exceptions/roundResults.exceptions";
 
 export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchema) {
     try {
@@ -87,7 +88,7 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
         return result;
 
     } catch (error) {
-        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError) {
+        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError || error instanceof InsertRoundResultsToDBError || error instanceof GetRoundResultFromDBError) {
             throw error
         }
         throw new FetchResumeScreeningDetailsError('Failed to fetch resume screening details', { cause: (error as Error).cause });

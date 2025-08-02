@@ -13,6 +13,7 @@ import db from "../repository/db";
 import { getJobByIdFromDB, updateJobInDB } from "../repository/job/job.repository";
 import { GetJobByIdError, UpdateJobInDBError } from "../exceptions/job.exceptions";
 import { updateRoundResultInDB } from "../repository/roundResults/roundResults.repository";
+import { UpdateRoundResultInDBError } from "../exceptions/roundResults.exceptions";
 
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
@@ -102,7 +103,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
             return;
         })
     } catch (error) {
-        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError || error instanceof UpdateRoundResultInDBError) {
             throw error
         }
         throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).cause });

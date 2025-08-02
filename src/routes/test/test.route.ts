@@ -3,6 +3,7 @@ import { generateEmbeddingsService, generateResumeSummary } from "../../services
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
+import { getResumeScreeningDetailsFromDB } from "../../repository/resumeScreening/resumeScreening.repository";
 
 const testRouter = new Hono()
 
@@ -160,8 +161,11 @@ BML Munjal University, Gurugram`;
 
 testRouter.get('/v2', async (c) => {
     try {
-        const nanodId = `round-${generateNanoId()}`
-        return c.json({ success: true, message: 'Applications fetched', nanodId }, 200)
+        const res = await getResumeScreeningDetailsFromDB({
+            screeningId: "screening-j3jauDK3WG_GRaxPUmn5O",
+            hrId: "VofeF3rFUHbcjVZeTamp8"
+        })
+        return c.json({ success: true, message: 'Applications fetched', res }, 200)
     } catch (error) {
        
         return c.json({ success: false, message: 'Something went wrong' }, 500)

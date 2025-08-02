@@ -2,7 +2,7 @@ import { and, eq, gte } from "drizzle-orm";
 import db from "../db";
 import { IFetchResumeScreeningDetailsSchema, IFetchScreeningResumesSchema } from "../../routes/v1/screening.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
-import { applications, candidates, jobs, resumeScreening } from "../schema";
+import { applications, candidates, jobs, resumeScreening, roundResults } from "../schema";
 import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 import { dbTx } from "../db.types";
 
@@ -75,12 +75,13 @@ export async function getResumeScreeningDetailsFromDB(payload: IFetchResumeScree
             candidateId: resumeScreening.candidateId,
             roundId: resumeScreening.roundId,
             matchScore: resumeScreening.matchScore,
+            roundResultId: resumeScreening.roundResultId,
             // feedback: resumeScreening.feedback,
             status: resumeScreening.status,
             appliedAt: resumeScreening.createdAt,
             jobDescription: jobs.jobDescription,
             resumeText: applications.resumeText,
-        }).from(resumeScreening).where(eq(resumeScreening.screeningId, payload.screeningId)).leftJoin(jobs, eq(resumeScreening.jobId, jobs.jobId)).leftJoin(applications, eq(resumeScreening.applicationId, applications.applicationId))
+        }).from(resumeScreening).where(eq(resumeScreening.screeningId, payload.screeningId)).leftJoin(jobs, eq(resumeScreening.jobId, jobs.jobId)).leftJoin(applications, eq(resumeScreening.applicationId, applications.applicationId)).leftJoin(roundResults, eq(resumeScreening.roundResultId, roundResults.roundResultId))
     } catch (error) {
         throw new GetResumeScreeningDetailsFromDBError('Failed to get resume screening details from DB', { cause: (error as Error).cause });
     }

@@ -7,9 +7,9 @@ import { ActiveConfig } from "../utils/config.utils";
 import { GenerateEmbeddingsServiceError, GenerateResumeFeedbackServiceError } from "../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
-import { getRoundResultFromDB, insertRoundResultsToDB } from "../repository/roundResults/roundResults.repository";
+import { insertRoundResultsToDB } from "../repository/roundResults/roundResults.repository";
 import db from "../repository/db";
-import { GetRoundResultFromDBError, InsertRoundResultsToDBError } from "../exceptions/roundResults.exceptions";
+import { InsertRoundResultsToDBError } from "../exceptions/roundResults.exceptions";
 
 export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchema) {
     try {
@@ -56,13 +56,9 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
             if (resumeScreeningDetails.length === 0) {
                 throw new NotFoundError('Resume screening details not found');
             }
-            const roundResult = await getRoundResultFromDB({
-                roundId: resumeScreeningDetails[0].roundId,
-                applicationId: resumeScreeningDetails[0].applicationId
-            })
 
             // if not present, generate feedback from llm
-            if (roundResult.length === 0) {
+            if (resumeScreeningDetails[0].roundResultId === null) {
                 // generate feedback from llm and update in db
                 const feedback = await generateResumeFeedbackService({
                     jobDescription: resumeScreeningDetails[0].jobDescription ?? '',
@@ -88,7 +84,7 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
         return result;
 
     } catch (error) {
-        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError || error instanceof InsertRoundResultsToDBError || error instanceof GetRoundResultFromDBError) {
+        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError || error instanceof InsertRoundResultsToDBError) {
             throw error
         }
         throw new FetchResumeScreeningDetailsError('Failed to fetch resume screening details', { cause: (error as Error).cause });

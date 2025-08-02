@@ -128,8 +128,9 @@ export const resumeScreening = pgTable('resume_screening', {
     applicationId: varchar('applicationId').notNull(),
     jobId: varchar('jobId').notNull(),
     candidateId: varchar('candidateId').notNull(),
+    roundId: varchar('roundId').notNull(),
+    roundResultId: varchar('roundResultId'),
     matchScore: real('matchScore').notNull(),
-    feedback: json('feedback'),
     status: varchar('status').notNull().default('pending'), // enum -> pending, rejected, accepted
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
@@ -140,6 +141,13 @@ export const resumeScreening = pgTable('resume_screening', {
     resumeScreeningMatchScoreIndex: index('resume_screening_match_score_idx').on(resumeScreening.matchScore)
 }))
 
-export type IRound = typeof rounds;
-export type ICandidate = typeof candidates;
-export type IResumeScreening = typeof resumeScreening;
+export const roundResults = pgTable('round_results', {
+    roundResultId: varchar('roundResultId').primaryKey(),
+    roundId: varchar('roundId').notNull(),
+    applicationId: varchar('applicationId').notNull(),
+    feedback: json('feedback'), // aiScore, aiSummary, aiRecommendation and other properties required based on round type
+    verdictBy: varchar('verdictBy'),// id of the person who gave verdict
+    isQualified: boolean('isQualified'),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})

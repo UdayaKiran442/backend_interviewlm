@@ -12,6 +12,7 @@ import { UpdateApplicationInDBError } from "../exceptions/applications.exception
 import db from "../repository/db";
 import { getJobByIdFromDB, updateJobInDB } from "../repository/job/job.repository";
 import { GetJobByIdError, UpdateJobInDBError } from "../exceptions/job.exceptions";
+import { updateRoundResultInDB } from "../repository/roundResults/roundResults.repository";
 
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
@@ -41,7 +42,13 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                             status: payload.isQualified ? 'qualified' : 'rejected',
                             title: "Resume Screening Completed",
                             description: "Your resume screening has been completed."
-                        }, tx)
+                        }, tx),
+                        updateRoundResultInDB({
+                            roundId: payload.roundId,
+                            applicationId: payload.applicationId,
+                            verdictBy: payload.hrId,
+                            isQualified: payload.isQualified
+                        })
                     ])
                     return;
                 }
@@ -72,6 +79,12 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     }) : updateJobInDB({
                         jobId: job[0].jobId,
                         rejected: job[0].rejected + 1
+                    }),
+                    updateRoundResultInDB({
+                        roundId: payload.roundId,
+                        applicationId: payload.applicationId,
+                        verdictBy: payload.hrId,
+                        isQualified: payload.isQualified
                     })
                 ])
                 if (!payload.isQualified) {

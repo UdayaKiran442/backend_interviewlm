@@ -7,6 +7,9 @@ import { ActiveConfig } from "../utils/config.utils";
 import { GenerateEmbeddingsServiceError, GenerateResumeFeedbackServiceError } from "../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
+import { getRoundResultFromDB, insertRoundResultsToDB } from "../repository/roundResults/roundResults.repository";
+import db from "../repository/db";
+import { GetRoundResultFromDBError, InsertRoundResultsToDBError } from "../exceptions/roundResults.exceptions";
 
 export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchema) {
     try {
@@ -47,31 +50,45 @@ export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchem
 
 export async function fetchResumeScreeningDetails(payload: IFetchResumeScreeningDetailsSchema) {
     try {
-        // check if feedback is present or not
-        const resumeScreeningDetails = await getResumeScreeningDetailsFromDB(payload)
-        if (resumeScreeningDetails.length === 0) {
-            throw new NotFoundError('Resume screening details not found');
-        }
-
-        // if not present, generate feedback from llm
-        if (!resumeScreeningDetails[0].feedback) {
-            // generate feedback from llm and update in db
-            const feedback = await generateResumeFeedbackService({
-                jobDescription: resumeScreeningDetails[0].jobDescription ?? '',
-                resumeText: resumeScreeningDetails[0].resumeText ?? ''
+        const result = db.transaction(async (tx: any) => {
+            // check if feedback is present or not
+            const resumeScreeningDetails = await getResumeScreeningDetailsFromDB(payload)
+            if (resumeScreeningDetails.length === 0) {
+                throw new NotFoundError('Resume screening details not found');
+            }
+            const roundResult = await getRoundResultFromDB({
+                roundId: resumeScreeningDetails[0].roundId,
+                applicationId: resumeScreeningDetails[0].applicationId
             })
-            // TODO: update feedback in db in background
-            await updateResumeScreeningInDB({
-                screeningId: resumeScreeningDetails[0].screeningId,
-                feedback: feedback
-            })
-            return { ...resumeScreeningDetails[0], feedback };
-        }
 
-        // if present return details
-        return resumeScreeningDetails[0];
+            // if not present, generate feedback from llm
+            if (roundResult.length === 0) {
+                // generate feedback from llm and update in db
+                const feedback = await generateResumeFeedbackService({
+                    jobDescription: resumeScreeningDetails[0].jobDescription ?? '',
+                    resumeText: resumeScreeningDetails[0].resumeText ?? ''
+                })
+                // TODO: update feedback in db in background
+                const roundResult = await insertRoundResultsToDB({
+                    roundId: resumeScreeningDetails[0].roundId,
+                    feedback: feedback,
+                    applicationId: resumeScreeningDetails[0].applicationId
+                })
+                await updateResumeScreeningInDB({
+                    screeningId: resumeScreeningDetails[0].screeningId,
+                    roundResultId: roundResult.roundResultId
+                }, tx)
+
+                return { ...resumeScreeningDetails[0], feedback };
+            }
+
+            // if present return details
+            return resumeScreeningDetails[0];
+        })
+        return result;
+
     } catch (error) {
-        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError) {
+        if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError || error instanceof InsertRoundResultsToDBError || error instanceof GetRoundResultFromDBError) {
             throw error
         }
         throw new FetchResumeScreeningDetailsError('Failed to fetch resume screening details', { cause: (error as Error).cause });

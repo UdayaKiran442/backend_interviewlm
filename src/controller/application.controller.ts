@@ -108,6 +108,7 @@ export async function applyJob(payload: IApplyJobSchema) {
                     candidateId: payload.candidateId,
                     jobId: payload.jobId,
                     matchScore: matchScore?.matches[0].score ?? 0,
+                    roundId: payload.currentRoundId
                 }, tx)
             }
             // check maximum applications and close job if limit is reached

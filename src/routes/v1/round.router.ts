@@ -18,7 +18,9 @@ const QualifyCandidateSchema = z.object({
     isQualified: z.boolean(),
 })
 
-export type IQualifyCandidateSchema = z.infer<typeof QualifyCandidateSchema>
+export type IQualifyCandidateSchema = z.infer<typeof QualifyCandidateSchema> & {
+    hrId: string
+}
 
 roundRouter.post('/qualify/candidate', async (c) => {
     try {

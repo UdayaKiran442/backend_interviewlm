@@ -6,7 +6,7 @@ import { applications, candidates, jobs, resumeScreening } from "../schema";
 import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 import { dbTx } from "../db.types";
 
-export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number }, tx?: dbTx) {
+export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number, roundId: string}, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         const insertPayload = {
@@ -15,6 +15,7 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
             jobId: payload.jobId,
             candidateId: payload.candidateId,
             matchScore: payload.matchScore,
+            roundId: payload.roundId,
             createdAt: new Date(),
             updatedAt: new Date(),
         }
@@ -32,7 +33,7 @@ export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesS
             jobId: resumeScreening.jobId,
             candidateId: resumeScreening.candidateId,
             matchScore: resumeScreening.matchScore,
-            feedback: resumeScreening.feedback,
+            // feedback: resumeScreening.feedback,
             status: resumeScreening.status,
             appliedAt: resumeScreening.createdAt,
             firstName: candidates.firstName,
@@ -72,8 +73,9 @@ export async function getResumeScreeningDetailsFromDB(payload: IFetchResumeScree
             applicationId: resumeScreening.applicationId,
             jobId: resumeScreening.jobId,
             candidateId: resumeScreening.candidateId,
+            roundId: resumeScreening.roundId,
             matchScore: resumeScreening.matchScore,
-            feedback: resumeScreening.feedback,
+            // feedback: resumeScreening.feedback,
             status: resumeScreening.status,
             appliedAt: resumeScreening.createdAt,
             jobDescription: jobs.jobDescription,
@@ -90,8 +92,8 @@ export async function updateResumeScreeningInDB(payload: {
     jobId?: string,
     candidateId?: string,
     matchScore?: number,
-    feedback?: object,
     status?: string,
+    roundResultId?: string
 }, tx?: dbTx){
     try {
         const dbConnection = tx || db;

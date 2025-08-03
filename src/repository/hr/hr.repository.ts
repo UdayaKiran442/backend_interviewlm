@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { CreateHRInDBError, GetHRFromDBError } from "../../exceptions/hr.exceptions";
+import { CreateHRInDBError, GetHRByEmailFromDBError, GetHRFromDBError } from "../../exceptions/hr.exceptions";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { hr } from "../schema";
@@ -27,5 +27,13 @@ export async function getHRFromDB(hrId: string) {
         return await db.select().from(hr).where(eq(hr.hrId, hrId))
     } catch (error) {
         throw new GetHRFromDBError('Failed to get HR from DB', { cause: (error as Error).cause });
+    }
+}
+
+export async function getHRByEmailFromDB(email: string){
+    try {
+        return await db.select().from(hr).where(eq(hr.email, email))
+    } catch (error) {
+        throw new GetHRByEmailFromDBError('Failed to get HR by email from DB', { cause: (error as Error).cause });
     }
 }

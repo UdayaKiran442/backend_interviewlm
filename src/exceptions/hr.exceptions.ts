@@ -27,3 +27,13 @@ export class GetJobsByHRError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class GetHRByEmailFromDBError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "GetHRByEmailFromDBError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}

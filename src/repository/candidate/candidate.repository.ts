@@ -5,6 +5,7 @@ import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByID
 import { ILoginSchema, IOnboardingSchema } from "../../routes/v1/candidate.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { dbTx } from "../db.types";
+import { IAuthSchema } from "../../routes/v1/auth.route";
 
 export async function getCandidateByEmailFromDB(email: string){
     try {
@@ -36,7 +37,7 @@ export async function updateCandidateInDB(payload: IOnboardingSchema) {
     }
 }
 
-export async function addCandidateInDB(payload: ILoginSchema) {
+export async function addCandidateInDB(payload: IAuthSchema) {
     try {
         const insertPayload = {
             candidateId: `candidate-${generateNanoId()}`,

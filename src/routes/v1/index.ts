@@ -7,6 +7,7 @@ import applicationsRoute from "./applicatons.route";
 import screeningRoute from "./screening.route";
 import roundRouter from "./round.router";
 import hrRoute from "./hr.route";
+import authRoute from "./auth.route";
 
 const v1Router = new Hono();
 
@@ -18,5 +19,6 @@ v1Router.route('/applications', applicationsRoute)
 v1Router.route('/screening', screeningRoute)
 v1Router.route('/round', roundRouter)
 v1Router.route('/hr', hrRoute)
+v1Router.route('/auth', authRoute);
 
 export default v1Router;

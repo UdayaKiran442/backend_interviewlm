@@ -2,7 +2,7 @@ import db from "../db";
 import { users } from "../schema";
 import { eq } from "drizzle-orm";
 import { AddUserInDBError, GetUserByEmailFromDBError } from "../../exceptions/user.exceptions";
-import { ILoginSchema } from "../../routes/v1/candidate.route";
+import { IAuthSchema } from "../../routes/v1/auth.route";
 
 export async function getUserByEmailFromDB(email: string) {
     try {
@@ -12,7 +12,7 @@ export async function getUserByEmailFromDB(email: string) {
     }
 }
 
-export async function addUserInDB(payload: ILoginSchema) {
+export async function addUserInDB(payload: IAuthSchema) {
     try {
         const insertPayload = {
             userId: payload.userId,

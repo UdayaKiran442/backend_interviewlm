@@ -80,6 +80,7 @@ export const candidates = pgTable('candidates', {
     githubProfile: varchar('githubProfile'),
     portfolio: varchar('portfolio'),
     experience: json('experience'),
+    totalExperience: varchar('totalExperience'),
     workAuthorization: varchar('workAuthorization'),
     willingToRelocate: boolean('willingToRelocate'),
     isOpenToRemote: boolean('isOpenToRemote'),

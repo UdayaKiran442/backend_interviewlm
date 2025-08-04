@@ -155,6 +155,13 @@
       "when": 1754288301422,
       "tag": "0021_bouncy_fat_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1754307071250,
+      "tag": "0022_quick_human_fly",
+      "breakpoints": true
     }
   ]
 }

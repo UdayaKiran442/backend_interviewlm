@@ -72,6 +72,7 @@ export async function getApplicationsByJobIdFromDB(jobId: string) {
             firstName: candidates.firstName,
             middleName: candidates.middleName,
             lastName: candidates.lastName,
+            totalExperience: candidates.totalExperience,
             email: candidates.email,
             phone: candidates.phone,
             jobId: applications.jobId,

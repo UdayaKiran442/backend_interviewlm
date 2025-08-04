@@ -1,13 +1,13 @@
 import db from "../db";
 import { candidates } from "../schema";
 import { eq } from "drizzle-orm";
-import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, UpdateCandidateInDBError, UpdateCandidateJobsInDBError } from "../../exceptions/candidate.exceptions";
+import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, OnBoardCandidateInDBError, UpdateCandidateJobsInDBError } from "../../exceptions/candidate.exceptions";
 import { IOnboardingSchema } from "../../routes/v1/candidate.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { dbTx } from "../db.types";
 import { IAuthSchema } from "../../routes/v1/auth.route";
 
-export async function getCandidateByEmailFromDB(email: string){
+export async function getCandidateByEmailFromDB(email: string) {
     try {
         return await db.select().from(candidates).where(eq(candidates.email, email))
     } catch (error) {
@@ -15,7 +15,7 @@ export async function getCandidateByEmailFromDB(email: string){
     }
 }
 
-export async function getCandidateByIDFromDB(candidateId: string, tx?: dbTx){
+export async function getCandidateByIDFromDB(candidateId: string, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         return await dbConnection.select().from(candidates).where(eq(candidates.candidateId, candidateId))
@@ -24,7 +24,7 @@ export async function getCandidateByIDFromDB(candidateId: string, tx?: dbTx){
     }
 }
 
-export async function updateCandidateInDB(payload: IOnboardingSchema) {
+export async function onBoardCandidateInDB(payload: IOnboardingSchema) {
     try {
         const updatePayload = {
             ...payload,
@@ -33,7 +33,7 @@ export async function updateCandidateInDB(payload: IOnboardingSchema) {
         }
         await db.update(candidates).set(updatePayload).where(eq(candidates.candidateId, payload.candidateId))
     } catch (error) {
-        throw new UpdateCandidateInDBError('Failed to update candidate in DB', { cause: (error as Error).cause });
+        throw new OnBoardCandidateInDBError('Failed to update candidate in DB', { cause: (error as Error).cause });
     }
 }
 
@@ -54,10 +54,10 @@ export async function addCandidateInDB(payload: IAuthSchema) {
     }
 }
 
-export async function updateCandidateJobsInDB(payload: {candidateId: string, jobs: string[]}, tx?: dbTx) {
+export async function updateCandidateJobsInDB(payload: { candidateId: string, jobs: string[] }, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
-        await dbConnection.update(candidates).set({jobs: payload.jobs}).where(eq(candidates.candidateId, payload.candidateId))
+        await dbConnection.update(candidates).set({ jobs: payload.jobs }).where(eq(candidates.candidateId, payload.candidateId))
     } catch (error) {
         throw new UpdateCandidateJobsInDBError('Failed to update candidate jobs in DB', { cause: (error as Error).cause });
     }

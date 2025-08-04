@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import z from "zod";
 import { onboardingCandidate } from "../../controller/candidate.controller";
-import { GetCandidateByIDFromDBError, OnboardCandidateError, UpdateCandidateInDBError } from "../../exceptions/candidate.exceptions";
+import { GetCandidateByIDFromDBError, OnboardCandidateError, OnBoardCandidateInDBError } from "../../exceptions/candidate.exceptions";
 
 const candidateRouter = new Hono();
 
@@ -22,6 +22,7 @@ const OnboardingSchema = z.object({
         endDate: z.string().nullish(),
         description: z.string().nullish(),
     })).nullish(),
+    totalExperience: z.string().nullish(),
     workAuthorization: z.string().nullish(),
     willingToRelocate: z.boolean().nullish(),
     isOpenToRemote: z.boolean().nullish(),
@@ -53,7 +54,7 @@ candidateRouter.post("/onboarding", async (c) => {
             const errMessage = JSON.parse(error.message)
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
-        if (error instanceof GetCandidateByIDFromDBError || error instanceof UpdateCandidateInDBError || error instanceof OnboardCandidateError) {
+        if (error instanceof GetCandidateByIDFromDBError || error instanceof OnBoardCandidateInDBError || error instanceof OnboardCandidateError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

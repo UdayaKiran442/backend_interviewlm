@@ -38,11 +38,11 @@ export class GetCandidateByIDFromDBError extends Error {
     }
 }
 
-export class UpdateCandidateInDBError extends Error {
+export class OnBoardCandidateInDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "UpdateCandidateInDBError";
+        this.name = "OnBoardCandidateInDBError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }

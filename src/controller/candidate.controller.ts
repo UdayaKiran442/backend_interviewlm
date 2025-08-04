@@ -1,9 +1,9 @@
 import { IOnboardingSchema } from "../routes/v1/candidate.route";
 
-import { GetCandidateByIDFromDBError, UpdateCandidateInDBError, OnboardCandidateError } from "../exceptions/candidate.exceptions";
+import { GetCandidateByIDFromDBError, OnBoardCandidateInDBError, OnboardCandidateError } from "../exceptions/candidate.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
 
-import { getCandidateByIDFromDB, updateCandidateInDB } from "../repository/candidate/candidate.repository";
+import { getCandidateByIDFromDB, onBoardCandidateInDB } from "../repository/candidate/candidate.repository";
 import { parsePDF } from "../services/llamaindex.service";
 import { ParsePDFError } from "../exceptions/llamaindex.exceptions";
 
@@ -18,9 +18,9 @@ export async function onboardingCandidate(payload: IOnboardingSchema) {
             throw new NotFoundError('Candidate not found');
         }
         // TODO: upload resume to cloud storage and extract text from it.
-        await updateCandidateInDB(payload);
+        await onBoardCandidateInDB(payload);
     } catch (error) {
-        if (error instanceof GetCandidateByIDFromDBError || error instanceof UpdateCandidateInDBError || error instanceof ParsePDFError) {
+        if (error instanceof GetCandidateByIDFromDBError || error instanceof OnBoardCandidateInDBError || error instanceof ParsePDFError) {
             throw error;
         }
         throw new OnboardCandidateError('Failed to update candidate', { cause: (error as Error).cause });

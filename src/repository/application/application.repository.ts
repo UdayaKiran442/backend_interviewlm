@@ -1,8 +1,8 @@
 import { IApplyJobSchema } from "../../routes/v1/applicatons.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
-import { applications } from "../schema";
-import { and, eq } from "drizzle-orm";
+import { applications, candidates, roundResults, rounds } from "../schema";
+import { and, eq, sql } from "drizzle-orm";
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplicationsByJobIdFromDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
 import { dbTx } from "../db.types";
 
@@ -50,7 +50,7 @@ export async function updateApplicationInDB(payload: {
     resumeText?: string,
     coverLetterText?: string,
     skills?: string[],
-}, tx?: dbTx){
+}, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         const updatedPayload = {
@@ -65,10 +65,34 @@ export async function updateApplicationInDB(payload: {
 
 export async function getApplicationsByJobIdFromDB(jobId: string) {
     try {
-        return await db.select().from(applications).where(eq(applications.jobId, jobId))
+        return await db.select({
+            applicationId: applications.applicationId,
+            candidateId: candidates.candidateId,
+            currentRound: applications.currentRound,
+            firstName: candidates.firstName,
+            middleName: candidates.middleName,
+            lastName: candidates.lastName,
+            email: candidates.email,
+            phone: candidates.phone,
+            jobId: applications.jobId,
+            status: applications.status,
+            appliedAt: applications.createdAt,
+            roundResults: sql`
+                    (
+                        SELECT COALESCE(json_agg(json_build_object(
+                            'roundResultId', rr."roundResultId",
+                            'roundId', rr."roundId",
+                            'applicationId', rr."applicationId",
+                            'isQualified', rr."isQualified",
+                            'feedback', rr."feedback",
+                            'verdictBy', rr."verdictBy"
+                        )), '[]')
+                        FROM round_results rr
+                        WHERE rr."applicationId" = ${applications.applicationId}
+                    )
+                `.as('roundResults')
+        }).from(applications).where(eq(applications.jobId, jobId)).leftJoin(candidates, eq(applications.candidateId, candidates.candidateId))
     } catch (error) {
-        console.log(error)
         throw new GetApplicationsByJobIdFromDBError('Failed to get applications by job id from DB', { cause: (error as Error).cause });
     }
 }
-    

@@ -128,10 +128,13 @@ export async function applyJob(payload: IApplyJobSchema) {
 
 export async function getApplicationsForJob(payload: IGetApplicationsForJobSchema) {
     try {
-        const result = await getApplicationsByJobIdFromDB(payload.jobId)
-        return result;
+        const [applications, rounds] = await Promise.all([
+            getApplicationsByJobIdFromDB(payload.jobId),
+            getRoundsByJobIdFromDB(payload.jobId)
+        ])
+        return { applications, rounds };
     } catch (error) {
-        if (error instanceof GetApplicationsByJobIdFromDBError) {
+        if (error instanceof GetApplicationsByJobIdFromDBError || error instanceof GetRoundsByJobIdFromDBError) {
             throw error;
         }
         throw new GetApplicationsForJobError('Failed to get applications for job', { cause: (error as Error).cause });

@@ -3,7 +3,7 @@ import z from "zod";
 import { applyJob, getApplicationsForJob } from "../../controller/application.controller";
 import { NotFoundError } from "../../exceptions/common.exceptions";
 import { CloseJobInDBError, GetJobByIdError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
-import { ApplyJobError, GetApplicationsForJobError, JobAlreadyAppliedError } from "../../exceptions/applications.exceptions";
+import { ApplyJobError, GetApplicationsByJobIdFromDBError, GetApplicationsForJobError, JobAlreadyAppliedError } from "../../exceptions/applications.exceptions";
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../../exceptions/applications.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } from "../../exceptions/openai.exceptions";
@@ -76,10 +76,9 @@ applicationsRoute.post("/job", async (c) => {
             const errMessage = JSON.parse(error.message)
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
-        if (error instanceof GetApplicationsForJobError) {
+        if (error instanceof GetApplicationsByJobIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GetApplicationsForJobError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
-        console.log(error)
         return c.json({ success: false, message: 'Something went wrong' }, 500)
     }
 })

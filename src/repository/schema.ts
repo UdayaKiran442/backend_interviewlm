@@ -9,7 +9,7 @@ export const company = pgTable('company', {
 export const hr = pgTable('hr', {
     hrId: varchar('hrId').primaryKey(),
     companyId: varchar('companyId').notNull(),
-    userId: varchar('userId'),
+    userId: varchar('userId').notNull(),
     name: varchar('name').notNull(),
     email: varchar('email').notNull(),
     phone: varchar('phone').notNull(),
@@ -69,7 +69,7 @@ export const users = pgTable('users', {
 
 export const candidates = pgTable('candidates', {
     candidateId: varchar('candidateId').primaryKey(),
-    userId: varchar('userId'),
+    userId: varchar('userId').notNull(),
     firstName: varchar('firstName'),
     middleName: varchar('middleName'),
     lastName: varchar('lastName'),

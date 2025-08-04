@@ -4,11 +4,12 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { hr } from "../schema";
 
-export async function createHRInDB(payload: { companyId: string, name: string, email: string, phone: string, isOrgAdmin: boolean }) {
+export async function createHRInDB(payload: { companyId: string, name: string, email: string, phone: string, isOrgAdmin: boolean, userId: string }) {
     try {
         const insertPayload = {
             hrId: `hr-${generateNanoId()}`,
             companyId: payload.companyId,
+            userId: payload.userId,
             name: payload.name,
             email: payload.email,
             phone: payload.phone,

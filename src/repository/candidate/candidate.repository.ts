@@ -2,7 +2,7 @@ import db from "../db";
 import { candidates } from "../schema";
 import { eq } from "drizzle-orm";
 import { GetCandidateByEmailFromDBError, AddCandidateInDBError, GetCandidateByIDFromDBError, UpdateCandidateInDBError, UpdateCandidateJobsInDBError } from "../../exceptions/candidate.exceptions";
-import { ILoginSchema, IOnboardingSchema } from "../../routes/v1/candidate.route";
+import { IOnboardingSchema } from "../../routes/v1/candidate.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { dbTx } from "../db.types";
 import { IAuthSchema } from "../../routes/v1/auth.route";
@@ -42,6 +42,7 @@ export async function addCandidateInDB(payload: IAuthSchema) {
         const insertPayload = {
             candidateId: `candidate-${generateNanoId()}`,
             email: payload.email,
+            userId: payload.userId,
             isOnboardingCompleted: false,
             createdAt: new Date(),
             updatedAt: new Date(),

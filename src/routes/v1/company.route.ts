@@ -9,6 +9,7 @@ const companyRoute = new Hono();
 const CompanySchema = z.object({
     name: z.string(),
     location: z.string(),
+    userId: z.string(),
     hrName: z.string(),
     hrEmail: z.string().email(),
     hrPhone: z.string(),

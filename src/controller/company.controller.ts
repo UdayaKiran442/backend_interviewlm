@@ -13,6 +13,7 @@ export async function createCompany(payload: ICompanySchema) {
             name: payload.hrName,
             email: payload.hrEmail,
             phone: payload.hrPhone,
+            userId: payload.userId,
             isOrgAdmin: true,
         })
         return company;

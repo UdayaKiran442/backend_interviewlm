@@ -4,6 +4,7 @@ import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { getResumeScreeningDetailsFromDB } from "../../repository/resumeScreening/resumeScreening.repository";
+import { userIdScript } from "../../scripts/userId.script";
 
 const testRouter = new Hono()
 
@@ -168,6 +169,17 @@ testRouter.get('/v2', async (c) => {
         return c.json({ success: true, message: 'Applications fetched', res }, 200)
     } catch (error) {
        
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
+    }
+})
+
+
+testRouter.get('/v3', async (c) => {
+    try {
+        await userIdScript()
+        return c.json({ success: true, message: 'Applications fetched' }, 200)
+    } catch (error) {
+        console.log(error)
         return c.json({ success: false, message: 'Something went wrong' }, 500)
     }
 })

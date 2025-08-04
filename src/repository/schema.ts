@@ -9,11 +9,14 @@ export const company = pgTable('company', {
 export const hr = pgTable('hr', {
     hrId: varchar('hrId').primaryKey(),
     companyId: varchar('companyId').notNull(),
+    userId: varchar('userId'),
     name: varchar('name').notNull(),
     email: varchar('email').notNull(),
     phone: varchar('phone').notNull(),
     isOrgAdmin: boolean('isOrgAdmin').notNull().default(false),
-})
+}, (hr) => ({
+    hrUserIdIndex: index('hr_user_id_idx').on(hr.userId),
+}))
 
 export const jobs = pgTable('jobs', {
     jobId: varchar('jobId').primaryKey(),
@@ -66,6 +69,7 @@ export const users = pgTable('users', {
 
 export const candidates = pgTable('candidates', {
     candidateId: varchar('candidateId').primaryKey(),
+    userId: varchar('userId'),
     firstName: varchar('firstName'),
     middleName: varchar('middleName'),
     lastName: varchar('lastName'),
@@ -88,7 +92,8 @@ export const candidates = pgTable('candidates', {
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }, (candidates) => ({
-    candidatesEmailIdx: index('candidates_email_idx').on(candidates.email)
+    candidatesEmailIdx: index('candidates_email_idx').on(candidates.email),
+    candidatesUserIdIdx: index('candidates_user_id_idx').on(candidates.userId)
 }))
 
 export const applications = pgTable('applications', {

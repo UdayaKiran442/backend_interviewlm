@@ -27,13 +27,13 @@ const OnboardingSchema = z.object({
     willingToRelocate: z.boolean().nullish(),
     isOpenToRemote: z.boolean().nullish(),
     resumeLink: z.string().nullish(),
+    resumeText: z.string().nullish(),
     acceptedTermsAndConditions: z.boolean().nullish(),
     receiveUpdatesOnApplication: z.boolean().nullish(),
 })
 
 export type IOnboardingSchema = z.infer<typeof OnboardingSchema> & {
     candidateId: string;
-    resumeText?: string;
 }
 
 

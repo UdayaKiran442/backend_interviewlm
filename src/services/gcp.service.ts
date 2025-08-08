@@ -12,6 +12,6 @@ export async function uploadFileToGCPService(payload: { filePath: string, fileNa
             destination: payload.fileName,
         })
     } catch (error) {
-        throw new UploadFileToGCPServiceError('Failed to upload file to GCP', { cause: (error as Error).cause });
+        throw new UploadFileToGCPServiceError('Failed to upload file to GCP', { cause: (error as Error).message });
     }
 }

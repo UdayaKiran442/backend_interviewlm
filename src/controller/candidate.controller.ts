@@ -18,6 +18,6 @@ export async function onboardingCandidate(payload: IOnboardingSchema) {
         if (error instanceof GetCandidateByIDFromDBError || error instanceof OnBoardCandidateInDBError) {
             throw error;
         }
-        throw new OnboardCandidateError('Failed to update candidate', { cause: (error as Error).cause });
+        throw new OnboardCandidateError('Failed to update candidate', { cause: (error as Error).message });
     }
 }

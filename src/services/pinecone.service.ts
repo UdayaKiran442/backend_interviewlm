@@ -17,7 +17,7 @@ export async function upsertVectorEmbeddingsService(payload: { indexName: string
             }
         ])
     } catch (error) {
-        throw new UpsertVectorEmbeddingsServiceError('Failed to upsert vector embeddings', { cause: (error as Error).cause });
+        throw new UpsertVectorEmbeddingsServiceError('Failed to upsert vector embeddings', { cause: (error as Error).message });
     }
 }
 
@@ -33,7 +33,7 @@ export async function queryVectorEmbeddingsService(payload: { indexName: string,
             topK: 10,
         })
     } catch (error) {
-        throw new QueryVectorEmbeddingsServiceError('Failed to query vector embeddings', { cause: (error as Error).cause });
+        throw new QueryVectorEmbeddingsServiceError('Failed to query vector embeddings', { cause: (error as Error).message });
     }
 }
 

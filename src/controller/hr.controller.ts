@@ -9,6 +9,6 @@ export async function getJobsByHR(hrId: string) {
         if (error instanceof GetJobsByHRFromDBError) {
             throw error;
         }
-        throw new GetJobsByHRError('Failed to get jobs by HR', { cause: (error as Error).cause });
+        throw new GetJobsByHRError('Failed to get jobs by HR', { cause: (error as Error).message });
     }
 }

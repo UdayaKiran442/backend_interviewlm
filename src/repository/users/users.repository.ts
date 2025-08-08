@@ -8,7 +8,7 @@ export async function getUserByEmailFromDB(email: string) {
     try {
         return await db.select().from(users).where(eq(users.email, email))
     } catch (error) {
-        throw new GetUserByEmailFromDBError('Failed to get user by email from DB', { cause: (error as Error).cause });
+        throw new GetUserByEmailFromDBError('Failed to get user by email from DB', { cause: (error as Error).message });
     }
 }
 
@@ -23,6 +23,6 @@ export async function addUserInDB(payload: IAuthSchema) {
         }
         await db.insert(users).values(insertPayload)
     } catch (error) {
-        throw new AddUserInDBError('Failed to add user in DB', { cause: (error as Error).cause });
+        throw new AddUserInDBError('Failed to add user in DB', { cause: (error as Error).message });
     }
 }

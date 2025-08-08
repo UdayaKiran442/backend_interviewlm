@@ -7,6 +7,6 @@ export async function parsePDFLangchainService(filePath: string) {
         const data = await reader.load();
         return data[0].pageContent;
     } catch (error) {
-        throw new ParsePDFLangchainError('Failed to parse PDF', { cause: (error as Error).cause });
+        throw new ParsePDFLangchainError('Failed to parse PDF', { cause: (error as Error).message });
     }
 }

@@ -26,7 +26,7 @@ export async function addApplicationToDB(payload: IApplyJobSchema, tx?: dbTx) {
         await dbConnection.insert(applications).values(insertPayload)
         return insertPayload;
     } catch (error) {
-        throw new AddApplicationToDBError('Failed to add application to DB', { cause: (error as Error).cause });
+        throw new AddApplicationToDBError('Failed to add application to DB', { cause: (error as Error).message });
     }
 }
 
@@ -34,7 +34,7 @@ export async function checkCandidateAppliedInDB(payload: { candidateId: string, 
     try {
         return await db.select().from(applications).where(and(eq(applications.candidateId, payload.candidateId), eq(applications.jobId, payload.jobId)))
     } catch (error) {
-        throw new CheckCandidateAppliedInDBError('Failed to check if candidate has already applied for job', { cause: (error as Error).cause });
+        throw new CheckCandidateAppliedInDBError('Failed to check if candidate has already applied for job', { cause: (error as Error).message });
     }
 }
 
@@ -59,7 +59,7 @@ export async function updateApplicationInDB(payload: {
         }
         await dbConnection.update(applications).set(updatedPayload).where(eq(applications.applicationId, payload.applicationId))
     } catch (error) {
-        throw new UpdateApplicationInDBError('Failed to update application in DB', { cause: (error as Error).cause });
+        throw new UpdateApplicationInDBError('Failed to update application in DB', { cause: (error as Error).message });
     }
 }
 
@@ -94,6 +94,6 @@ export async function getApplicationsByJobIdFromDB(jobId: string) {
                 `.as('roundResults')
         }).from(applications).where(eq(applications.jobId, jobId)).leftJoin(candidates, eq(applications.candidateId, candidates.candidateId))
     } catch (error) {
-        throw new GetApplicationsByJobIdFromDBError('Failed to get applications by job id from DB', { cause: (error as Error).cause });
+        throw new GetApplicationsByJobIdFromDBError('Failed to get applications by job id from DB', { cause: (error as Error).message });
     }
 }

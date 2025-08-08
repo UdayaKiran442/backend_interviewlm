@@ -106,6 +106,6 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
         if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError || error instanceof UpdateRoundResultInDBError) {
             throw error
         }
-        throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).cause });
+        throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).message });
     }
 }

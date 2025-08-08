@@ -27,7 +27,7 @@ export async function createRoundInDB(payload: ICreatRoundInDB, tx?: dbTx) {
         await dbConnection.insert(rounds).values(insertPayload)
         return insertPayload;
     } catch (error) {
-        throw new CreateRoundInDBError('Failed to create round in DB', { cause: (error as Error).cause });
+        throw new CreateRoundInDBError('Failed to create round in DB', { cause: (error as Error).message });
     }
 }
 
@@ -38,7 +38,7 @@ export async function getRoundsByJobIdFromDB(jobId: string, roundNumber?: number
         }
         return await db.select().from(rounds).where(eq(rounds.jobId, jobId))
     } catch (error) {
-        throw new GetRoundsByJobIdFromDBError('Failed to get rounds by job id', { cause: (error as Error).cause });
+        throw new GetRoundsByJobIdFromDBError('Failed to get rounds by job id', { cause: (error as Error).message });
     }
 }
 
@@ -46,6 +46,6 @@ export async function getRoundByIdFromDB(roundId: string) {
     try {
         return await db.select().from(rounds).where(eq(rounds.roundId, roundId))
     } catch (error) {
-        throw new GetRoundByIdFromDBError('Failed to get round by id', { cause: (error as Error).cause });
+        throw new GetRoundByIdFromDBError('Failed to get round by id', { cause: (error as Error).message });
     }
 }

@@ -18,6 +18,6 @@ export async function upsertVectorEmbeddings(payload: { indexName: string, text:
         if (error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError) {
             throw error;
         }
-        throw new UpsertVectorEmbeddingsError('Failed to upsert vector embeddings', { cause: (error as Error).cause });
+        throw new UpsertVectorEmbeddingsError('Failed to upsert vector embeddings', { cause: (error as Error).message });
     }
 }

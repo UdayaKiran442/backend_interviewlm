@@ -14,7 +14,7 @@ export async function generateEmbeddingsService(text: string) {
         })
         return embeddings.data[0].embedding
     } catch (error) {
-        throw new GenerateEmbeddingsServiceError('Failed to generate embeddings', { cause: (error as Error).cause });
+        throw new GenerateEmbeddingsServiceError('Failed to generate embeddings', { cause: (error as Error).message });
     }
 }
 
@@ -58,7 +58,7 @@ Return output in **valid JSON** format like:
         })
         return JSON.parse(response.choices[0].message.content ?? "");
     } catch (error) {
-        throw new GenerateResumeSummaryServiceError('Failed to generate resume summary', { cause: (error as Error).cause });
+        throw new GenerateResumeSummaryServiceError('Failed to generate resume summary', { cause: (error as Error).message });
     }
 }
 
@@ -112,6 +112,6 @@ Avoid any extra explanation outside of the JSON. Respond with the JSON object on
         })
         return JSON.parse(response.choices[0].message.content ?? "");
     } catch (error) {
-        throw new GenerateResumeFeedbackServiceError('Failed to generate resume feedback', { cause: (error as Error).cause})
+        throw new GenerateResumeFeedbackServiceError('Failed to generate resume feedback', { cause: (error as Error).cause })
     }
 }

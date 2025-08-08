@@ -19,7 +19,7 @@ export async function uploadFileToGCP(payload: { file: File }) {
         return `https://storage.googleapis.com/${ActiveConfig.GCP_BUCKET_NAME}/${fileName}`
 
     } catch (error) {
-        throw new UploadFileToGCPError('Failed to upload file to GCP', { cause: (error as Error).cause });
+        throw new UploadFileToGCPError('Failed to upload file to GCP', { cause: (error as Error).message });
     }
     finally {
         if (filePath) {
@@ -40,7 +40,7 @@ export async function extractTextFromDoc(file: File) {
         if (error instanceof ParsePDFLangchainError) {
             throw error;
         }
-        throw new ExtractTextFromDocError('Failed to parse PDF', { cause: (error as Error).cause });
+        throw new ExtractTextFromDocError('Failed to parse PDF', { cause: (error as Error).message });
     }
     finally {
         if (filePath) {

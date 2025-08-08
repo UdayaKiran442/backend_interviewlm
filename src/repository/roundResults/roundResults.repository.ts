@@ -24,7 +24,7 @@ export async function insertRoundResultsToDB(payload: {
         await db.insert(roundResults).values(insertPayload)
         return insertPayload;
     } catch (error) {
-        throw new InsertRoundResultsToDBError('Failed to insert round results to DB', { cause: (error as Error).cause });
+        throw new InsertRoundResultsToDBError('Failed to insert round results to DB', { cause: (error as Error).message });
     }
 }
 
@@ -32,7 +32,7 @@ export async function getRoundResultFromDB(payload: { roundId: string, applicati
     try {
         return await db.select().from(roundResults).where(and(eq(roundResults.roundId, payload.roundId), eq(roundResults.applicationId, payload.applicationId)))
     } catch (error) {
-        throw new GetRoundResultFromDBError('Failed to get round result by round id and application id', { cause: (error as Error).cause });
+        throw new GetRoundResultFromDBError('Failed to get round result by round id and application id', { cause: (error as Error).message });
     }
 }
 
@@ -44,6 +44,6 @@ export async function updateRoundResultInDB(payload: { roundId: string, applicat
         }
         await db.update(roundResults).set(updatedPayload).where(and(eq(roundResults.roundId, payload.roundId), eq(roundResults.applicationId, payload.applicationId)))
     } catch (error) {
-        throw new UpdateRoundResultInDBError('Failed to update round result in DB', { cause: (error as Error).cause });
+        throw new UpdateRoundResultInDBError('Failed to update round result in DB', { cause: (error as Error).message });
     }
 }

@@ -65,7 +65,7 @@ export async function createJob(payload: ICreateJobSchema) {
         if (error instanceof CreateJobInDBError || error instanceof CreateRoundInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError) {
             throw error;
         }
-        throw new CreateJobError('Failed to create job', { cause: (error as Error).cause });
+        throw new CreateJobError('Failed to create job', { cause: (error as Error).message });
     }
 }
 
@@ -97,6 +97,6 @@ export async function closeJob(payload: ICloseJobSchema) {
         if (error instanceof NotFoundError || error instanceof UnauthorizedError || error instanceof CloseJobInDBError || error instanceof GetJobByIdError || error instanceof GetHRFromDBError) {
             throw error;
         }
-        throw new CloseJobError('Failed to close job', { cause: (error as Error).cause });
+        throw new CloseJobError('Failed to close job', { cause: (error as Error).message });
     }
 }

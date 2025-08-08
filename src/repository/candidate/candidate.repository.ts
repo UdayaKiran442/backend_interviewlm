@@ -11,7 +11,7 @@ export async function getCandidateByEmailFromDB(email: string) {
     try {
         return await db.select().from(candidates).where(eq(candidates.email, email))
     } catch (error) {
-        throw new GetCandidateByEmailFromDBError('Failed to get candidate by email from DB', { cause: (error as Error).cause });
+        throw new GetCandidateByEmailFromDBError('Failed to get candidate by email from DB', { cause: (error as Error).message });
     }
 }
 
@@ -20,7 +20,7 @@ export async function getCandidateByIDFromDB(candidateId: string, tx?: dbTx) {
         const dbConnection = tx || db;
         return await dbConnection.select().from(candidates).where(eq(candidates.candidateId, candidateId))
     } catch (error) {
-        throw new GetCandidateByIDFromDBError('Failed to get candidate by ID from DB', { cause: (error as Error).cause });
+        throw new GetCandidateByIDFromDBError('Failed to get candidate by ID from DB', { cause: (error as Error).message });
     }
 }
 
@@ -33,7 +33,7 @@ export async function onBoardCandidateInDB(payload: IOnboardingSchema) {
         }
         await db.update(candidates).set(updatePayload).where(eq(candidates.candidateId, payload.candidateId))
     } catch (error) {
-        throw new OnBoardCandidateInDBError('Failed to update candidate in DB', { cause: (error as Error).cause });
+        throw new OnBoardCandidateInDBError('Failed to update candidate in DB', { cause: (error as Error).message });
     }
 }
 
@@ -50,7 +50,7 @@ export async function addCandidateInDB(payload: IAuthSchema) {
         await db.insert(candidates).values(insertPayload)
         return insertPayload;
     } catch (error) {
-        throw new AddCandidateInDBError('Failed to add candidate in DB', { cause: (error as Error).cause });
+        throw new AddCandidateInDBError('Failed to add candidate in DB', { cause: (error as Error).message });
     }
 }
 
@@ -59,6 +59,6 @@ export async function updateCandidateJobsInDB(payload: { candidateId: string, jo
         const dbConnection = tx || db;
         await dbConnection.update(candidates).set({ jobs: payload.jobs }).where(eq(candidates.candidateId, payload.candidateId))
     } catch (error) {
-        throw new UpdateCandidateJobsInDBError('Failed to update candidate jobs in DB', { cause: (error as Error).cause });
+        throw new UpdateCandidateJobsInDBError('Failed to update candidate jobs in DB', { cause: (error as Error).message });
     }
 }    

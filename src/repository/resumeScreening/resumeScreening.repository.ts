@@ -6,7 +6,7 @@ import { applications, candidates, jobs, resumeScreening, roundResults } from ".
 import { GetResumeScreeningDetailsFromDBError, GetScreeningResumesFromDBError, InsertScreeningResultsToDBError, UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 import { dbTx } from "../db.types";
 
-export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number, roundId: string}, tx?: dbTx) {
+export async function insertScreeningResultsToDB(payload: { applicationId: string, jobId: string, candidateId: string, matchScore: number, roundId: string }, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         const insertPayload = {
@@ -21,7 +21,7 @@ export async function insertScreeningResultsToDB(payload: { applicationId: strin
         }
         await dbConnection.insert(resumeScreening).values(insertPayload)
     } catch (error) {
-        throw new InsertScreeningResultsToDBError('Failed to insert screening results to DB', { cause: (error as Error).cause });
+        throw new InsertScreeningResultsToDBError('Failed to insert screening results to DB', { cause: (error as Error).message });
     }
 }
 
@@ -62,7 +62,7 @@ export async function getScreeningResumesFromDB(payload: IFetchScreeningResumesS
             .leftJoin(applications, eq(resumeScreening.applicationId, applications.applicationId));
 
     } catch (error) {
-        throw new GetScreeningResumesFromDBError('Failed to get screening resumes from DB', { cause: (error as Error).cause });
+        throw new GetScreeningResumesFromDBError('Failed to get screening resumes from DB', { cause: (error as Error).message });
     }
 }
 
@@ -83,7 +83,7 @@ export async function getResumeScreeningDetailsFromDB(payload: IFetchResumeScree
             resumeText: applications.resumeText,
         }).from(resumeScreening).where(eq(resumeScreening.screeningId, payload.screeningId)).leftJoin(jobs, eq(resumeScreening.jobId, jobs.jobId)).leftJoin(applications, eq(resumeScreening.applicationId, applications.applicationId)).leftJoin(roundResults, eq(resumeScreening.roundResultId, roundResults.roundResultId))
     } catch (error) {
-        throw new GetResumeScreeningDetailsFromDBError('Failed to get resume screening details from DB', { cause: (error as Error).cause });
+        throw new GetResumeScreeningDetailsFromDBError('Failed to get resume screening details from DB', { cause: (error as Error).message });
     }
 }
 
@@ -95,7 +95,7 @@ export async function updateResumeScreeningInDB(payload: {
     matchScore?: number,
     status?: string,
     roundResultId?: string
-}, tx?: dbTx){
+}, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         const updatedPayload = {
@@ -104,6 +104,6 @@ export async function updateResumeScreeningInDB(payload: {
         }
         await dbConnection.update(resumeScreening).set(updatedPayload).where(eq(resumeScreening.screeningId, payload.screeningId))
     } catch (error) {
-        throw new UpdateResumeScreeningInDBError('Failed to update resume screening in DB', { cause: (error as Error).cause });
+        throw new UpdateResumeScreeningInDBError('Failed to update resume screening in DB', { cause: (error as Error).message });
     }
 }

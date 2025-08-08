@@ -16,6 +16,6 @@ export async function createCompanyInDB(payload: ICompanySchema) {
         await db.insert(company).values(insertPayload)
         return insertPayload;
     } catch (error) {
-        throw new CreateCompanyInDBError('Failed to create company in DB', { cause: (error as Error).cause });
+        throw new CreateCompanyInDBError('Failed to create company in DB', { cause: (error as Error).message });
     }
 }

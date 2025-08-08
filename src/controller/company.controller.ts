@@ -21,6 +21,6 @@ export async function createCompany(payload: ICompanySchema) {
         if (error instanceof CreateCompanyInDBError || error instanceof CreateHRInDBError) {
             throw error;
         }
-        throw new CreateCompanyError('Failed to create company', { cause: (error as Error).cause });
+        throw new CreateCompanyError('Failed to create company', { cause: (error as Error).message });
     }
 }

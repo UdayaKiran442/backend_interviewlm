@@ -24,7 +24,7 @@ export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
         await dbConnection.insert(jobs).values(insertPayload)
         return insertPayload;
     } catch (error) {
-        throw new CreateJobInDBError('Failed to create job in DB', { cause: (error as Error).cause });
+        throw new CreateJobInDBError('Failed to create job in DB', { cause: (error as Error).message });
     }
 }
 
@@ -32,7 +32,7 @@ export async function getJobByIdFromDB(jobId: string) {
     try {
         return await db.select().from(jobs).where(eq(jobs.jobId, jobId))
     } catch (error) {
-        throw new GetJobByIdError('Failed to get job by id', { cause: (error as Error).cause });
+        throw new GetJobByIdError('Failed to get job by id', { cause: (error as Error).message });
     }
 }
 
@@ -40,7 +40,7 @@ export async function closeJobInDB(jobId: string) {
     try {
         await db.update(jobs).set({ isJobOpen: false, updatedAt: new Date() }).where(eq(jobs.jobId, jobId))
     } catch (error) {
-        throw new CloseJobInDBError('Failed to close job', { cause: (error as Error).cause });
+        throw new CloseJobInDBError('Failed to close job', { cause: (error as Error).message });
     }
 }
 
@@ -49,7 +49,7 @@ export async function updateJobApplicationsCountInDB(payload: { jobId: string, c
         const dbConnection = tx || db;
         await dbConnection.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
     } catch (error) {
-        throw new UpdateJobApplicationsCountInDBError('Failed to update job applications count', { cause: (error as Error).cause });
+        throw new UpdateJobApplicationsCountInDBError('Failed to update job applications count', { cause: (error as Error).message });
     }
 }
 
@@ -62,7 +62,7 @@ export async function updateJobInDB(payload: { jobId: string, hrId?: string, job
         }
         await dbConnection.update(jobs).set(updatedPayload).where(eq(jobs.jobId, payload.jobId))
     } catch (error) {
-        throw new UpdateJobInDBError('Failed to update job in DB', { cause: (error as Error).cause });
+        throw new UpdateJobInDBError('Failed to update job in DB', { cause: (error as Error).message });
     }
 }
 
@@ -70,6 +70,6 @@ export async function getJobsByHRFromDB(hrId: string) {
     try {
         return await db.select().from(jobs).where(eq(jobs.hrId, hrId))
     } catch (error) {
-        throw new GetJobsByHRFromDBError('Failed to get jobs by HR', { cause: (error as Error).cause });
+        throw new GetJobsByHRFromDBError('Failed to get jobs by HR', { cause: (error as Error).message });
     }
 }

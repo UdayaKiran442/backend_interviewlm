@@ -20,7 +20,7 @@ export async function addApplicationTimelineToDB(payload: { applicationId: strin
         }
         await dbConnection.insert(applicationTimeline).values(insertPayload)
     } catch (error) {
-        throw new AddApplicationTimelineToDBError('Failed to add application timeline to DB', { cause: (error as Error).cause });
+        throw new AddApplicationTimelineToDBError('Failed to add application timeline to DB', { cause: (error as Error).message });
     }
 }
 
@@ -35,9 +35,8 @@ export async function updateApplicationTimelineToDB(payload: { applicationId: st
             status: payload.status,
             updatedAt: new Date(),
         }
-        await dbConnection.update(applicationTimeline).set(updatedPayload).where(and(eq(applicationTimeline.applicationId,payload.applicationId), eq(applicationTimeline.roundId, payload.roundId)))
+        await dbConnection.update(applicationTimeline).set(updatedPayload).where(and(eq(applicationTimeline.applicationId, payload.applicationId), eq(applicationTimeline.roundId, payload.roundId)))
     } catch (error) {
-        throw new UpdateApplicationTimelineToDBError('Failed to update application timeline to DB', { cause: (error as Error).cause });
+        throw new UpdateApplicationTimelineToDBError('Failed to update application timeline to DB', { cause: (error as Error).message });
     }
 }
-    

@@ -55,6 +55,6 @@ export async function loginUser(payload: IAuthSchema) {
         if (error instanceof GetUserByEmailFromDBError || error instanceof AddUserInDBError || error instanceof GetCandidateByEmailFromDBError || error instanceof AddCandidateInDBError || error instanceof GetHRByEmailFromDBError) {
             throw error;
         }
-        throw new LoginUserError('Failed to login user', { cause: (error as Error).cause });
+        throw new LoginUserError('Failed to login user', { cause: (error as Error).message });
     }
 }

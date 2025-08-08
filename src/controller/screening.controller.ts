@@ -44,7 +44,7 @@ export async function fetchScreeningResumes(payload: IFetchScreeningResumesSchem
         if (error instanceof GenerateEmbeddingsServiceError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof GetScreeningResumesFromDBError) {
             throw error;
         }
-        throw new FetchScreeningResumesError('Failed to fetch screening resumes', { cause: (error as Error).cause });
+        throw new FetchScreeningResumesError('Failed to fetch screening resumes', { cause: (error as Error).message });
     }
 }
 
@@ -87,6 +87,6 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
         if (error instanceof GetResumeScreeningDetailsFromDBError || error instanceof NotFoundError || error instanceof GenerateResumeFeedbackServiceError || error instanceof UpdateResumeScreeningInDBError || error instanceof InsertRoundResultsToDBError) {
             throw error
         }
-        throw new FetchResumeScreeningDetailsError('Failed to fetch resume screening details', { cause: (error as Error).cause });
+        throw new FetchResumeScreeningDetailsError('Failed to fetch resume screening details', { cause: (error as Error).message });
     }
 }

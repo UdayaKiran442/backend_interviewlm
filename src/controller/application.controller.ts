@@ -122,7 +122,7 @@ export async function applyJob(payload: IApplyJobSchema) {
         if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
             throw error;
         }
-        throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).cause });
+        throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).message });
     }
 }
 
@@ -137,6 +137,6 @@ export async function getApplicationsForJob(payload: IGetApplicationsForJobSchem
         if (error instanceof GetApplicationsByJobIdFromDBError || error instanceof GetRoundsByJobIdFromDBError) {
             throw error;
         }
-        throw new GetApplicationsForJobError('Failed to get applications for job', { cause: (error as Error).cause });
+        throw new GetApplicationsForJobError('Failed to get applications for job', { cause: (error as Error).message });
     }
 }

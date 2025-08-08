@@ -19,6 +19,7 @@ export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
             package: payload.package,
             maximumApplications: payload.maximumApplications,
             companyId: payload.companyId,
+            location: payload.location
         }
         await dbConnection.insert(jobs).values(insertPayload)
         return insertPayload;
@@ -43,7 +44,7 @@ export async function closeJobInDB(jobId: string) {
     }
 }
 
-export async function updateJobApplicationsCountInDB(payload: {jobId: string, count: number}, tx?: dbTx) {
+export async function updateJobApplicationsCountInDB(payload: { jobId: string, count: number }, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         await dbConnection.update(jobs).set({ applications: payload.count, updatedAt: new Date() }).where(eq(jobs.jobId, payload.jobId))
@@ -52,7 +53,7 @@ export async function updateJobApplicationsCountInDB(payload: {jobId: string, co
     }
 }
 
-export async function updateJobInDB(payload: { jobId: string, hrId?: string, jobTitle?: string, jobDescription?: string, department?: string, package?: string, maximumApplications?: number, companyId?: string, applications?: number, inProgress?: number, rejected?: number, interviewing?: number, hired?: number, isJobOpen?: boolean, isScreeningDone?: boolean}, tx?: dbTx) {
+export async function updateJobInDB(payload: { jobId: string, hrId?: string, jobTitle?: string, jobDescription?: string, department?: string, package?: string, maximumApplications?: number, companyId?: string, applications?: number, inProgress?: number, rejected?: number, interviewing?: number, hired?: number, isJobOpen?: boolean, isScreeningDone?: boolean }, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         const updatedPayload = {
@@ -72,4 +73,3 @@ export async function getJobsByHRFromDB(hrId: string) {
         throw new GetJobsByHRFromDBError('Failed to get jobs by HR', { cause: (error as Error).cause });
     }
 }
-    

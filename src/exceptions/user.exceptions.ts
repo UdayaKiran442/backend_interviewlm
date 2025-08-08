@@ -17,4 +17,3 @@ export class AddUserInDBError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
-    

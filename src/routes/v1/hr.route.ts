@@ -2,12 +2,13 @@ import { Hono } from "hono";
 import { GetJobsByHRFromDBError } from "../../exceptions/job.exceptions";
 import { getJobsByHR } from "../../controller/hr.controller";
 import { GetJobsByHRError } from "../../exceptions/hr.exceptions";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 const hrRoute = new Hono()
 
-hrRoute.get('/jobs', async (c) => {
+hrRoute.get('/jobs', authMiddleware, async (c) => {
     try {
-        const hrId = "VofeF3rFUHbcjVZeTamp8"
+        const hrId = c.get("user").hrId
         const jobs = await getJobsByHR(hrId)
         return c.json({ success: true, message: 'Jobs fetched successfully', jobs }, 200)
     } catch (error) {

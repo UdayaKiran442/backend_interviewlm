@@ -26,6 +26,7 @@ export const jobs = pgTable('jobs', {
     jobDescription: varchar('jobDescription').notNull(),
     department: varchar('department').notNull(),
     package: varchar('package'),
+    location: varchar('location'),
     maximumApplications: integer('maximumApplications'),
     applications: integer('applications').notNull().default(0), // total applications
     inProgress: integer('inProgress').notNull().default(0), // applications that have done resume screening

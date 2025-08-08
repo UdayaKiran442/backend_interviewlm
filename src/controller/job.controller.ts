@@ -26,6 +26,7 @@ export async function createJob(payload: ICreateJobSchema) {
                     jobTitle: payload.jobTitle,
                     maximumApplications: payload.maximumApplications,
                     package: payload.package,
+                    location: payload.location
                 }, tx)
             ])
 

@@ -15,6 +15,7 @@ const CreateJobSchema = z.object({
     jobDescription: z.string(),
     department: z.string(),
     package: z.string().optional(),
+    location: z.string().optional(),
     maximumApplications: z.number().optional(),
     rounds: z.array(z.object({
         roundNumber: z.number(),

@@ -28,4 +28,5 @@ export type ICreatJobInDB = {
 	package: string | undefined;
 	maximumApplications: number | undefined;
 	companyId: string;
+	location: string | undefined;
 };

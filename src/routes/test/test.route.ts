@@ -1,11 +1,14 @@
 import { Hono } from "hono";
-import { generateEmbeddingsService, generateResumeSummary } from "../../services/openai.service";
+import { generateEmbeddingsService, generateQuestionsService, generateResumeSummary } from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { getResumeScreeningDetailsFromDB } from "../../repository/resumeScreening/resumeScreening.repository";
 import { userIdScript } from "../../scripts/userId.script";
 import { parsePDFLangchainService } from "../../services/langchain.service";
+import { getRoundByIdFromDB, getRoundsByJobIdFromDB } from "../../repository/rounds/rounds.repository";
+import { getJobByIdFromDB } from "../../repository/job/job.repository";
+import { getApplicationByIdFromDB } from "../../repository/application/application.repository";
 
 const testRouter = new Hono()
 
@@ -163,10 +166,7 @@ BML Munjal University, Gurugram`;
 
 testRouter.get('/v2', async (c) => {
     try {
-        const res = await getResumeScreeningDetailsFromDB({
-            screeningId: "screening-j3jauDK3WG_GRaxPUmn5O",
-            hrId: "VofeF3rFUHbcjVZeTamp8"
-        })
+        const res = `applicationTimeline-${generateNanoId()}`
         return c.json({ success: true, message: 'Applications fetched', res }, 200)
     } catch (error) {
 
@@ -180,6 +180,19 @@ testRouter.get('/v3', async (c) => {
         const res = await parsePDFLangchainService("https://storage.googleapis.com/resumes_candidates/4Nrdyrmr7xn2FCFDolNkk.pdf")
         console.log(res)
         return c.json({ success: true, message: 'Applications fetched', res }, 200)
+    } catch (error) {
+        console.log(error)
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
+    }
+})
+
+testRouter.get('/v4', async (c) => {
+    try {
+        const round = await getRoundByIdFromDB("round-XgtV3bjA_EpobubKIvTmL");
+        console.log(round)
+        const nextRound = await getRoundsByJobIdFromDB(round[0].jobId, round[0].roundNumber + 1);
+        console.log(nextRound)
+        return c.json({ success: true, message: 'Applications fetched', nextRound }, 200)
     } catch (error) {
         console.log(error)
         return c.json({ success: false, message: 'Something went wrong' }, 500)

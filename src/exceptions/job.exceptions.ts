@@ -18,7 +18,7 @@ export class CreateJobError extends Error {
     }
 }
 
-export class GetJobByIdError extends Error {
+export class GetJobByIdFromDBError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);

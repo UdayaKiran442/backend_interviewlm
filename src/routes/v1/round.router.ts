@@ -2,11 +2,14 @@ import { Hono } from "hono";
 import z from "zod";
 import { qualifyCandidate } from "../../controller/round.controller";
 import { GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
-import { UpdateApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
+import { AddApplicationTimelineToDBError, UpdateApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
 import { UpdateResumeScreeningInDBError } from "../../exceptions/screening.exceptions";
 import { NotFoundError } from "../../exceptions/common.exceptions";
-import { UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
-import { GetJobByIdError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
+import { GetApplicationByIdFromDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
+import { GetJobByIdFromDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
+import { InsertBulkQuestionsInDBError } from "../../exceptions/question.exceptions";
+import { GenerateQuestionsServiceError } from "../../exceptions/openai.exceptions";
+import { CreateAIInterviewError, CreateInterviewInDBError } from "../../exceptions/interview.exceptions";
 
 const roundRouter = new Hono();
 
@@ -42,7 +45,7 @@ roundRouter.post('/qualify/candidate', async (c) => {
         if (error instanceof NotFoundError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 404)
         }
-        if (error instanceof GetRoundByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdFromDBError || error instanceof UpdateJobInDBError || error instanceof CreateInterviewInDBError || error instanceof GetApplicationByIdFromDBError || error instanceof GenerateQuestionsServiceError || error instanceof InsertBulkQuestionsInDBError || error instanceof AddApplicationTimelineToDBError || error instanceof CreateAIInterviewError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         return c.json({ success: false, message: 'Something went wrong' }, 500)

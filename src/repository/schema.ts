@@ -158,3 +158,23 @@ export const roundResults = pgTable('round_results', {
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
+
+export const interview = pgTable('interview', {
+    interviewId: varchar('interviewId').primaryKey(),
+    applicationId: varchar('applicationId').notNull(),
+    roundId: varchar('roundId').notNull(),
+    roundResultsId: varchar('roundResultsId'),
+    status: varchar('status').notNull(), // enum -> PENDING, IN_PROGRESS, COMPLETED
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const questions = pgTable('questions', {
+    questionId: varchar('questionId').primaryKey(),
+    interviewId: varchar('interviewId').notNull(),
+    question: varchar('question').notNull(),
+    answer: varchar('answer'),
+    feedback: varchar('feedback'),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})

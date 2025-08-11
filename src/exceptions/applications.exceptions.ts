@@ -67,4 +67,13 @@ export class GetApplicationsForJobError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
-    
+
+export class GetApplicationByIdFromDBError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "GetApplicationByIdFromDBError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}

@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { ActiveConfig } from "../utils/config.utils";
-import { GenerateEmbeddingsServiceError, GenerateResumeFeedbackServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
+import { GenerateEmbeddingsServiceError, GenerateQuestionsServiceError, GenerateResumeFeedbackServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
+import { generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
 
 const openai = new OpenAI({
     apiKey: ActiveConfig.OPENAI_API_KEY,
@@ -113,5 +114,34 @@ Avoid any extra explanation outside of the JSON. Respond with the JSON object on
         return JSON.parse(response.choices[0].message.content ?? "");
     } catch (error) {
         throw new GenerateResumeFeedbackServiceError('Failed to generate resume feedback', { cause: (error as Error).cause })
+    }
+}
+
+export async function generateQuestionsService(payload: {resumeText: string, jobDescription: string, questionType: string, difficulty: string}){
+    try {
+        let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined
+        switch (payload.questionType) {
+            case "jd+resume":
+                message = [
+                    {
+                        role: "system",
+                        content: generateQuestionsPromptForJDandResume({resumeText: payload.resumeText, jobDescription: payload.jobDescription, difficulty: payload.difficulty})
+                    }
+                ]
+                break;
+            default:
+                break;
+        }
+        if(message) {
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o-mini-2024-07-18",
+                messages: message,
+                temperature: 1,
+                top_p: 1,
+            })
+            return JSON.parse(response.choices[0].message.content ?? "");
+        }
+    } catch (error) {
+        throw new GenerateQuestionsServiceError('Failed to generate questions from llm', { cause: (error as Error).cause })
     }
 }

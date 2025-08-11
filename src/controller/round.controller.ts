@@ -1,4 +1,4 @@
-import { UpdateApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
+import { AddApplicationTimelineToDBError, UpdateApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
 import { GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
 import { UpdateResumeScreeningInDBError } from "../exceptions/screening.exceptions";
@@ -8,12 +8,17 @@ import { getRoundByIdFromDB, getRoundsByJobIdFromDB } from "../repository/rounds
 import { IQualifyCandidateSchema } from "../routes/v1/round.router";
 import { QualifyCandidateError } from "../exceptions/round.exceptions";
 import { updateApplicationInDB } from "../repository/application/application.repository";
-import { UpdateApplicationInDBError } from "../exceptions/applications.exceptions";
+import { GetApplicationByIdFromDBError, UpdateApplicationInDBError } from "../exceptions/applications.exceptions";
 import db from "../repository/db";
 import { getJobByIdFromDB, updateJobInDB } from "../repository/job/job.repository";
-import { GetJobByIdError, UpdateJobInDBError } from "../exceptions/job.exceptions";
+import { GetJobByIdFromDBError, UpdateJobInDBError } from "../exceptions/job.exceptions";
 import { updateRoundResultInDB } from "../repository/roundResults/roundResults.repository";
 import { UpdateRoundResultInDBError } from "../exceptions/roundResults.exceptions";
+import { createAIInterview } from "./interview.controller";
+import { ApplicationTimelineStatus } from "../constants/applicationTimeline.constants";
+import { CreateAIInterviewError, CreateInterviewInDBError } from "../exceptions/interview.exceptions";
+import { GenerateQuestionsServiceError } from "../exceptions/openai.exceptions";
+import { InsertBulkQuestionsInDBError } from "../exceptions/question.exceptions";
 
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
@@ -26,6 +31,9 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
             ])
             if (round.length === 0) {
                 throw new NotFoundError('Round not found')
+            }
+            if (job.length === 0) {
+                throw new NotFoundError('Job not found')
             }
             if (payload.screeningId) {
                 // get next round details of the job
@@ -40,7 +48,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                         updateApplicationTimelineToDB({
                             applicationId: payload.applicationId,
                             roundId: payload.roundId,
-                            status: payload.isQualified ? 'qualified' : 'rejected',
+                            status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
                             title: "Resume Screening Completed",
                             description: "Your resume screening has been completed."
                         }, tx),
@@ -59,7 +67,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     updateApplicationTimelineToDB({
                         applicationId: payload.applicationId,
                         roundId: payload.roundId,
-                        status: payload.isQualified ? 'qualified' : 'rejected',
+                        status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
                         title: "Resume Screening Completed",
                         description: "Your resume screening has been completed."
                     }, tx),
@@ -97,13 +105,21 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     // TODO: send email to candidate
                 }
 
-                // TODO(after interview table and routes): if next is interview round and is taken by ai then create interview for the candidate
-
+                // if next is interview round and is taken by ai then create interview for the candidate
+                if (payload.isQualified && nextRound[0].roundType === 'Technical Interview' && nextRound[0].isAI) {
+                    await createAIInterview({
+                        applicationId: payload.applicationId,
+                        hrId: payload.hrId,
+                        difficulty: nextRound[0].difficulty,
+                        questionType: nextRound[0].questionType,
+                        jobDescription: job[0].jobDescription
+                    })
+                }
             }
             return;
         })
     } catch (error) {
-        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdError || error instanceof UpdateJobInDBError || error instanceof UpdateRoundResultInDBError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdFromDBError || error instanceof UpdateJobInDBError || error instanceof UpdateRoundResultInDBError || error instanceof CreateInterviewInDBError || error instanceof GetApplicationByIdFromDBError || error instanceof GenerateQuestionsServiceError || error instanceof InsertBulkQuestionsInDBError || error instanceof AddApplicationTimelineToDBError || error instanceof CreateAIInterviewError) {
             throw error
         }
         throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).message });

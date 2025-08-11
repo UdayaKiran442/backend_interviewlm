@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import z from "zod";
 import { applyJob, getApplicationsForJob } from "../../controller/application.controller";
 import { NotFoundError } from "../../exceptions/common.exceptions";
-import { CloseJobInDBError, GetJobByIdError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
+import { CloseJobInDBError, GetJobByIdFromDBError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
 import { ApplyJobError, GetApplicationsByJobIdFromDBError, GetApplicationsForJobError, JobAlreadyAppliedError } from "../../exceptions/applications.exceptions";
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../../exceptions/applications.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
@@ -43,7 +43,7 @@ applicationsRoute.post("/job/apply", async (c) => {
             const errMessage = JSON.parse(error.message)
             return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400)
         }
-        if (error instanceof ApplyJobError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
+        if (error instanceof ApplyJobError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
             return c.json({ success: false, message: error.message, error: error.cause }, 400)
         }
         if (error instanceof NotFoundError) {

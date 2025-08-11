@@ -42,9 +42,10 @@ export async function getRoundsByJobIdFromDB(jobId: string, roundNumber?: number
     }
 }
 
-export async function getRoundByIdFromDB(roundId: string) {
+export async function getRoundByIdFromDB(roundId: string, tx?: dbTx) {
     try {
-        return await db.select().from(rounds).where(eq(rounds.roundId, roundId))
+        const dbConnection = tx || db;
+        return await dbConnection.select().from(rounds).where(eq(rounds.roundId, roundId))
     } catch (error) {
         throw new GetRoundByIdFromDBError('Failed to get round by id', { cause: (error as Error).message });
     }

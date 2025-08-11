@@ -3,7 +3,7 @@ import { ApplyJobError, JobAlreadyAppliedError } from "../exceptions/application
 import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { UpdateCandidateJobsInDBError } from "../exceptions/candidate.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
-import { CloseJobInDBError, GetJobByIdError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../exceptions/job.exceptions";
+import { CloseJobInDBError, GetJobByIdFromDBError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../exceptions/job.exceptions";
 import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
@@ -119,7 +119,7 @@ export async function applyJob(payload: IApplyJobSchema) {
         })
         return result;
     } catch (error) {
-        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
+        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
             throw error;
         }
         throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).message });

@@ -30,3 +30,8 @@ export type ICreatJobInDB = {
 	companyId: string;
 	location: string | undefined;
 };
+
+export type ICreateQuestionInDB = {
+    interviewId: string;
+    question: string;
+}

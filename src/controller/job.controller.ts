@@ -1,4 +1,4 @@
-import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdError, CloseJobError } from "../exceptions/job.exceptions";
+import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdFromDBError, CloseJobError } from "../exceptions/job.exceptions";
 import { closeJobInDB, createJobInDB, getJobByIdFromDB } from "../repository/job/job.repository";
 import { ICloseJobSchema, ICreateJobSchema } from "../routes/v1/job.route";
 import { createRoundInDB } from "../repository/rounds/rounds.repository";
@@ -94,7 +94,7 @@ export async function closeJob(payload: ICloseJobSchema) {
 
         await closeJobInDB(payload.jobId);
     } catch (error) {
-        if (error instanceof NotFoundError || error instanceof UnauthorizedError || error instanceof CloseJobInDBError || error instanceof GetJobByIdError || error instanceof GetHRFromDBError) {
+        if (error instanceof NotFoundError || error instanceof UnauthorizedError || error instanceof CloseJobInDBError || error instanceof GetJobByIdFromDBError || error instanceof GetHRFromDBError) {
             throw error;
         }
         throw new CloseJobError('Failed to close job', { cause: (error as Error).message });

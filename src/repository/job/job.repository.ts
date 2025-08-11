@@ -4,7 +4,7 @@ import { jobs } from "../schema";
 import { CloseJobInDBError, CreateJobInDBError, GetJobsByHRFromDBError, UpdateJobApplicationsCountInDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
 import { ICreatJobInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
-import { GetJobByIdError } from "../../exceptions/job.exceptions";
+import { GetJobByIdFromDBError } from "../../exceptions/job.exceptions";
 import { dbTx } from "../db.types";
 
 export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
@@ -28,11 +28,12 @@ export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
     }
 }
 
-export async function getJobByIdFromDB(jobId: string) {
+export async function getJobByIdFromDB(jobId: string, tx?: dbTx) {
     try {
-        return await db.select().from(jobs).where(eq(jobs.jobId, jobId))
+        const dbConnection = tx || db;
+        return await dbConnection.select().from(jobs).where(eq(jobs.jobId, jobId))
     } catch (error) {
-        throw new GetJobByIdError('Failed to get job by id', { cause: (error as Error).message });
+        throw new GetJobByIdFromDBError('Failed to get job by id', { cause: (error as Error).message });
     }
 }
 

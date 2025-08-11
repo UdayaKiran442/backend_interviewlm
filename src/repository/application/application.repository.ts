@@ -3,7 +3,7 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { applications, candidates, roundResults, rounds } from "../schema";
 import { and, eq, sql } from "drizzle-orm";
-import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplicationsByJobIdFromDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
+import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplicationByIdFromDBError, GetApplicationsByJobIdFromDBError, UpdateApplicationInDBError } from "../../exceptions/applications.exceptions";
 import { dbTx } from "../db.types";
 
 export async function addApplicationToDB(payload: IApplyJobSchema, tx?: dbTx) {
@@ -95,5 +95,14 @@ export async function getApplicationsByJobIdFromDB(jobId: string) {
         }).from(applications).where(eq(applications.jobId, jobId)).leftJoin(candidates, eq(applications.candidateId, candidates.candidateId))
     } catch (error) {
         throw new GetApplicationsByJobIdFromDBError('Failed to get applications by job id from DB', { cause: (error as Error).message });
+    }
+}
+
+export async function getApplicationByIdFromDB(applicationId: string, tx?: dbTx) {
+    try {
+        const dbConnection = tx || db;
+        return await dbConnection.select().from(applications).where(eq(applications.applicationId, applicationId))
+    } catch (error) {
+        throw new GetApplicationByIdFromDBError('Failed to get application by id from DB', { cause: (error as Error).message });
     }
 }

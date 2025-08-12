@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { ActiveConfig } from "../utils/config.utils";
 import { GenerateEmbeddingsServiceError, GenerateQuestionsServiceError, GenerateResumeFeedbackServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
-import { generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
+import { generateQuestionsPromptForJD, generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
 
 const openai = new OpenAI({
     apiKey: ActiveConfig.OPENAI_API_KEY,
@@ -117,7 +117,7 @@ Avoid any extra explanation outside of the JSON. Respond with the JSON object on
     }
 }
 
-export async function generateQuestionsService(payload: {resumeText: string, jobDescription: string, questionType: string, difficulty: string}){
+export async function generateQuestionsService(payload: { resumeText: string, jobDescription: string, questionType: string, difficulty: string }) {
     try {
         let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined
         switch (payload.questionType) {
@@ -125,14 +125,22 @@ export async function generateQuestionsService(payload: {resumeText: string, job
                 message = [
                     {
                         role: "system",
-                        content: generateQuestionsPromptForJDandResume({resumeText: payload.resumeText, jobDescription: payload.jobDescription, difficulty: payload.difficulty})
+                        content: generateQuestionsPromptForJDandResume({ resumeText: payload.resumeText, jobDescription: payload.jobDescription, difficulty: payload.difficulty })
+                    }
+                ]
+                break;
+            case "jd":
+                message = [
+                    {
+                        role: "system",
+                        content: generateQuestionsPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty })
                     }
                 ]
                 break;
             default:
                 break;
         }
-        if(message) {
+        if (message) {
             const response = await openai.chat.completions.create({
                 model: "gpt-4o-mini-2024-07-18",
                 messages: message,

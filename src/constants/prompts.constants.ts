@@ -23,3 +23,25 @@ export function generateQuestionsPromptForJDandResume(payload: { resumeText: str
 				[CACHE_BYPASS]: ${Date.now()}
 				`
 }
+
+export function generateQuestionsPromptForJD(payload: { jobDescription: string, difficulty: string }) {
+	return `
+				You are a technical interviewer.
+
+				Given the following job description, generate exactly 3 unique interview questions. Each question should:
+				- Be relevant to the job description.
+
+				Return ONLY the questions in the following strict JSON format:
+				{
+				"response": []
+				}
+
+				Job Description:
+				${payload.jobDescription}
+
+				Difficulty:
+				${payload.difficulty}
+
+				[CACHE_BYPASS]: ${Date.now()}
+				`
+}

@@ -3,6 +3,7 @@ import { GetRoundResultFromDBError, InsertRoundResultsToDBError, UpdateRoundResu
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { roundResults } from "../schema";
+import { dbTx } from "../db.types";
 
 export async function insertRoundResultsToDB(payload: {
     roundId: string,
@@ -36,13 +37,14 @@ export async function getRoundResultFromDB(payload: { roundId: string, applicati
     }
 }
 
-export async function updateRoundResultInDB(payload: { roundId: string, applicationId: string, feedback?: object, verdictBy?: string, isQualified?: boolean }) {
+export async function updateRoundResultInDB(payload: { roundId: string, applicationId: string, feedback?: object, verdictBy?: string, isQualified?: boolean }, tx?: dbTx) {
     try {
+        const dbConnection = tx || db;
         const updatedPayload = {
             ...payload,
             updatedAt: new Date()
         }
-        await db.update(roundResults).set(updatedPayload).where(and(eq(roundResults.roundId, payload.roundId), eq(roundResults.applicationId, payload.applicationId)))
+        await dbConnection.update(roundResults).set(updatedPayload).where(and(eq(roundResults.roundId, payload.roundId), eq(roundResults.applicationId, payload.applicationId)))
     } catch (error) {
         throw new UpdateRoundResultInDBError('Failed to update round result in DB', { cause: (error as Error).message });
     }

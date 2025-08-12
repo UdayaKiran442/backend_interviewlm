@@ -85,16 +85,16 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                     payload.isQualified ? updateJobInDB({
                         jobId: job[0].jobId,
                         inProgress: job[0].inProgress + 1
-                    }) : updateJobInDB({
+                    }, tx) : updateJobInDB({
                         jobId: job[0].jobId,
                         rejected: job[0].rejected + 1
-                    }),
+                    }, tx),
                     updateRoundResultInDB({
                         roundId: payload.roundId,
                         applicationId: payload.applicationId,
                         verdictBy: payload.hrId,
                         isQualified: payload.isQualified
-                    })
+                    }, tx)
                 ])
                 if (!payload.isQualified) {
                     // update application status to rejected

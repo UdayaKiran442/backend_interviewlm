@@ -20,9 +20,9 @@ const CreateJobSchema = z.object({
     rounds: z.array(z.object({
         roundNumber: z.number(),
         roundType: z.string(),
-        questionType: z.string(),
-        duration: z.number().positive(),
-        difficulty: z.string(),
+        questionType: z.string().optional(),
+        duration: z.number().positive().optional(),
+        difficulty: z.string().optional(),
         roundDescription: z.string().optional(),
         isAI: z.boolean(),
     }))

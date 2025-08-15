@@ -4,7 +4,7 @@ import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeli
 import { UpdateCandidateJobsInDBError } from "../exceptions/candidate.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
 import { CloseJobInDBError, GetJobByIdFromDBError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../exceptions/job.exceptions";
-import { GenerateEmbeddingsServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
+import { GenerateEmbeddingsServiceError, GenerateResumeSkillsServiceError } from "../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
 import { InsertScreeningResultsToDBError } from "../exceptions/screening.exceptions";
@@ -16,7 +16,7 @@ import { closeJobInDB, getJobByIdFromDB, updateJobApplicationsCountInDB } from "
 import { insertScreeningResultsToDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
 import { IApplyJobSchema, IGetApplicationsForJobSchema } from "../routes/v1/applicatons.route";
-import { generateResumeSummary } from "../services/openai.service";
+import { generateResumeSkills } from "../services/openai.service";
 import { queryVectorEmbeddingsService } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
 import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
@@ -24,13 +24,13 @@ import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 export async function applyJob(payload: IApplyJobSchema) {
     try {
         const result = db.transaction(async (tx: any) => {
-            const [job, rounds, application, resumeSummary] = await Promise.all([
+            const [job, rounds, application, resumeSkills, candidate] = await Promise.all([
                 getJobByIdFromDB(payload.jobId),
                 getRoundsByJobIdFromDB(payload.jobId),
                 checkCandidateAppliedInDB({ candidateId: payload.candidateId, jobId: payload.jobId }),
-                generateResumeSummary(payload.resumeText)
+                generateResumeSkills(payload.resumeText),
+                getCandidateByIDFromDB(payload.candidateId)
             ])
-
             // check if the job exists
             if (job.length === 0) {
                 throw new NotFoundError('Job not found');
@@ -50,8 +50,8 @@ export async function applyJob(payload: IApplyJobSchema) {
             if (rounds && rounds.length > 0) {
                 payload.currentRoundId = rounds[0].roundId
             }
-            if (resumeSummary.skills.length > 0) {
-                payload.skills = resumeSummary.skills
+            if (resumeSkills.skills.length > 0) {
+                payload.skills = resumeSkills.skills
             }
 
             // apply to job
@@ -59,41 +59,35 @@ export async function applyJob(payload: IApplyJobSchema) {
 
             // update job applications count
             const newCount = job[0].applications + 1
-            // TODO: run in background
-            await updateJobApplicationsCountInDB({ jobId: payload.jobId, count: newCount }, tx)
 
             // update candidate jobs
-            const candidate = await getCandidateByIDFromDB(payload.candidateId, tx)
             const jobs = candidate[0].jobs as string[]
             const newJobs = [...jobs, payload.jobId]
-            // TODO: run in background
-            await updateCandidateJobsInDB({ candidateId: payload.candidateId, jobs: newJobs }, tx)
-
-            // add to application timeline
-            // TODO: run in background
             if (newApplication) {
-                await addApplicationTimelineToDB({
-                    applicationId: newApplication.applicationId,
-                    description: "Your application has been received and is under review.",
-                    status: "applied",
-                    title: "Application Submitted",
-                }, tx)
-                await addApplicationTimelineToDB({
-                    applicationId: newApplication.applicationId,
-                    title: "Resume Under Review",
-                    status: "pending",
-                    description: "Your resume is under review.",
-                    roundId: newApplication.currentRound,
-                }, tx)
-                // TODO: run in background
+                await Promise.all([
+                    updateJobApplicationsCountInDB({ jobId: payload.jobId, count: newCount }, tx),
+                    updateCandidateJobsInDB({ candidateId: payload.candidateId, jobs: newJobs }, tx),
+                    addApplicationTimelineToDB({
+                        applicationId: newApplication.applicationId,
+                        description: "Your application has been received and is under review.",
+                        status: "applied",
+                        title: "Application Submitted",
+                    }, tx),
+                    addApplicationTimelineToDB({
+                        applicationId: newApplication.applicationId,
+                        title: "Resume Under Review",
+                        status: "pending",
+                        description: "Your resume is under review.",
+                        roundId: newApplication.currentRound,
+                    }, tx)
+                ])
                 const resumeEmbeddings = await upsertVectorEmbeddings({
                     indexName: ActiveConfig.RESUME_INDEX,
-                    text: resumeSummary.summary,
+                    text: payload.resumeText,
                     metadata: {
                         applicationId: newApplication.applicationId,
                         resumeText: payload.resumeText,
-                        summary: resumeSummary.summary,
-                        skills: resumeSummary.skills,
+                        skills: resumeSkills.skills,
                         jobId: payload.jobId,
                     }
                 })
@@ -102,7 +96,6 @@ export async function applyJob(payload: IApplyJobSchema) {
                     vector: resumeEmbeddings ?? [],
                     jobId: payload.jobId
                 })
-                // add in resume screening table
                 await insertScreeningResultsToDB({
                     applicationId: newApplication.applicationId,
                     candidateId: payload.candidateId,
@@ -119,7 +112,7 @@ export async function applyJob(payload: IApplyJobSchema) {
         })
         return result;
     } catch (error) {
-        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSummaryServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
+        if (error instanceof NotFoundError || error instanceof JobClosedError || error instanceof JobAlreadyAppliedError || error instanceof CloseJobInDBError || error instanceof AddApplicationToDBError || error instanceof CheckCandidateAppliedInDBError || error instanceof UpsertVectorEmbeddingsServiceError || error instanceof GenerateEmbeddingsServiceError || error instanceof UpsertVectorEmbeddingsError || error instanceof InsertScreeningResultsToDBError || error instanceof QueryVectorEmbeddingsServiceError || error instanceof UpdateJobApplicationsCountInDBError || error instanceof GetJobByIdFromDBError || error instanceof GetRoundsByJobIdFromDBError || error instanceof GenerateResumeSkillsServiceError || error instanceof UpdateCandidateJobsInDBError || error instanceof AddApplicationTimelineToDBError) {
             throw error;
         }
         throw new ApplyJobError('Failed to apply for job', { cause: (error as Error).message });

@@ -8,11 +8,11 @@ export class GenerateEmbeddingsServiceError extends Error {
     }
 }
 
-export class GenerateResumeSummaryServiceError extends Error {
+export class GenerateResumeSkillsServiceError extends Error {
     public cause?: unknown;
     constructor(message: string, options?: { cause?: unknown }) {
         super(message);
-        this.name = "GenerateResumeSummaryServiceError";
+        this.name = "GenerateResumeSkillsServiceError";
         if (options?.cause) this.cause = options.cause;
         Error.captureStackTrace(this, this.constructor);
     }

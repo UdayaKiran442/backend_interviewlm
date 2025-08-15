@@ -8,9 +8,9 @@ export type ICreatRoundInDB = {
 	jobId: string;
 	roundNumber: number;
 	roundType: string;
-	questionType: string;
-	duration: number;
-	difficulty: string;
+	questionType: string | undefined;
+	duration: number | undefined;
+	difficulty: string | undefined;
 	roundDescription: string | undefined;
 	isAI: boolean;
 }[];
@@ -32,6 +32,6 @@ export type ICreatJobInDB = {
 };
 
 export type ICreateQuestionInDB = {
-    interviewId: string;
-    question: string;
+	interviewId: string;
+	question: string;
 }

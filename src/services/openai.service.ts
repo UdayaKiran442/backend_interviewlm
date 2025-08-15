@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { ActiveConfig } from "../utils/config.utils";
-import { GenerateEmbeddingsServiceError, GenerateQuestionsServiceError, GenerateResumeFeedbackServiceError, GenerateResumeSummaryServiceError } from "../exceptions/openai.exceptions";
+import { GenerateEmbeddingsServiceError, GenerateQuestionsServiceError, GenerateResumeFeedbackServiceError, GenerateResumeSkillsServiceError } from "../exceptions/openai.exceptions";
 import { generateQuestionsPromptForJD, generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
 
 const openai = new OpenAI({
@@ -19,31 +19,20 @@ export async function generateEmbeddingsService(text: string) {
     }
 }
 
-export async function generateResumeSummary(resumeText: string) {
+export async function generateResumeSkills(resumeText: string) {
     try {
         const message = [
             {
                 role: "system",
                 content: `
-You are a resume summarizer that extracts high-signal information for semantic search.
+You are a resume summarizer that extracts skills from resume.
 
-Generate a dense and structured summary from the given resume text. This summary will be embedded for querying, so focus on capturing core professional data.
+Follow the instructions:
+1. Extract all the skills mentioned in the resume either implicitly or explicitly.
+2. Save all the skills in the skills array.
 
-Follow these rules strictly:
-
-1. Only include details from **Work Experience**, **Skills**, **Projects**, and **Education**.
-2. Exclude any **personal information** such as name, email, phone number, address, or LinkedIn.
-3. Do not include any **quantitative values** like percentages, dates, or specific counts (e.g., "improved by 30%", "5 years").
-4. Emphasize the candidate's **job roles**, **technical and domain-specific skills**, and **how those skills were applied** in projects and work experience.
-5. Highlight **technologies, frameworks, tools, and platforms** used in projects and work experience.
-6. Keep the summary factual and professional — do not make assumptions or add commentary.
-7. The summary should be a single paragraph, not bullet points.
-8. Group skills logically for embedding and searching.
-9. Avoid vague action verbs and resume buzzwords like "optimized", "improved", "enhanced", "results-driven", "hardworking", "dynamic", "detail-oriented", unless used with specific technical context.
-10. Prefer descriptive phrases like "developed REST APIs using Node.js" over generic phrases like "built scalable systems".
-11. Store all the relevant skills mentioned in the resume in the skills array.
 Return output in **valid JSON** format like:
-{ "summary": "string", "skills": ["string"] }
+{ "skills": ["string"] }
     `
             },
             {
@@ -59,7 +48,7 @@ Return output in **valid JSON** format like:
         })
         return JSON.parse(response.choices[0].message.content ?? "");
     } catch (error) {
-        throw new GenerateResumeSummaryServiceError('Failed to generate resume summary', { cause: (error as Error).message });
+        throw new GenerateResumeSkillsServiceError('Failed to generate resume summary', { cause: (error as Error).message });
     }
 }
 

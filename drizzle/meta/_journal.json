@@ -176,6 +176,13 @@
       "when": 1754914266665,
       "tag": "0024_tiresome_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1755066225260,
+      "tag": "0025_tired_mimic",
+      "breakpoints": true
     }
   ]
 }

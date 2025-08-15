@@ -1,8 +1,8 @@
-import { AddApplicationTimelineToDBError, UpdateApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
+import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { NotFoundError } from "../exceptions/common.exceptions";
 import { GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
 import { UpdateResumeScreeningInDBError } from "../exceptions/screening.exceptions";
-import { updateApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
+import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { updateResumeScreeningInDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundByIdFromDB, getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
 import { IQualifyCandidateSchema } from "../routes/v1/round.router";
@@ -45,7 +45,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                             applicationId: payload.applicationId,
                             status: payload.isQualified ? 'qualified' : 'rejected'
                         }, tx),
-                        updateApplicationTimelineToDB({
+                        addApplicationTimelineToDB({
                             applicationId: payload.applicationId,
                             roundId: payload.roundId,
                             status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
@@ -63,8 +63,8 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
                 }
 
                 await Promise.all([
-                    // update application timeline
-                    updateApplicationTimelineToDB({
+                    // add to application timeline
+                    addApplicationTimelineToDB({
                         applicationId: payload.applicationId,
                         roundId: payload.roundId,
                         status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
@@ -119,7 +119,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
             return;
         })
     } catch (error) {
-        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateApplicationTimelineToDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdFromDBError || error instanceof UpdateJobInDBError || error instanceof UpdateRoundResultInDBError || error instanceof CreateInterviewInDBError || error instanceof GetApplicationByIdFromDBError || error instanceof GenerateQuestionsServiceError || error instanceof InsertBulkQuestionsInDBError || error instanceof AddApplicationTimelineToDBError || error instanceof CreateAIInterviewError) {
+        if (error instanceof GetRoundByIdFromDBError || error instanceof NotFoundError || error instanceof GetRoundsByJobIdFromDBError || error instanceof UpdateResumeScreeningInDBError || error instanceof UpdateApplicationInDBError || error instanceof GetJobByIdFromDBError || error instanceof UpdateJobInDBError || error instanceof UpdateRoundResultInDBError || error instanceof CreateInterviewInDBError || error instanceof GetApplicationByIdFromDBError || error instanceof GenerateQuestionsServiceError || error instanceof InsertBulkQuestionsInDBError || error instanceof AddApplicationTimelineToDBError || error instanceof CreateAIInterviewError) {
             throw error
         }
         throw new QualifyCandidateError('Failed to qualify candidate', { cause: (error as Error).message });

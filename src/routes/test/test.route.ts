@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { generateEmbeddingsService, generateQuestionsService, generateResumeSummary } from "../../services/openai.service";
+import { generateEmbeddingsService, generateQuestionsService, generateResumeSkills } from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
@@ -137,7 +137,7 @@ Education
 Bachelor of Technology - Computer Science
 BML Munjal University, Gurugram`;
     try {
-        const resumeSummary = await generateResumeSummary(resumeText)
+        const resumeSummary = await generateResumeSkills(resumeText)
         const resumeEmbeddings = await generateEmbeddingsService(resumeSummary.summary)
         await upsertVectorEmbeddingsService({
             indexName: ActiveConfig.RESUME_INDEX,

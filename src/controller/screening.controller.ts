@@ -70,8 +70,6 @@ export async function fetchResumeScreeningDetails(payload: IFetchResumeScreening
                     feedback: feedback,
                     applicationId: resumeScreeningDetails[0].applicationId
                 })
-                console.log(feedback);
-                console.log(roundResult);
                 await updateResumeScreeningInDB({
                     screeningId: resumeScreeningDetails[0].screeningId,
                     roundResultId: roundResult.roundResultId

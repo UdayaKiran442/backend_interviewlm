@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { generateEmbeddingsService, generateQuestionsService, generateResumeSkills } from "../../services/openai.service";
+import { generateEmbeddingsService, generateQuestionsService, generateResumeFeedbackService, generateResumeSkills } from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
@@ -68,13 +68,12 @@ Bus Booking API                                                                 
 Education
 Bachelor of Technology - Computer Science
 BML Munjal University, Gurugram`;
-        const resumeEmbeddings = await generateEmbeddingsService(resumeText)
-        const matchScore = await queryVectorEmbeddingsService({
-            indexName: ActiveConfig.JD_INDEX,
-            vector: resumeEmbeddings ?? [],
-            jobId: "job-wxQ8EagEnzcb8JURSvYH1"
+        const job = await getJobByIdFromDB("job-NCqzLLGua6ny4x46y3xQS")
+        const feedback = await generateResumeFeedbackService({
+            jobDescription: job[0].jobDescription ?? "",
+            resumeText: resumeText
         })
-        return c.json({ matchScore })
+        return c.json({ feedback })
     } catch (error) {
 
     }

@@ -2,10 +2,10 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { jobs } from "../schema";
 import { CloseJobInDBError, CreateJobInDBError, GetJobsByHRFromDBError, UpdateJobApplicationsCountInDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
-import { ICreatJobInDB } from "../../types/types";
+import type { ICreatJobInDB } from "../../types/types";
 import { eq } from "drizzle-orm";
 import { GetJobByIdFromDBError } from "../../exceptions/job.exceptions";
-import { dbTx } from "../db.types";
+import type { dbTx } from "../db.types";
 
 export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
     try {

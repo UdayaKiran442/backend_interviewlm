@@ -1,6 +1,6 @@
 /**
  * ICreatRoundInDB
- * 
+ *
  * @description This type is input payload used to create a round in the database
  */
 
@@ -17,7 +17,7 @@ export type ICreatRoundInDB = {
 
 /**
  * ICreatJobInDB
- * 
+ *
  * @description This type is input payload used to create a job in the database
  */
 export type ICreatJobInDB = {
@@ -34,4 +34,12 @@ export type ICreatJobInDB = {
 export type ICreateQuestionInDB = {
 	interviewId: string;
 	question: string;
-}
+};
+
+export type IUpdateInterviewInDB = {
+	interviewId: string;
+	applicationId?: string;
+	roundId?: string;
+	roundResultsId?: string;
+	status?: string;
+};

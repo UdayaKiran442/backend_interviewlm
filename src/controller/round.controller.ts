@@ -19,10 +19,11 @@ import { ApplicationTimelineStatus } from "../constants/applicationTimeline.cons
 import { CreateAIInterviewError, CreateInterviewInDBError } from "../exceptions/interview.exceptions";
 import { GenerateQuestionsServiceError } from "../exceptions/openai.exceptions";
 import { InsertBulkQuestionsInDBError } from "../exceptions/question.exceptions";
+import type { dbTx } from "../repository/db.types";
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 	try {
-		const result = db.transaction(async (tx: any) => {
+		const result = db.transaction(async (tx: dbTx) => {
 			// get round details of roundId
 			const [round, job] = await Promise.all([getRoundByIdFromDB(payload.roundId), getJobByIdFromDB(payload.jobId)]);
 			if (round.length === 0) {

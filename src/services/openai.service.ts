@@ -1,30 +1,36 @@
 import OpenAI from "openai";
 import { ActiveConfig } from "../utils/config.utils";
-import { GenerateEmbeddingsServiceError, GenerateQuestionsServiceError, GenerateResumeFeedbackServiceError, GenerateResumeSkillsServiceError } from "../exceptions/openai.exceptions";
-import { generateQuestionsPromptForJD, generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
+import {
+	GenerateEmbeddingsServiceError,
+	GenerateFollowUpQuestionServiceError,
+	GenerateQuestionsServiceError,
+	GenerateResumeFeedbackServiceError,
+	GenerateResumeSkillsServiceError,
+} from "../exceptions/openai.exceptions";
+import { generateFollowUpQuestionPromptForJD, generateFollowUpQuestionPromptForJDandResume, generateQuestionsPromptForJD, generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
 
 const openai = new OpenAI({
-    apiKey: ActiveConfig.OPENAI_API_KEY,
-})
+	apiKey: ActiveConfig.OPENAI_API_KEY,
+});
 
 export async function generateEmbeddingsService(text: string) {
-    try {
-        const embeddings = await openai.embeddings.create({
-            model: "text-embedding-3-small",
-            input: text,
-        })
-        return embeddings.data[0].embedding
-    } catch (error) {
-        throw new GenerateEmbeddingsServiceError('Failed to generate embeddings', { cause: (error as Error).message });
-    }
+	try {
+		const embeddings = await openai.embeddings.create({
+			model: "text-embedding-3-small",
+			input: text,
+		});
+		return embeddings.data[0].embedding;
+	} catch (error) {
+		throw new GenerateEmbeddingsServiceError("Failed to generate embeddings", { cause: (error as Error).message });
+	}
 }
 
 export async function generateResumeSkills(resumeText: string) {
-    try {
-        const message = [
-            {
-                role: "system",
-                content: `
+	try {
+		const message = [
+			{
+				role: "system",
+				content: `
 You are a resume summarizer that extracts skills from resume.
 
 Follow the instructions:
@@ -33,31 +39,31 @@ Follow the instructions:
 
 Return output in **valid JSON** format like:
 { "skills": ["string"] }
-    `
-            },
-            {
-                role: "user",
-                content: resumeText
-            }
-        ]
+    `,
+			},
+			{
+				role: "user",
+				content: resumeText,
+			},
+		];
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini-2024-07-18",
-            messages: message as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-            temperature: 1
-        })
-        return JSON.parse(response.choices[0].message.content ?? "");
-    } catch (error) {
-        throw new GenerateResumeSkillsServiceError('Failed to generate resume summary', { cause: (error as Error).message });
-    }
+		const response = await openai.chat.completions.create({
+			model: "gpt-4o-mini-2024-07-18",
+			messages: message as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+			temperature: 1,
+		});
+		return JSON.parse(response.choices[0].message.content ?? "");
+	} catch (error) {
+		throw new GenerateResumeSkillsServiceError("Failed to generate resume summary", { cause: (error as Error).message });
+	}
 }
 
-export async function generateResumeFeedbackService(payload: { jobDescription: string, resumeText: string }) {
-    try {
-        const message = [
-            {
-                role: "system",
-                content: `
+export async function generateResumeFeedbackService(payload: { jobDescription: string; resumeText: string }) {
+	try {
+		const message = [
+			{
+				role: "system",
+				content: `
 You are an expert technical recruiter and resume evaluator with deep knowledge across multiple industries. Analyze the provided resume against the job description with the precision of a senior hiring manager.
 
 **ANALYSIS FRAMEWORK:**
@@ -103,54 +109,98 @@ Resume Content: ${payload.resumeText}
   "concerns": ["string"],
   "aiRecommendation": "Hire" | "Not Hire" | "Human Review"
 }
-`
-            }
-        ]
+`,
+			},
+		];
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini-2024-07-18",
-            messages: message as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-            temperature: 0
-        })
-        return JSON.parse(response.choices[0].message.content ?? "");
-    } catch (error) {
-        throw new GenerateResumeFeedbackServiceError('Failed to generate resume feedback', { cause: (error as Error).cause })
-    }
+		const response = await openai.chat.completions.create({
+			model: "gpt-4o-mini-2024-07-18",
+			messages: message as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+			temperature: 0,
+		});
+		return JSON.parse(response.choices[0].message.content ?? "");
+	} catch (error) {
+		throw new GenerateResumeFeedbackServiceError("Failed to generate resume feedback", { cause: (error as Error).cause });
+	}
 }
 
-export async function generateQuestionsService(payload: { resumeText: string, jobDescription: string, questionType: string, difficulty: string }) {
-    try {
-        let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined
-        switch (payload.questionType) {
-            case "jd+resume":
-                message = [
-                    {
-                        role: "system",
-                        content: generateQuestionsPromptForJDandResume({ resumeText: payload.resumeText, jobDescription: payload.jobDescription, difficulty: payload.difficulty })
-                    }
-                ]
-                break;
-            case "jd":
-                message = [
-                    {
-                        role: "system",
-                        content: generateQuestionsPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty })
-                    }
-                ]
-                break;
-            default:
-                break;
-        }
-        if (message) {
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o-mini-2024-07-18",
-                messages: message,
-                temperature: 1,
-                top_p: 1,
-            })
-            return JSON.parse(response.choices[0].message.content ?? "");
-        }
-    } catch (error) {
-        throw new GenerateQuestionsServiceError('Failed to generate questions from llm', { cause: (error as Error).cause })
-    }
+export async function generateQuestionsService(payload: { resumeText: string; jobDescription: string; questionType: string; difficulty: string }) {
+	try {
+		let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined;
+		switch (payload.questionType) {
+			case "jd+resume":
+				message = [
+					{
+						role: "system",
+						content: generateQuestionsPromptForJDandResume({ resumeText: payload.resumeText, jobDescription: payload.jobDescription, difficulty: payload.difficulty }),
+					},
+				];
+				break;
+			case "jd":
+				message = [
+					{
+						role: "system",
+						content: generateQuestionsPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty }),
+					},
+				];
+				break;
+			default:
+				break;
+		}
+		if (message) {
+			const response = await openai.chat.completions.create({
+				model: "gpt-4o-mini-2024-07-18",
+				messages: message,
+				temperature: 1,
+				top_p: 1,
+			});
+			return JSON.parse(response.choices[0].message.content ?? "");
+		}
+	} catch (error) {
+		throw new GenerateQuestionsServiceError("Failed to generate questions from llm", { cause: (error as Error).cause });
+	}
+}
+
+export async function generateFollowUpQuestionService(payload: { userResponse: string; jobDescription: string; resumeText: string; questionType: string; difficulty: string }) {
+	try {
+		let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined;
+		switch (payload.questionType) {
+			case "jd+resume":
+				message = [
+					{
+						role: "system",
+						content: generateFollowUpQuestionPromptForJDandResume({
+							resumeText: payload.resumeText,
+							jobDescription: payload.jobDescription,
+							difficulty: payload.difficulty,
+							response: payload.userResponse,
+						}),
+					},
+				];
+				break;
+			case "jd":
+				message = [
+					{
+						role: "system",
+						content: generateFollowUpQuestionPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty, response: payload.userResponse }),
+					},
+				];
+				break;
+			default:
+				message = [
+					{
+						role: "system",
+						content: generateFollowUpQuestionPromptForJDandResume({
+							resumeText: payload.resumeText,
+							jobDescription: payload.jobDescription,
+							difficulty: payload.difficulty,
+							response: payload.userResponse,
+						}),
+					},
+				];
+				break;
+		}
+	} catch (error) {
+		throw new GenerateFollowUpQuestionServiceError("Failed to generate follow up question from llm", { cause: (error as Error).cause });
+	}
 }

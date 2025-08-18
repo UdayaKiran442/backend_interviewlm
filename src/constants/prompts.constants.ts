@@ -1,5 +1,5 @@
-export function generateQuestionsPromptForJDandResume(payload: { resumeText: string, jobDescription: string, difficulty: string }) {
-    return `
+export function generateQuestionsPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string }) {
+	return `
 				You are a technical interviewer.
 
 				Given the following candidate resume and job description, generate exactly 3 unique interview questions. Each question should:
@@ -21,10 +21,10 @@ export function generateQuestionsPromptForJDandResume(payload: { resumeText: str
 				${payload.difficulty}
 
 				[CACHE_BYPASS]: ${Date.now()}
-				`
+				`;
 }
 
-export function generateQuestionsPromptForJD(payload: { jobDescription: string, difficulty: string }) {
+export function generateQuestionsPromptForJD(payload: { jobDescription: string; difficulty: string }) {
 	return `
 				You are a technical interviewer.
 
@@ -43,5 +43,13 @@ export function generateQuestionsPromptForJD(payload: { jobDescription: string, 
 				${payload.difficulty}
 
 				[CACHE_BYPASS]: ${Date.now()}
-				`
+				`;
+}
+
+export function generateFollowUpQuestionPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string; response: string }) {
+	return ``;
+}
+
+export function generateFollowUpQuestionPromptForJD(payload: { jobDescription: string; difficulty: string; response: string }) {
+	return ``;
 }

@@ -207,6 +207,10 @@ export const questions = pgTable("questions", {
 	question: varchar("question").notNull(),
 	answer: varchar("answer"),
 	feedback: varchar("feedback"),
+	isDisplayed: boolean("isDisplayed"),
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
+}, (questions) => ({
+	questionInterviewIdIndex: index("question_interview_id_idx").on(questions.interviewId),
+	questionDisplayedIndex: index("question_displayed_idx").on(questions.isDisplayed),
+}));

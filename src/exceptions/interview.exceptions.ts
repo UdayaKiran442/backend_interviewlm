@@ -47,3 +47,13 @@ export class StartAIInterviewError extends Error {
 		Error.captureStackTrace(this, this.constructor);
 	}
 }
+
+export class GetLatestInterviewResponseFromDB extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "GetLatestInterviewResponseFromDB";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}

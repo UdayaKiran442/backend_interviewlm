@@ -43,3 +43,12 @@ export type IUpdateInterviewInDB = {
 	roundResultsId?: string;
 	status?: string;
 };
+
+export type IUpdateQuestionInDB = {
+	questionId: string;
+	interviewId?: string;
+	question?: string;
+	answer?: string;
+	feedback?: string;
+	isDisplayed?: boolean;
+};

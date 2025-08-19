@@ -136,7 +136,6 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 				if (payload.isQualified && nextRound[0].roundType === "Technical Interview" && nextRound[0].isAI) {
 					await createAIInterview({
 						applicationId: payload.applicationId,
-						hrId: payload.hrId,
 						difficulty: nextRound[0].difficulty,
 						questionType: nextRound[0].questionType,
 						jobDescription: job[0].jobDescription,

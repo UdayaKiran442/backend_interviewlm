@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { generateEmbeddingsService, generateQuestionsService, generateResumeFeedbackService, generateResumeSkills } from "../../services/openai.service";
+import { generateEmbeddingsService, generateFollowUpQuestionService, generateQuestionsService, generateResumeFeedbackService, generateResumeSkills } from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
@@ -9,6 +9,7 @@ import { parsePDFLangchainService } from "../../services/langchain.service";
 import { getRoundByIdFromDB, getRoundsByJobIdFromDB } from "../../repository/rounds/rounds.repository";
 import { getJobByIdFromDB } from "../../repository/job/job.repository";
 import { getApplicationByIdFromDB } from "../../repository/application/application.repository";
+import { getInterviewByIdFromDB } from "../../repository/interview/interview.repository";
 
 const testRouter = new Hono()
 
@@ -192,6 +193,23 @@ testRouter.get('/v4', async (c) => {
         const nextRound = await getRoundsByJobIdFromDB(round[0].jobId, round[0].roundNumber + 1);
         console.log(nextRound)
         return c.json({ success: true, message: 'Applications fetched', nextRound }, 200)
+    } catch (error) {
+        console.log(error)
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
+    }
+})
+
+testRouter.get('/v5', async (c) => {
+    try {
+        const interview = await getInterviewByIdFromDB("interview-7nn3ZiWADBILVGp8K76yY");
+        const response = await generateFollowUpQuestionService({
+            difficulty: interview[0].difficulty ?? '',
+            jobDescription: interview[0].jobDescription,
+            questionType: interview[0].questionType ?? '',
+            resumeText: interview[0].resumeText,
+            userResponse: "Utilised pinecone vector db for contextual memory and search"
+        })
+        return c.json({ success: true, message: 'Applications fetched', response }, 200)
     } catch (error) {
         console.log(error)
         return c.json({ success: false, message: 'Something went wrong' }, 500)

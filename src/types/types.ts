@@ -34,6 +34,18 @@ export type ICreatJobInDB = {
 export type ICreateQuestionInDB = {
 	interviewId: string;
 	question: string;
+	isDisplayed: boolean;
+};
+
+export type ICreateInterviewInDB = {
+	applicationId: string;
+	roundId: string;
+	roundResultsId: string | null;
+	status: string;
+	jobDescription: string;
+	resumeText: string;
+	questionType: string | null;
+	difficulty: string | null;
 };
 
 export type IUpdateInterviewInDB = {
@@ -42,6 +54,10 @@ export type IUpdateInterviewInDB = {
 	roundId?: string;
 	roundResultsId?: string;
 	status?: string;
+	jobDescription?: string;
+	resumeText?: string;
+	questionType?: string;
+	difficulty?: string;
 };
 
 export type IUpdateQuestionInDB = {

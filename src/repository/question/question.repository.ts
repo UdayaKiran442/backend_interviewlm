@@ -2,7 +2,7 @@ import db from "../db";
 import type { ICreateQuestionInDB, IUpdateQuestionInDB } from "../../types/types";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { questions } from "../schema";
-import { CreateQuestionInDBError, InsertBulkQuestionsInDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
+import { CreateQuestionInDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
 import type { INextQuestionSchema } from "../../routes/v1/question.route";
 import { and, desc, eq } from "drizzle-orm";
 import type { dbTx } from "../db.types";
@@ -72,4 +72,21 @@ export async function getLatestInterviewResponseFromDB(interviewId: string) {
 	} catch (error) {
         throw new GetLatestInterviewResponseFromDB("Failed to get latest interview response from DB", { cause: (error as Error).message });
     }
+}
+
+export async function insertQuestionInDB(payload: ICreateQuestionInDB){
+	try {
+		const insertPayload = {
+			questionId: `question-${generateNanoId()}`,
+			interviewId: payload.interviewId,
+			question: payload.question,
+			isDisplayed: payload.isDisplayed,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}
+		await db.insert(questions).values(insertPayload);
+		return insertPayload;
+	} catch (error) {
+		throw new InsertQuestionToDBError("Failed to insert question to DB", { cause: (error as Error).message });
+	}
 }

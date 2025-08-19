@@ -200,6 +200,15 @@ export async function generateFollowUpQuestionService(payload: { userResponse: s
 				];
 				break;
 		}
+		if (message) {
+			const response = await openai.chat.completions.create({
+				model: "gpt-4o-mini-2024-07-18",
+				messages: message,
+				temperature: 1,
+				top_p: 1,
+			});
+			return JSON.parse(response.choices[0].message.content ?? "");
+		}
 	} catch (error) {
 		throw new GenerateFollowUpQuestionServiceError("Failed to generate follow up question from llm", { cause: (error as Error).cause });
 	}

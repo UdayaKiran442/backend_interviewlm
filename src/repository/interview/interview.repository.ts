@@ -1,21 +1,23 @@
+import { eq } from "drizzle-orm";
 import db from "../db";
 import { interview } from "../schema";
 import type { dbTx } from "../db.types";
 import { CreateInterviewInDBError, GetInterviewByIdFromDBError, UpdateInterviewInDBError } from "../../exceptions/interview.exceptions";
-import type { ICreateInterviewSchema } from "../../routes/v1/interview.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
-import { InterviewStatus } from "../../constants/interview.constants";
-import type { IUpdateInterviewInDB } from "../../types/types";
-import { eq } from "drizzle-orm";
+import type { ICreateInterviewInDB, IUpdateInterviewInDB } from "../../types/types";
 
-export async function createInterviewInDB(payload: ICreateInterviewSchema, tx?: dbTx) {
+export async function createInterviewInDB(payload: ICreateInterviewInDB, tx?: dbTx) {
 	try {
 		const dbConnection = tx || db;
 		const insertPayload = {
 			interviewId: `interview-${generateNanoId()}`,
 			applicationId: payload.applicationId,
 			roundId: payload.roundId,
-			status: InterviewStatus.PENDING,
+			status: payload.status,
+			jobDescription: payload.jobDescription,
+			resumeText: payload.resumeText,
+			questionType: payload.questionType,
+			difficulty: payload.difficulty,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

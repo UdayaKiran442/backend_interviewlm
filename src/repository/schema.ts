@@ -197,20 +197,28 @@ export const interview = pgTable("interview", {
 	roundId: varchar("roundId").notNull(),
 	roundResultsId: varchar("roundResultsId"),
 	status: varchar("status").notNull(), // enum -> PENDING, IN_PROGRESS, COMPLETED
+	jobDescription: varchar("jobDescription").notNull(),
+	resumeText: varchar("resumeText").notNull(), // snapshot at start
+	questionType: varchar("questionType"),
+	difficulty: varchar("difficulty"),
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
-export const questions = pgTable("questions", {
-	questionId: varchar("questionId").primaryKey(),
-	interviewId: varchar("interviewId").notNull(),
-	question: varchar("question").notNull(),
-	answer: varchar("answer"),
-	feedback: varchar("feedback"),
-	isDisplayed: boolean("isDisplayed"),
-	createdAt: timestamp("createdAt").notNull().defaultNow(),
-	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-}, (questions) => ({
-	questionInterviewIdIndex: index("question_interview_id_idx").on(questions.interviewId),
-	questionDisplayedIndex: index("question_displayed_idx").on(questions.isDisplayed),
-}));
+export const questions = pgTable(
+	"questions",
+	{
+		questionId: varchar("questionId").primaryKey(),
+		interviewId: varchar("interviewId").notNull(),
+		question: varchar("question").notNull(),
+		answer: varchar("answer"),
+		feedback: varchar("feedback"),
+		isDisplayed: boolean("isDisplayed"),
+		createdAt: timestamp("createdAt").notNull().defaultNow(),
+		updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+	},
+	(questions) => ({
+		questionInterviewIdIndex: index("question_interview_id_idx").on(questions.interviewId),
+		questionDisplayedIndex: index("question_displayed_idx").on(questions.isDisplayed),
+	}),
+);

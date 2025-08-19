@@ -16,7 +16,7 @@ import { InterviewStatus } from "../constants/interview.constants";
 import { getJobByIdFromDB, updateJobInDB } from "../repository/job/job.repository";
 import { GetJobByIdFromDBError, UpdateJobInDBError } from "../exceptions/job.exceptions";
 
-export async function createAIInterview(payload: { applicationId: string; hrId: string; difficulty: string | null; questionType: string | null; jobDescription: string }) {
+export async function createAIInterview(payload: { applicationId: string; difficulty: string | null; questionType: string | null; jobDescription: string }) {
 	try {
 		const result = await db.transaction(async (tx: dbTx) => {
 			const [application] = await Promise.all([getApplicationByIdFromDB(payload.applicationId, tx)]);
@@ -24,11 +24,13 @@ export async function createAIInterview(payload: { applicationId: string; hrId: 
 			const interview = await createInterviewInDB(
 				{
 					applicationId: payload.applicationId,
-					hrId: payload.hrId,
 					difficulty: payload.difficulty,
 					questionType: payload.questionType,
 					roundId: application[0].currentRound,
-					jobId: application[0].jobId,
+					roundResultsId: null,
+					status: InterviewStatus.PENDING,
+					jobDescription: payload.jobDescription,
+					resumeText: application[0].resumeText,
 				},
 				tx,
 			);
@@ -98,7 +100,6 @@ export async function startAIInterview(payload: IStartAIInterviewSchema) {
 				description: "Interview started successfully",
 			}),
 		]);
-
 	} catch (error) {
 		if (
 			error instanceof GetJobByIdFromDBError ||

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { generateEmbeddingsService, generateFollowUpQuestionService, generateQuestionsService, generateResumeFeedbackService, generateResumeSkills } from "../../services/openai.service";
+import { generateEmbeddingsService, generateFeedbackToQuestionService, generateFollowUpQuestionService, generateQuestionsService, generateResumeFeedbackService, generateResumeSkills } from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
@@ -208,6 +208,21 @@ testRouter.get('/v5', async (c) => {
             questionType: interview[0].questionType ?? '',
             resumeText: interview[0].resumeText,
             userResponse: "Utilised pinecone vector db for contextual memory and search"
+        })
+        return c.json({ success: true, message: 'Applications fetched', response }, 200)
+    } catch (error) {
+        console.log(error)
+        return c.json({ success: false, message: 'Something went wrong' }, 500)
+    }
+})
+
+testRouter.get('/v6', async (c) => {
+    try {
+        const interview = await getInterviewByIdFromDB("interview-7nn3ZiWADBILVGp8K76yY");
+        const response = await generateFeedbackToQuestionService({
+            answerText: "Using vector similar search I had performed a search query to retrieve the similar context of the query and passed it to prompt for contextual understanding and knowledge",
+            questionText: "Can you explain how the integration of Pinecone vector databases improved the performance of your AI chatbot in the Budget Buddy project?",
+            resumeText: interview[0].resumeText
         })
         return c.json({ success: true, message: 'Applications fetched', response }, 200)
     } catch (error) {

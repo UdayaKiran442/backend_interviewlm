@@ -98,3 +98,26 @@ export function generateFollowUpQuestionPromptForJD(payload: { jobDescription: s
 	${payload.response}
 	`;
 }
+
+export function generateFeedbackToQuestionPrompt(payload: { answerText: string; questionText: string; resumeText: string }) {
+	return `You are a technical interviewer.
+                A candidate answered a question for interview, generate a valid feedback based on the answer given by candidate.
+                In feedback, include the following:
+                - Clarity of explanation
+                - Technical accuracy and depth
+                - Areas to improve if any
+                - Any other relevant points you think are important  
+
+Question: ${payload.questionText}  
+Answer: ${payload.answerText}  
+Resume: ${payload.resumeText}  
+
+Give feedback in single sentence.
+
+Return ONLY the feedback in the following strict JSON format:
+{
+  "response": "feedback_text"
+}
+
+[CACHE_BYPASS]: ${Date.now()}`;
+}

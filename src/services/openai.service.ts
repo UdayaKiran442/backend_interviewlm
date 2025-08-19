@@ -2,12 +2,19 @@ import OpenAI from "openai";
 import { ActiveConfig } from "../utils/config.utils";
 import {
 	GenerateEmbeddingsServiceError,
+	GenerateFeedbackToQuestionServiceError,
 	GenerateFollowUpQuestionServiceError,
 	GenerateQuestionsServiceError,
 	GenerateResumeFeedbackServiceError,
 	GenerateResumeSkillsServiceError,
 } from "../exceptions/openai.exceptions";
-import { generateFollowUpQuestionPromptForJD, generateFollowUpQuestionPromptForJDandResume, generateQuestionsPromptForJD, generateQuestionsPromptForJDandResume } from "../constants/prompts.constants";
+import {
+	generateFeedbackToQuestionPrompt,
+	generateFollowUpQuestionPromptForJD,
+	generateFollowUpQuestionPromptForJDandResume,
+	generateQuestionsPromptForJD,
+	generateQuestionsPromptForJDandResume,
+} from "../constants/prompts.constants";
 
 const openai = new OpenAI({
 	apiKey: ActiveConfig.OPENAI_API_KEY,
@@ -211,5 +218,24 @@ export async function generateFollowUpQuestionService(payload: { userResponse: s
 		}
 	} catch (error) {
 		throw new GenerateFollowUpQuestionServiceError("Failed to generate follow up question from llm", { cause: (error as Error).cause });
+	}
+}
+
+export async function generateFeedbackToQuestionService(payload: { answerText: string; questionText: string; resumeText: string }) {
+	try {
+		const response = await openai.chat.completions.create({
+			model: "gpt-4o-mini-2024-07-18",
+			messages: [
+				{
+					role: "system",
+					content: generateFeedbackToQuestionPrompt(payload),
+				},
+			],
+			temperature: 1,
+			top_p: 1,
+		});
+		return JSON.parse(response.choices[0].message.content ?? "");
+	} catch (error) {
+		throw new GenerateFeedbackToQuestionServiceError("Failed to generate feedback to question from llm", { cause: (error as Error).cause });
 	}
 }

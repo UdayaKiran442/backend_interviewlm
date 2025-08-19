@@ -1,11 +1,13 @@
 import db from "../repository/db";
 import type { dbTx } from "../repository/db.types";
-import { FetchNextQuestionError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../exceptions/question.exceptions";
-import { getLatestInterviewResponseFromDB, insertQuestionInDB, nextQuestionFromDB, updateQuestionInDB } from "../repository/question/question.repository";
-import type { INextQuestionSchema } from "../routes/v1/question.route";
-import { GenerateFollowUpQuestionServiceError } from "../exceptions/openai.exceptions";
-import { generateFollowUpQuestionService } from "../services/openai.service";
+import { FetchNextQuestionError, GetQuestionByIdFromDBError, InsertQuestionToDBError, NextQuestionFromDBError, SubmitQuestionError, UpdateQuestionInDBError } from "../exceptions/question.exceptions";
+import { getLatestInterviewResponseFromDB, getQuestionByIdFromDB, insertQuestionInDB, nextQuestionFromDB, updateQuestionInDB } from "../repository/question/question.repository";
+import type { INextQuestionSchema, ISubmitQuestionSchema } from "../routes/v1/question.route";
+import { GenerateFeedbackToQuestionServiceError, GenerateFollowUpQuestionServiceError } from "../exceptions/openai.exceptions";
+import { generateFeedbackToQuestionService, generateFollowUpQuestionService } from "../services/openai.service";
 import { getInterviewByIdFromDB } from "../repository/interview/interview.repository";
+import { GetInterviewByIdFromDBError } from "../exceptions/interview.exceptions";
+import { NotFoundError } from "../exceptions/common.exceptions";
 
 export async function nextQuestion(payload: INextQuestionSchema) {
 	try {
@@ -46,5 +48,40 @@ export async function nextQuestion(payload: INextQuestionSchema) {
 			throw error;
 		}
 		throw new FetchNextQuestionError("Failed to fetch next question", { cause: (error as Error).message });
+	}
+}
+
+export async function submitQuestion(payload: ISubmitQuestionSchema) {
+	try {
+		// fetch question and interview details
+		const [question, interview] = await Promise.all([await getQuestionByIdFromDB(payload.questionId), await getInterviewByIdFromDB(payload.interviewId)]);
+		if(question.length === 0 || interview.length === 0){
+			throw new NotFoundError("Question or Interview not found");
+		}
+
+		// llm function to generate feedback of the question
+		const feedback = await generateFeedbackToQuestionService({
+			answerText: payload.answerText,
+			questionText: question[0].question,
+			resumeText: interview[0].resumeText,
+		});
+
+		// store feedback in db
+		// TODO: background job
+		await updateQuestionInDB({
+			questionId: payload.questionId,
+			feedback: feedback.response,
+		});
+	} catch (error) {
+		if (
+			error instanceof GetQuestionByIdFromDBError ||
+			error instanceof GenerateFeedbackToQuestionServiceError ||
+			error instanceof GetInterviewByIdFromDBError ||
+			error instanceof UpdateQuestionInDBError ||
+			error instanceof NotFoundError
+		) {
+			throw error;
+		}
+		throw new SubmitQuestionError("Failed to submit question", { cause: (error as Error).message });
 	}
 }

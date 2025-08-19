@@ -2,7 +2,7 @@ import db from "../db";
 import type { ICreateQuestionInDB, IUpdateQuestionInDB } from "../../types/types";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { questions } from "../schema";
-import { CreateQuestionInDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
+import { CreateQuestionInDBError, GetQuestionByIdFromDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
 import type { INextQuestionSchema } from "../../routes/v1/question.route";
 import { and, desc, eq } from "drizzle-orm";
 import type { dbTx } from "../db.types";
@@ -88,5 +88,13 @@ export async function insertQuestionInDB(payload: ICreateQuestionInDB){
 		return insertPayload;
 	} catch (error) {
 		throw new InsertQuestionToDBError("Failed to insert question to DB", { cause: (error as Error).message });
+	}
+}
+
+export async function getQuestionByIdFromDB(questionId: string) {
+	try {
+		return await db.select().from(questions).where(eq(questions.questionId, questionId));
+	} catch (error) {
+		throw new GetQuestionByIdFromDBError("Failed to get question by id from DB", { cause: (error as Error).message });
 	}
 }

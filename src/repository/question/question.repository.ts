@@ -2,33 +2,20 @@ import db from "../db";
 import type { ICreateQuestionInDB, IUpdateQuestionInDB } from "../../types/types";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { questions } from "../schema";
-import { CreateQuestionInDBError, GetQuestionByIdFromDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
+import { GetQuestionByIdFromDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
 import type { INextQuestionSchema } from "../../routes/v1/question.route";
 import { and, desc, eq } from "drizzle-orm";
 import type { dbTx } from "../db.types";
 import { GetLatestInterviewResponseFromDB } from "../../exceptions/interview.exceptions";
 
-export async function createQuestionInDB(payload: ICreateQuestionInDB) {
-	try {
-		const insertPayload = {
-			questionId: `question-${generateNanoId()}`,
-			interviewId: payload.interviewId,
-			question: payload.question,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-		await db.insert(questions).values(insertPayload);
-	} catch (error) {
-		throw new CreateQuestionInDBError("Failed to create question in DB", { cause: (error as Error).message });
-	}
-}
 
-export async function insertBulkQuestionsInDB(payload: { interviewId: string; questions: string[] }) {
+export async function insertBulkQuestionsInDB(payload: { interviewId: string; questions: string[]; isDisplayed: boolean }) {
 	try {
 		const insertPayload = payload.questions.map((question) => {
 			return {
 				questionId: `question-${generateNanoId()}`,
 				interviewId: payload.interviewId,
+				isDisplayed: payload.isDisplayed,
 				question,
 				createdAt: new Date(),
 				updatedAt: new Date(),

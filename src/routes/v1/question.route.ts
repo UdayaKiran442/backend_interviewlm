@@ -17,7 +17,6 @@ const questionRoute = new Hono();
 
 const NextQuestionSchema = z.object({
 	interviewId: z.string(),
-	jobId: z.string(),
 });
 
 export type INextQuestionSchema = z.infer<typeof NextQuestionSchema> & { candidateId: string };

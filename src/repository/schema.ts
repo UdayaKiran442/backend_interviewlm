@@ -213,7 +213,7 @@ export const questions = pgTable(
 		question: varchar("question").notNull(),
 		answer: varchar("answer"),
 		feedback: varchar("feedback"),
-		isDisplayed: boolean("isDisplayed"),
+		isDisplayed: boolean("isDisplayed").notNull(),
 		createdAt: timestamp("createdAt").notNull().defaultNow(),
 		updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 	},

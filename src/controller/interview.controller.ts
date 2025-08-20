@@ -46,6 +46,7 @@ export async function createAIInterview(payload: { applicationId: string; diffic
 			const newQuestions = await insertBulkQuestionsInDB({
 				interviewId: interview.interviewId,
 				questions: questions.response,
+				isDisplayed: false,
 			});
 
 			// update application timeline

@@ -1,3 +1,4 @@
+import * as path from "path";
 import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdFromDBError, CloseJobError } from "../exceptions/job.exceptions";
 import { closeJobInDB, createJobInDB, getJobByIdFromDB } from "../repository/job/job.repository";
 import type { ICloseJobSchema, ICreateJobSchema } from "../routes/v1/job.route";
@@ -7,34 +8,27 @@ import { getHRFromDB } from "../repository/hr/hr.repository";
 import { NotFoundError, UnauthorizedError } from "../exceptions/common.exceptions";
 import { GetHRFromDBError } from "../exceptions/hr.exceptions";
 import { ActiveConfig } from "../utils/config.utils";
-import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError } from "../exceptions/openai.exceptions";
 import db from "../repository/db";
 import type { dbTx } from "../repository/db.types";
 
 export async function createJob(payload: ICreateJobSchema) {
+	const upsertVectorEmbeddingsWorker = new Worker(path.resolve(__dirname, "../worker/upsertVectorEmbeddings.worker.ts"));
 	try {
 		// create job and generate embeddings for job description
 		const result = db.transaction(async (tx: dbTx) => {
-			const [newJob] = await Promise.all([
-				createJobInDB(
-					{
-						companyId: payload.companyId,
-						department: payload.department,
-						hrId: payload.hrId,
-						jobDescription: payload.jobDescription,
-						jobTitle: payload.jobTitle,
-						maximumApplications: payload.maximumApplications,
-						package: payload.package,
-						location: payload.location,
-					},
-					tx,
-				),
-			]);
-
-			// TODO: run in background
-			await upsertVectorEmbeddings({
+			const newJob = await createJobInDB({
+				companyId: payload.companyId,
+				department: payload.department,
+				hrId: payload.hrId,
+				jobDescription: payload.jobDescription,
+				jobTitle: payload.jobTitle,
+				maximumApplications: payload.maximumApplications,
+				package: payload.package,
+				location: payload.location,
+			});
+			upsertVectorEmbeddingsWorker.postMessage({
 				indexName: ActiveConfig.JD_INDEX,
 				text: payload.jobDescription,
 				metadata: {

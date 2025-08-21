@@ -64,6 +64,7 @@ export async function submitQuestion(payload: ISubmitQuestionSchema) {
 		await updateQuestionInDB({
 			questionId: payload.questionId,
 			feedback: feedback.response,
+			answer: payload.answerText,
 		});
 	} catch (error) {
 		if (

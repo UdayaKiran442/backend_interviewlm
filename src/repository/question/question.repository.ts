@@ -8,7 +8,6 @@ import { and, desc, eq } from "drizzle-orm";
 import type { dbTx } from "../db.types";
 import { GetLatestInterviewResponseFromDB } from "../../exceptions/interview.exceptions";
 
-
 export async function insertBulkQuestionsInDB(payload: { interviewId: string; questions: string[]; isDisplayed: boolean }) {
 	try {
 		const insertPayload = payload.questions.map((question) => {
@@ -57,11 +56,11 @@ export async function getLatestInterviewResponseFromDB(interviewId: string) {
 	try {
 		return await db.select().from(questions).where(eq(questions.interviewId, interviewId)).orderBy(desc(questions.updatedAt)).limit(1);
 	} catch (error) {
-        throw new GetLatestInterviewResponseFromDB("Failed to get latest interview response from DB", { cause: (error as Error).message });
-    }
+		throw new GetLatestInterviewResponseFromDB("Failed to get latest interview response from DB", { cause: (error as Error).message });
+	}
 }
 
-export async function insertQuestionInDB(payload: ICreateQuestionInDB){
+export async function insertQuestionInDB(payload: ICreateQuestionInDB) {
 	try {
 		const insertPayload = {
 			questionId: `question-${generateNanoId()}`,
@@ -70,7 +69,7 @@ export async function insertQuestionInDB(payload: ICreateQuestionInDB){
 			isDisplayed: payload.isDisplayed,
 			createdAt: new Date(),
 			updatedAt: new Date(),
-		}
+		};
 		await db.insert(questions).values(insertPayload);
 		return insertPayload;
 	} catch (error) {

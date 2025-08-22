@@ -4,6 +4,7 @@ import {
 	GenerateEmbeddingsServiceError,
 	GenerateFeedbackToQuestionServiceError,
 	GenerateFollowUpQuestionServiceError,
+	GenerateInterviewFeedbackServiceError,
 	GenerateQuestionsServiceError,
 	GenerateResumeFeedbackServiceError,
 	GenerateResumeSkillsServiceError,
@@ -12,9 +13,11 @@ import {
 	generateFeedbackToQuestionPrompt,
 	generateFollowUpQuestionPromptForJD,
 	generateFollowUpQuestionPromptForJDandResume,
+	generateInterviewFeedbackPrompt,
 	generateQuestionsPromptForJD,
 	generateQuestionsPromptForJDandResume,
 } from "../constants/prompts.constants";
+import type { IGenerateInterviewFeedbackService } from "../types/prompt.types";
 
 const openai = new OpenAI({
 	apiKey: ActiveConfig.OPENAI_API_KEY,
@@ -237,5 +240,24 @@ export async function generateFeedbackToQuestionService(payload: { answerText: s
 		return JSON.parse(response.choices[0].message.content ?? "");
 	} catch (error) {
 		throw new GenerateFeedbackToQuestionServiceError("Failed to generate feedback to question from llm", { cause: (error as Error).cause });
+	}
+}
+
+export async function generateInterviewFeedbackService(payload: IGenerateInterviewFeedbackService) {
+	try {
+		const response = await openai.chat.completions.create({
+			model: "gpt-4o-mini-2024-07-18",
+			messages: [
+				{
+					role: "system",
+					content: generateInterviewFeedbackPrompt(payload),
+				},
+			],
+			temperature: 0.5,
+			top_p: 1,
+		});
+		return JSON.parse(response.choices[0].message.content ?? "");
+	} catch (error) {
+		throw new GenerateInterviewFeedbackServiceError("Failed to generate interview feedback from llm", { cause: (error as Error).cause });
 	}
 }

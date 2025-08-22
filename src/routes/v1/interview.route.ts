@@ -1,9 +1,12 @@
 import { Hono } from "hono";
 import z from "zod";
-import { startAIInterview } from "../../controller/interview.controller";
-import { GetInterviewByIdFromDBError, StartAIInterviewError, UpdateInterviewInDBError } from "../../exceptions/interview.exceptions";
+import { startAIInterview, submitInterview } from "../../controller/interview.controller";
+import { GetInterviewByIdFromDBError, StartAIInterviewError, SubmitInterviewError, UpdateInterviewInDBError } from "../../exceptions/interview.exceptions";
 import { GetJobByIdFromDBError, UpdateJobInDBError } from "../../exceptions/job.exceptions";
 import { AddApplicationTimelineToDBError } from "../../exceptions/applicationTimeline.exceptions";
+import { GetQuestionsByInterviewIdFromDBError } from "../../exceptions/question.exceptions";
+import { GenerateInterviewFeedbackServiceError } from "../../exceptions/openai.exceptions";
+import { NotFoundError } from "../../exceptions/common.exceptions";
 
 const interviewRoute = new Hono();
 
@@ -48,6 +51,39 @@ interviewRoute.post("/ai/start", async (c) => {
 			error instanceof StartAIInterviewError
 		) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
+		}
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
+
+const SubmitInterviewSchema = z.object({
+	interviewId: z.string(),
+});
+
+export type ISubmitInterviewSchema = z.infer<typeof SubmitInterviewSchema> & { candidateId: string };
+
+interviewRoute.post("/submit", async (c) => {
+	try {
+		const validation = SubmitInterviewSchema.safeParse(await c.req.json());
+		if (!validation.success) {
+			throw validation.error;
+		}
+		const payload = {
+			...validation.data,
+			candidateId: "candidate-Xh6XqZUcCt6yYpxzvl94S",
+		};
+		const response = await submitInterview(payload);
+		return c.json({ success: true, message: "Interview submitted", payload: response }, 200);
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
+		if (error instanceof GetQuestionsByInterviewIdFromDBError || error instanceof GenerateInterviewFeedbackServiceError || error instanceof SubmitInterviewError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 400);
+		}
+		if (error instanceof NotFoundError) {
+			return c.json({ success: false, message: error.message }, 404);
 		}
 		return c.json({ success: false, message: "Something went wrong" }, 500);
 	}

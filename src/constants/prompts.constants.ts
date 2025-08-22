@@ -121,3 +121,18 @@ Return ONLY the feedback in the following strict JSON format:
 
 [CACHE_BYPASS]: ${Date.now()}`;
 }
+
+export function generateInterviewFeedbackPrompt(payload: { questionText: string; feedback: string }[]) {
+	return `
+		You are a technical interviewer.
+		Based on the following questions and feedback, generate a valid interview feedback summary.
+
+		### Input:
+		${payload.map(item => `Question: ${item.questionText}\nFeedback: ${item.feedback}`).join("\n\n")}
+
+		### Output:
+		{
+			"summary": "string" 
+		}
+	`;
+}

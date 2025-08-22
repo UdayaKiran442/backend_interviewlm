@@ -2,7 +2,7 @@ import db from "../db";
 import type { ICreateQuestionInDB, IUpdateQuestionInDB } from "../../types/types";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import { questions } from "../schema";
-import { GetQuestionByIdFromDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
+import { GetQuestionByIdFromDBError, GetQuestionsByInterviewIdFromDBError, InsertBulkQuestionsInDBError, InsertQuestionToDBError, NextQuestionFromDBError, UpdateQuestionInDBError } from "../../exceptions/question.exceptions";
 import type { INextQuestionSchema } from "../../routes/v1/question.route";
 import { and, desc, eq } from "drizzle-orm";
 import type { dbTx } from "../db.types";
@@ -82,5 +82,13 @@ export async function getQuestionByIdFromDB(questionId: string) {
 		return await db.select().from(questions).where(eq(questions.questionId, questionId));
 	} catch (error) {
 		throw new GetQuestionByIdFromDBError("Failed to get question by id from DB", { cause: (error as Error).message });
+	}
+}
+
+export async function getQuestionsByInterviewIdFromDB(interviewId: string) {
+	try {
+		return await db.select().from(questions).where(eq(questions.interviewId, interviewId));
+	} catch (error) {
+		throw new GetQuestionsByInterviewIdFromDBError("Failed to get questions by interview id from DB", { cause: (error as Error).message });
 	}
 }

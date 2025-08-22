@@ -3,5 +3,6 @@ export const ApplicationTimelineStatus = {
     QUALIFIED: "QUALIFIED",
     REJECTED: "REJECTED",
     IN_PROGRESS: "IN_PROGRESS",
+    VERDICT_PENDING: "VERDICT_PENDING",
     COMPLETED: "COMPLETED"
 }

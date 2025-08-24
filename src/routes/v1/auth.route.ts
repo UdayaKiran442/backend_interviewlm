@@ -5,6 +5,7 @@ import { AddUserInDBError, GetUserByEmailFromDBError } from "../../exceptions/us
 import { AddCandidateInDBError, GetCandidateByEmailFromDBError } from "../../exceptions/candidate.exceptions";
 import { GetHRByEmailFromDBError } from "../../exceptions/hr.exceptions";
 import { LoginUserError } from "../../exceptions/auth.exceptions";
+import { GetInterviewerByEmailFromDBError } from "../../exceptions/interviewer.exceptions";
 
 const authRoute = new Hono();
 
@@ -40,7 +41,8 @@ authRoute.post("/login", async (c) => {
 			error instanceof GetCandidateByEmailFromDBError ||
 			error instanceof AddCandidateInDBError ||
 			error instanceof GetHRByEmailFromDBError ||
-			error instanceof LoginUserError
+			error instanceof LoginUserError ||
+			error instanceof GetInterviewerByEmailFromDBError
 		) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
 		}

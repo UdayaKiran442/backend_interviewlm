@@ -7,6 +7,8 @@ import { addUserInDB, getUserByEmailFromDB } from "../repository/users/users.rep
 import type { IAuthSchema } from "../routes/v1/auth.route";
 import { LoginUserError } from "../exceptions/auth.exceptions";
 import { UserRoles } from "../constants/user.constants";
+import { GetInterviewerByEmailFromDBError } from "../exceptions/interviewer.exceptions";
+import { getInterviewerByEmailFromDB } from "../repository/interviewer/interviewer.repository";
 
 export async function loginUser(payload: IAuthSchema) {
 	try {
@@ -23,12 +25,12 @@ export async function loginUser(payload: IAuthSchema) {
 		// check the role of the user
 		const roles = user[0].roles as string[];
 		// check table based on role
+		// return user along with role
 		if (roles.includes(UserRoles.CANDIDATE)) {
 			const candidate = await getCandidateByEmailFromDB(payload.email);
 			return {
 				userId: user[0].userId,
 				email: user[0].email,
-				roles: user[0].roles,
 				candidate: candidate[0],
 				role: UserRoles.CANDIDATE,
 			};
@@ -42,20 +44,30 @@ export async function loginUser(payload: IAuthSchema) {
 				phone: hr[0].phone,
 				name: hr[0].name,
 				email: user[0].email,
-				roles: user[0].roles,
 				isOrgAdmin: hr[0].isOrgAdmin,
 				role: UserRoles.HR,
 			};
 		}
-
-		// return user along with role
+		if (roles.includes(UserRoles.INTERVIEWER)) {
+			const interviewer = await getInterviewerByEmailFromDB(payload.email);
+			return {
+				userId: user[0].userId,
+				interviewerId: interviewer[0].interviewerId,
+				companyId: interviewer[0].companyId,
+				phone: interviewer[0].phone,
+				name: interviewer[0].name,
+				email: user[0].email,
+				role: UserRoles.INTERVIEWER,
+			};
+		}
 	} catch (error) {
 		if (
 			error instanceof GetUserByEmailFromDBError ||
 			error instanceof AddUserInDBError ||
 			error instanceof GetCandidateByEmailFromDBError ||
 			error instanceof AddCandidateInDBError ||
-			error instanceof GetHRByEmailFromDBError
+			error instanceof GetHRByEmailFromDBError ||
+			error instanceof GetInterviewerByEmailFromDBError
 		) {
 			throw error;
 		}

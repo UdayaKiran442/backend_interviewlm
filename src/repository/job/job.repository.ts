@@ -19,7 +19,8 @@ export async function createJobInDB(payload: ICreatJobInDB, tx?: dbTx) {
             package: payload.package,
             maximumApplications: payload.maximumApplications,
             companyId: payload.companyId,
-            location: payload.location
+            location: payload.location,
+            jobReviewers: payload.jobReviewers,
         }
         await dbConnection.insert(jobs).values(insertPayload)
         return insertPayload;

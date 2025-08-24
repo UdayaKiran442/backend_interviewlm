@@ -29,6 +29,7 @@ export type ICreatJobInDB = {
 	maximumApplications: number | undefined;
 	companyId: string;
 	location: string | undefined;
+	jobReviewers: string[] | null;
 };
 
 export type ICreateQuestionInDB = {

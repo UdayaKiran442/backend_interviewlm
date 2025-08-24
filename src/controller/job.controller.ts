@@ -27,6 +27,7 @@ export async function createJob(payload: ICreateJobSchema) {
 				maximumApplications: payload.maximumApplications,
 				package: payload.package,
 				location: payload.location,
+				jobReviewers: payload.jobReviewers
 			});
 			upsertVectorEmbeddingsWorker.postMessage({
 				indexName: ActiveConfig.JD_INDEX,

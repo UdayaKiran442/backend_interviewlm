@@ -41,6 +41,7 @@ export const jobs = pgTable(
 		hired: integer("hired").notNull().default(0), // applications that have been hired
 		isJobOpen: boolean("isJobOpen").notNull().default(true),
 		isScreeningDone: boolean("isScreeningDone").notNull().default(false),
+		jobReviewers: json("jobReviewers").default([]),
 		createdAt: timestamp("createdAt").notNull().defaultNow(),
 		updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 	},

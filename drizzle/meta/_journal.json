@@ -204,6 +204,13 @@
       "when": 1755872785238,
       "tag": "0028_magical_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1756031938950,
+      "tag": "0029_bizarre_tattoo",
+      "breakpoints": true
     }
   ]
 }

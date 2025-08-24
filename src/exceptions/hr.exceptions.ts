@@ -48,12 +48,11 @@ export class GetHRByUserIdFromDBError extends Error {
 	}
 }
 
-
-export class InviteInterviewerError extends Error {
+export class InviteReviewerError extends Error {
 	public cause?: unknown;
 	constructor(message: string, options?: { cause?: unknown }) {
 		super(message);
-		this.name = "InviteInterviewerError";
+		this.name = "InviteReviewerError";
 		if (options?.cause) this.cause = options.cause;
 		Error.captureStackTrace(this, this.constructor);
 	}

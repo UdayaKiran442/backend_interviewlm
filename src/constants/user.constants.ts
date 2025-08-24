@@ -1,5 +1,5 @@
 export const UserRoles = {
 	HR: "hr",
-	INTERVIEWER: "interviewer",
+	REVIEWER: "reviewer",
 	CANDIDATE: "candidate",
 };

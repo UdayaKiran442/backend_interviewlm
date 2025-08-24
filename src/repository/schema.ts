@@ -224,8 +224,8 @@ export const questions = pgTable(
 	}),
 );
 
-export const interviewer = pgTable("interviewer", {
-	interviewerId: varchar("interviewerId").primaryKey(),
+export const reviewer = pgTable("reviewer", {
+	reviewerId: varchar("reviewerId").primaryKey(),
 	companyId: varchar("companyId").notNull(),
 	name: varchar("name").notNull(),
 	email: varchar("email").notNull().unique(),
@@ -237,7 +237,7 @@ export const interviewer = pgTable("interviewer", {
 
 export const validationTable = pgTable("validations_table", {
 	validationId: varchar("validationId").primaryKey(),
-	interviewerId: varchar("interviewerId"),
+	reviewerId: varchar("reviewerId"),
 	interviewId: varchar("interviewId").notNull(),
 	jobId: varchar("jobId").notNull(),
 	roundId: varchar("roundId").notNull(),

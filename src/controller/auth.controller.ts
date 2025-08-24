@@ -7,8 +7,8 @@ import { addUserInDB, getUserByEmailFromDB } from "../repository/users/users.rep
 import type { IAuthSchema } from "../routes/v1/auth.route";
 import { LoginUserError } from "../exceptions/auth.exceptions";
 import { UserRoles } from "../constants/user.constants";
-import { GetInterviewerByEmailFromDBError } from "../exceptions/interviewer.exceptions";
-import { getInterviewerByEmailFromDB } from "../repository/interviewer/interviewer.repository";
+import { GetReviewerByEmailFromDBError } from "../exceptions/reviewer.exceptions";
+import { getReviewerByEmailFromDB } from "../repository/reviewer/reviewer.repository";
 
 export async function loginUser(payload: IAuthSchema) {
 	try {
@@ -48,16 +48,16 @@ export async function loginUser(payload: IAuthSchema) {
 				role: UserRoles.HR,
 			};
 		}
-		if (roles.includes(UserRoles.INTERVIEWER)) {
-			const interviewer = await getInterviewerByEmailFromDB(payload.email);
+		if (roles.includes(UserRoles.REVIEWER)) {
+			const reviewer = await getReviewerByEmailFromDB(payload.email);
 			return {
 				userId: user[0].userId,
-				interviewerId: interviewer[0].interviewerId,
-				companyId: interviewer[0].companyId,
-				phone: interviewer[0].phone,
-				name: interviewer[0].name,
+				reviewerId: reviewer[0].reviewerId,
+				companyId: reviewer[0].companyId,
+				phone: reviewer[0].phone,
+				name: reviewer[0].name,
 				email: user[0].email,
-				role: UserRoles.INTERVIEWER,
+				role: UserRoles.REVIEWER,
 			};
 		}
 	} catch (error) {
@@ -67,7 +67,7 @@ export async function loginUser(payload: IAuthSchema) {
 			error instanceof GetCandidateByEmailFromDBError ||
 			error instanceof AddCandidateInDBError ||
 			error instanceof GetHRByEmailFromDBError ||
-			error instanceof GetInterviewerByEmailFromDBError
+			error instanceof GetReviewerByEmailFromDBError
 		) {
 			throw error;
 		}

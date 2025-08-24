@@ -5,7 +5,7 @@ import { AddUserInDBError, GetUserByEmailFromDBError } from "../../exceptions/us
 import { AddCandidateInDBError, GetCandidateByEmailFromDBError } from "../../exceptions/candidate.exceptions";
 import { GetHRByEmailFromDBError } from "../../exceptions/hr.exceptions";
 import { LoginUserError } from "../../exceptions/auth.exceptions";
-import { GetInterviewerByEmailFromDBError } from "../../exceptions/interviewer.exceptions";
+import { GetReviewerByEmailFromDBError } from "../../exceptions/reviewer.exceptions";
 
 const authRoute = new Hono();
 
@@ -26,7 +26,7 @@ authRoute.post("/login", async (c) => {
 		}
 		const payload = {
 			...validation.data,
-			role: "" as "candidate" | "hr" | "interviewer",
+			role: "" as "candidate" | "hr" | "reviewer",
 		};
 		const res = await loginUser(payload);
 		return c.json({ success: true, message: "User logged in", res }, 200);
@@ -42,7 +42,7 @@ authRoute.post("/login", async (c) => {
 			error instanceof AddCandidateInDBError ||
 			error instanceof GetHRByEmailFromDBError ||
 			error instanceof LoginUserError ||
-			error instanceof GetInterviewerByEmailFromDBError
+			error instanceof GetReviewerByEmailFromDBError
 		) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
 		}

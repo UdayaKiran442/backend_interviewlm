@@ -1,13 +1,13 @@
 import { UserRoles } from "../constants/user.constants";
 import { CreateUserInClerkServiceError } from "../exceptions/clerk.exceptions";
-import { InviteInterviewerError, GetJobsByHRError } from "../exceptions/hr.exceptions";
-import { CreateInterviewerInDBError } from "../exceptions/interviewer.exceptions";
+import { InviteReviewerError, GetJobsByHRError } from "../exceptions/hr.exceptions";
+import { CreateReviewerInDBError } from "../exceptions/reviewer.exceptions";
 import { GetJobsByHRFromDBError } from "../exceptions/job.exceptions";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../exceptions/user.exceptions";
-import { createInterviewerInDB } from "../repository/interviewer/interviewer.repository";
+import { createReviewerInDB } from "../repository/reviewer/reviewer.repository";
 import { getJobsByHRFromDB } from "../repository/job/job.repository";
 import { addUserInDB, getUserByEmailFromDB, updateUserInDB } from "../repository/users/users.repository";
-import type { IAssignInterviewerSchema } from "../routes/v1/hr.route";
+import type { IAssignReviewerSchema } from "../routes/v1/hr.route";
 import { createUserInClerkService } from "../services/clerk.service";
 
 export async function getJobsByHR(hrId: string) {
@@ -21,20 +21,20 @@ export async function getJobsByHR(hrId: string) {
 	}
 }
 
-export async function inviteInterviewer(payload: IAssignInterviewerSchema) {
+export async function inviteReviewer(payload: IAssignReviewerSchema) {
 	try {
 		// check if user is present in user table by email
 		const user = await getUserByEmailFromDB(payload.email);
 
-		// if present then update user role column with interviewer, else add user in users table
+		// if present then update user role column with reviewer, else add user in users table
 		if (user.length > 0) {
 			const roles = user[0].roles as string[];
 			await Promise.all([
 				updateUserInDB({
 					userId: user[0].userId,
-					roles: [...roles, UserRoles.INTERVIEWER],
+					roles: [...roles, UserRoles.REVIEWER],
 				}),
-				createInterviewerInDB(payload),
+				createReviewerInDB(payload),
 			]);
 		} else {
 			// Create user in Clerk and add to DB
@@ -42,17 +42,17 @@ export async function inviteInterviewer(payload: IAssignInterviewerSchema) {
 			await Promise.all([
 				addUserInDB({
 					email: payload.email,
-					role: UserRoles.INTERVIEWER,
+					role: UserRoles.REVIEWER,
 					userId: clerkUser.id,
 				}),
-				createInterviewerInDB(payload),
+				createReviewerInDB(payload),
 			]);
 			// TODO: Send email invitation to user with password
 		}
 	} catch (error) {
-		if (error instanceof CreateInterviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError) {
+		if (error instanceof CreateReviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError) {
 			throw error;
 		}
-		throw new InviteInterviewerError("Failed to assign interviewer", { cause: (error as Error).message });
+		throw new InviteReviewerError("Failed to assign reviewer", { cause: (error as Error).message });
 	}
 }

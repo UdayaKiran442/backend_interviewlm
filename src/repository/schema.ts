@@ -222,3 +222,27 @@ export const questions = pgTable(
 		questionDisplayedIndex: index("question_displayed_idx").on(questions.isDisplayed),
 	}),
 );
+
+export const interviewer = pgTable("interviewer", {
+	interviewerId: varchar("interviewerId").primaryKey(),
+	companyId: varchar("companyId").notNull(),
+	name: varchar("name").notNull(),
+	email: varchar("email").notNull().unique(),
+	phone: varchar("phone"),
+	jobTitle: varchar("jobTitle").notNull(),
+	createdAt: timestamp("createdAt").notNull().defaultNow(),
+	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const validationTable = pgTable("validations_table", {
+	validationId: varchar("validationId").primaryKey(),
+	interviewerId: varchar("interviewerId"),
+	interviewId: varchar("interviewId").notNull(),
+	jobId: varchar("jobId").notNull(),
+	roundId: varchar("roundId").notNull(),
+	roundResultId: varchar("roundResultId").notNull(),
+	notes: varchar("notes"),
+	status: varchar("status").notNull().default("PENDING"), // enum -> pending, completed
+	createdAt: timestamp("createdAt").notNull().defaultNow(),
+	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});

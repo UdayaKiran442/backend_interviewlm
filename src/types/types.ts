@@ -68,3 +68,9 @@ export type IUpdateQuestionInDB = {
 	feedback?: string;
 	isDisplayed?: boolean;
 };
+
+export type IUpdateUserInDB = {
+	userId: string;
+	email?: string;
+	roles?: string[];
+};

@@ -5,6 +5,7 @@
     "prod": "NODE_ENV=production bun run --hot src/index.ts"
   },
   "dependencies": {
+    "@clerk/backend": "^2.9.4",
     "@google-cloud/storage": "^7.16.0",
     "@langchain/community": "^0.3.49",
     "@langchain/core": "^0.3.66",

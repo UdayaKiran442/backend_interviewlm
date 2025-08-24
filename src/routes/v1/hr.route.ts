@@ -3,10 +3,11 @@ import { Hono } from "hono";
 
 import { GetJobsByHRFromDBError } from "../../exceptions/job.exceptions";
 import { inviteInterviewer, getJobsByHR } from "../../controller/hr.controller";
-import { AssignInterviewerError, CreateInterviewerInDBError, GetJobsByHRError } from "../../exceptions/hr.exceptions";
+import { InviteInterviewerError, GetJobsByHRError } from "../../exceptions/hr.exceptions";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../../exceptions/user.exceptions";
 import { CreateUserInClerkServiceError } from "../../exceptions/clerk.exceptions";
+import { CreateInterviewerInDBError } from "../../exceptions/interviewer.exceptions";
 
 const hrRoute = new Hono();
 
@@ -51,7 +52,7 @@ hrRoute.post("/invite/interviewer", async (c) => {
 			return c.json({ success: false, message: "Invalid input", errors: errMessage.errors }, 400);
 		}
 		if (
-			error instanceof AssignInterviewerError ||
+			error instanceof InviteInterviewerError ||
 			error instanceof CreateInterviewerInDBError ||
 			error instanceof UpdateUserInDBError ||
 			error instanceof GetUserByEmailFromDBError ||

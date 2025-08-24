@@ -1,9 +1,8 @@
 import { eq } from "drizzle-orm";
-import { CreateHRInDBError, CreateInterviewerInDBError, GetHRByEmailFromDBError, GetHRByUserIdFromDBError, GetHRFromDBError } from "../../exceptions/hr.exceptions";
+import { CreateHRInDBError, GetHRByEmailFromDBError, GetHRByUserIdFromDBError, GetHRFromDBError } from "../../exceptions/hr.exceptions";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
-import { hr, interviewer } from "../schema";
-import type { IAssignInterviewerSchema } from "../../routes/v1/hr.route";
+import { hr } from "../schema";
 
 export async function createHRInDB(payload: { companyId: string; name: string; email: string; phone: string; isOrgAdmin: boolean; userId: string }) {
 	try {
@@ -45,23 +44,5 @@ export async function getHRByEmailFromDB(email: string) {
 		return await db.select().from(hr).where(eq(hr.email, email));
 	} catch (error) {
 		throw new GetHRByEmailFromDBError("Failed to get HR by email from DB", { cause: (error as Error).message });
-	}
-}
-
-export async function createInterviewerInDB(payload: IAssignInterviewerSchema) {
-	try {
-		const insertPayload = {
-			interviewerId: `interviewer-${generateNanoId()}`,
-			companyId: payload.companyId,
-			name: payload.name,
-			email: payload.email,
-			phone: payload.phone,
-			jobTitle: payload.jobTitle,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-		await db.insert(interviewer).values(insertPayload);
-	} catch (error) {
-		throw new CreateInterviewerInDBError("Failed to create interviewer in DB", { cause: (error as Error).message });
 	}
 }

@@ -1,9 +1,10 @@
 import { UserRoles } from "../constants/user.constants";
 import { CreateUserInClerkServiceError } from "../exceptions/clerk.exceptions";
-import { AssignInterviewerError, CreateInterviewerInDBError, GetJobsByHRError } from "../exceptions/hr.exceptions";
+import { InviteInterviewerError, GetJobsByHRError } from "../exceptions/hr.exceptions";
+import { CreateInterviewerInDBError } from "../exceptions/interviewer.exceptions";
 import { GetJobsByHRFromDBError } from "../exceptions/job.exceptions";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../exceptions/user.exceptions";
-import { createInterviewerInDB } from "../repository/hr/hr.repository";
+import { createInterviewerInDB } from "../repository/interviewer/interviewer.repository";
 import { getJobsByHRFromDB } from "../repository/job/job.repository";
 import { addUserInDB, getUserByEmailFromDB, updateUserInDB } from "../repository/users/users.repository";
 import type { IAssignInterviewerSchema } from "../routes/v1/hr.route";
@@ -52,6 +53,6 @@ export async function inviteInterviewer(payload: IAssignInterviewerSchema) {
 		if (error instanceof CreateInterviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError) {
 			throw error;
 		}
-		throw new AssignInterviewerError("Failed to assign interviewer", { cause: (error as Error).message });
+		throw new InviteInterviewerError("Failed to assign interviewer", { cause: (error as Error).message });
 	}
 }

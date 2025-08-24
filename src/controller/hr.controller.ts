@@ -1,3 +1,4 @@
+import { UserRoles } from "../constants/user.constants";
 import { CreateUserInClerkServiceError } from "../exceptions/clerk.exceptions";
 import { AssignInterviewerError, CreateInterviewerInDBError, GetJobsByHRError } from "../exceptions/hr.exceptions";
 import { GetJobsByHRFromDBError } from "../exceptions/job.exceptions";
@@ -27,21 +28,26 @@ export async function inviteInterviewer(payload: IAssignInterviewerSchema) {
 		// if present then update user role column with interviewer, else add user in users table
 		if (user.length > 0) {
 			const roles = user[0].roles as string[];
-			await updateUserInDB({
-				userId: user[0].userId,
-				roles: [...roles, "developer"],
-			});
+			await Promise.all([
+				updateUserInDB({
+					userId: user[0].userId,
+					roles: [...roles, UserRoles.INTERVIEWER],
+				}),
+				createInterviewerInDB(payload),
+			]);
 		} else {
 			// Create user in Clerk and add to DB
 			const clerkUser = await createUserInClerkService(payload.email);
-			await addUserInDB({
-				email: payload.email,
-				role: "developer",
-				userId: clerkUser.id,
-			});
+			await Promise.all([
+				addUserInDB({
+					email: payload.email,
+					role: UserRoles.INTERVIEWER,
+					userId: clerkUser.id,
+				}),
+				createInterviewerInDB(payload),
+			]);
 			// TODO: Send email invitation to user with password
 		}
-		return await createInterviewerInDB(payload);
 	} catch (error) {
 		if (error instanceof CreateInterviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError) {
 			throw error;

@@ -11,6 +11,7 @@ import hrRoute from "./hr.route";
 import authRoute from "./auth.route";
 import interviewRoute from "./interview.route";
 import questionRoute from "./question.route";
+import reviewerRoute from "./reviewer.route";
 
 const v1Router = new Hono();
 
@@ -25,5 +26,6 @@ v1Router.route("/hr", hrRoute);
 v1Router.route("/auth", authRoute);
 v1Router.route("/interview", interviewRoute);
 v1Router.route("/question", questionRoute);
+v1Router.route("/reviewer", reviewerRoute);
 
 export default v1Router;

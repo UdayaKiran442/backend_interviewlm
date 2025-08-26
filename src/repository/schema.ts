@@ -233,7 +233,11 @@ export const reviewer = pgTable("reviewer", {
 	jobTitle: varchar("jobTitle").notNull(),
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
+},
+(reviewer) => ({
+	nameIdx: index("reviewer_name_idx").on(reviewer.name),
+	emailIdx: index("reviewer_email_idx").on(reviewer.email),
+}));
 
 export const validationTable = pgTable("validations_table", {
 	validationId: varchar("validationId").primaryKey(),

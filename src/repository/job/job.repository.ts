@@ -55,7 +55,7 @@ export async function updateJobApplicationsCountInDB(payload: { jobId: string, c
     }
 }
 
-export async function updateJobInDB(payload: { jobId: string, hrId?: string, jobTitle?: string, jobDescription?: string, department?: string, package?: string, maximumApplications?: number, companyId?: string, applications?: number, inProgress?: number, rejected?: number, interviewing?: number, hired?: number, isJobOpen?: boolean, isScreeningDone?: boolean }, tx?: dbTx) {
+export async function updateJobInDB(payload: { jobId: string, hrId?: string, jobTitle?: string, jobDescription?: string, department?: string, package?: string, maximumApplications?: number, companyId?: string, applications?: number, inProgress?: number, rejected?: number, interviewing?: number, hired?: number, isJobOpen?: boolean, isScreeningDone?: boolean, jobReviewers?: string[] }, tx?: dbTx) {
     try {
         const dbConnection = tx || db;
         const updatedPayload = {

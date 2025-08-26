@@ -1,14 +1,15 @@
 import { UserRoles } from "../constants/user.constants";
 import { CreateUserInClerkServiceError } from "../exceptions/clerk.exceptions";
-import { InviteReviewerError, GetJobsByHRError } from "../exceptions/hr.exceptions";
+import { AssignReviewerToJobError, CreateReviewerError, GetJobsByHRError } from "../exceptions/hr.exceptions";
 import { CreateReviewerInDBError } from "../exceptions/reviewer.exceptions";
-import { GetJobsByHRFromDBError } from "../exceptions/job.exceptions";
+import { GetJobByIdFromDBError, GetJobsByHRFromDBError, UpdateJobInDBError } from "../exceptions/job.exceptions";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../exceptions/user.exceptions";
 import { createReviewerInDB } from "../repository/reviewer/reviewer.repository";
-import { getJobsByHRFromDB } from "../repository/job/job.repository";
+import { getJobByIdFromDB, getJobsByHRFromDB, updateJobInDB } from "../repository/job/job.repository";
 import { addUserInDB, getUserByEmailFromDB, updateUserInDB } from "../repository/users/users.repository";
-import type { IAssignReviewerSchema } from "../routes/v1/hr.route";
+import type { ICreateReviewerSchema, IAssignReviewerToJobSchema } from "../routes/v1/hr.route";
 import { createUserInClerkService } from "../services/clerk.service";
+import { NotFoundError } from "../exceptions/common.exceptions";
 
 export async function getJobsByHR(hrId: string) {
 	try {
@@ -21,7 +22,7 @@ export async function getJobsByHR(hrId: string) {
 	}
 }
 
-export async function inviteReviewer(payload: IAssignReviewerSchema) {
+export async function createReviewer(payload: ICreateReviewerSchema) {
 	try {
 		// check if user is present in user table by email
 		const user = await getUserByEmailFromDB(payload.email);
@@ -53,6 +54,29 @@ export async function inviteReviewer(payload: IAssignReviewerSchema) {
 		if (error instanceof CreateReviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError) {
 			throw error;
 		}
-		throw new InviteReviewerError("Failed to assign reviewer", { cause: (error as Error).message });
+		throw new CreateReviewerError("Failed to assign reviewer", { cause: (error as Error).message });
+	}
+}
+
+export async function assignReviewerToJob(payload: IAssignReviewerToJobSchema) {
+	try {
+		const job = await getJobByIdFromDB(payload.jobId);
+		if (job.length === 0) {
+			throw new NotFoundError("Job not found");
+		}
+		const reviewers = (job[0].jobReviewers || []) as string[];
+		if (reviewers.includes(payload.reviewerId)) {
+			return;
+		}
+		await updateJobInDB({
+			jobId: payload.jobId,
+			jobReviewers: [...reviewers, payload.reviewerId],
+		});
+		return;
+	} catch (error) {
+		if (error instanceof NotFoundError || error instanceof GetJobByIdFromDBError || error instanceof UpdateJobInDBError) {
+			throw error;
+		}
+		throw new AssignReviewerToJobError("Failed to assign reviewer to job", { cause: (error as Error).message });
 	}
 }

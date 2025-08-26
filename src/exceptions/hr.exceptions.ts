@@ -48,11 +48,21 @@ export class GetHRByUserIdFromDBError extends Error {
 	}
 }
 
-export class InviteReviewerError extends Error {
+export class CreateReviewerError extends Error {
 	public cause?: unknown;
 	constructor(message: string, options?: { cause?: unknown }) {
 		super(message);
-		this.name = "InviteReviewerError";
+		this.name = "CreateReviewerError";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}
+
+export class AssignReviewerToJobError extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "AssignReviewerToJobError";
 		if (options?.cause) this.cause = options.cause;
 		Error.captureStackTrace(this, this.constructor);
 	}

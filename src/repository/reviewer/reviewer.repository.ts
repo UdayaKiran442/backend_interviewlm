@@ -1,13 +1,13 @@
 import { eq, sql } from "drizzle-orm";
 
 import { CreateReviewerInDBError, GetReviewerByEmailFromDBError, SearchReviewerInDBError } from "../../exceptions/reviewer.exceptions";
-import type { IAssignReviewerSchema } from "../../routes/v1/hr.route";
+import type { ICreateReviewerSchema } from "../../routes/v1/hr.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { reviewer } from "../schema";
 import type { ISearchReviewerSchema } from "../../routes/v1/reviewer.route";
 
-export async function createReviewerInDB(payload: IAssignReviewerSchema) {
+export async function createReviewerInDB(payload: ICreateReviewerSchema) {
 	try {
 		const insertPayload = {
 			reviewerId: `reviewer-${generateNanoId()}`,

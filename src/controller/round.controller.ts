@@ -26,6 +26,8 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 		const result = db.transaction(async (tx: dbTx) => {
 			// get round details of roundId
 			const [round, job] = await Promise.all([getRoundByIdFromDB(payload.roundId), getJobByIdFromDB(payload.jobId)]);
+			const nextRound = await getRoundsByJobIdFromDB(round[0].jobId, round[0].roundNumber + 1);
+
 			if (round.length === 0) {
 				throw new NotFoundError("Round not found");
 			}
@@ -34,7 +36,6 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 			}
 			if (payload.screeningId) {
 				// get next round details of the job
-				const nextRound = await getRoundsByJobIdFromDB(round[0].jobId, round[0].roundNumber + 1);
 				if (nextRound.length === 0) {
 					// update application status to qualified or rejected
 					await Promise.all([

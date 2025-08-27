@@ -20,6 +20,9 @@ import { CreateAIInterviewError, CreateInterviewInDBError } from "../exceptions/
 import { GenerateQuestionsServiceError } from "../exceptions/openai.exceptions";
 import { InsertBulkQuestionsInDBError } from "../exceptions/question.exceptions";
 import type { dbTx } from "../repository/db.types";
+import { updateValidationInDB } from "../repository/validationsTable/validationsTable.repository";
+import { ValidationTableStatus } from "../constants/validationTable.constants";
+import { UpdateValidationInDBError } from "../exceptions/validationsTable.exceptions";
 
 export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 	try {
@@ -34,38 +37,18 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 			if (job.length === 0) {
 				throw new NotFoundError("Job not found");
 			}
-			if (payload.screeningId) {
-				// get next round details of the job
-				if (nextRound.length === 0) {
-					// update application status to qualified or rejected
-					await Promise.all([
-						updateApplicationInDB(
-							{
-								applicationId: payload.applicationId,
-								status: payload.isQualified ? "qualified" : "rejected",
-							},
-							tx,
-						),
-						addApplicationTimelineToDB(
-							{
-								applicationId: payload.applicationId,
-								roundId: payload.roundId,
-								status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
-								title: "Resume Screening Completed",
-								description: "Your resume screening has been completed.",
-							},
-							tx,
-						),
-						updateRoundResultInDB({
-							roundId: payload.roundId,
-							applicationId: payload.applicationId,
-							verdictBy: payload.hrId,
-							isQualified: payload.isQualified,
-						}),
-					]);
-					return;
-				}
 
+			if (nextRound.length === 0 || !payload.isQualified) {
+				// update application status to qualified or rejected
+				await Promise.all([
+					updateApplicationInDB({
+						applicationId: payload.applicationId,
+						status: payload.isQualified ? "qualified" : "rejected",
+					}),
+				]);
+			}
+
+			if (payload.screeningId) {
 				await Promise.all([
 					// add to application timeline
 					addApplicationTimelineToDB(
@@ -80,6 +63,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 					),
 					// update in application table
 					payload.isQualified &&
+						nextRound[0] &&
 						updateApplicationInDB(
 							{
 								applicationId: payload.applicationId,
@@ -97,13 +81,18 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 					),
 					// if qualified update inProgress count in job table
 					payload.isQualified
-						? updateJobInDB(
-								{
+						? nextRound[0]
+							? updateJobInDB(
+									{
+										jobId: job[0].jobId,
+										inProgress: job[0].inProgress + 1,
+									},
+									tx,
+								)
+							: updateJobInDB({
 									jobId: job[0].jobId,
-									inProgress: job[0].inProgress + 1,
-								},
-								tx,
-							)
+									inProgress: job[0].hired + 1,
+								})
 						: updateJobInDB(
 								{
 									jobId: job[0].jobId,
@@ -121,28 +110,65 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 						tx,
 					),
 				]);
-				if (!payload.isQualified) {
-					// update application status to rejected
-					await updateApplicationInDB(
-						{
-							applicationId: payload.applicationId,
-							status: "rejected",
-						},
-						tx,
-					);
-					// TODO: send email to candidate
-				}
-
-				// if next is interview round and is taken by ai then create interview for the candidate
-				if (payload.isQualified && nextRound[0].roundType === "Technical Interview" && nextRound[0].isAI) {
-					await createAIInterview({
+			}
+			if (payload.validationId) {
+				// add to application timeline
+				await Promise.all([
+					addApplicationTimelineToDB({
 						applicationId: payload.applicationId,
-						difficulty: nextRound[0].difficulty,
-						questionType: nextRound[0].questionType,
-						jobDescription: job[0].jobDescription,
-						roundId: nextRound[0].roundId,
-					});
-				}
+						roundId: payload.roundId,
+						status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
+						title: "Validation Completed",
+						description: "Your validation has been completed.",
+					}),
+					// update jobs table, if rejected increment rejected and decrement inProgress
+					nextRound[0]
+						? !payload.isQualified &&
+							updateJobInDB({
+								jobId: job[0].jobId,
+								rejected: job[0].rejected + 1,
+								inProgress: job[0].inProgress - 1,
+							})
+						: payload.isQualified
+							? updateJobInDB({
+									jobId: job[0].jobId,
+									hired: job[0].hired + 1,
+								})
+							: updateJobInDB({
+									jobId: job[0].jobId,
+									rejected: job[0].rejected + 1,
+								}),
+					// update validations table with status completed
+					updateValidationInDB({
+						validationId: payload.validationId,
+						status: ValidationTableStatus.COMPLETED,
+						notes: payload.notes,
+					}),
+					// if nextRound present update application table with next round
+					nextRound[0] &&
+						payload.isQualified &&
+						updateApplicationInDB({
+							applicationId: payload.applicationId,
+							currentRound: nextRound[0].roundId,
+						}),
+					// update round results table
+					updateRoundResultInDB({
+						roundId: payload.roundId,
+						applicationId: payload.applicationId,
+						verdictBy: payload.reviewerId,
+						isQualified: payload.isQualified,
+					}),
+				]);
+			}
+			// if next is interview round and is taken by ai then create interview for the candidate
+			if (payload.isQualified && nextRound[0].roundType === "Technical Interview" && nextRound[0].isAI) {
+				await createAIInterview({
+					applicationId: payload.applicationId,
+					difficulty: nextRound[0].difficulty,
+					questionType: nextRound[0].questionType,
+					jobDescription: job[0].jobDescription,
+					roundId: nextRound[0].roundId,
+				});
 			}
 			return;
 		});
@@ -162,7 +188,8 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 			error instanceof GenerateQuestionsServiceError ||
 			error instanceof InsertBulkQuestionsInDBError ||
 			error instanceof AddApplicationTimelineToDBError ||
-			error instanceof CreateAIInterviewError
+			error instanceof CreateAIInterviewError ||
+			error instanceof UpdateValidationInDBError
 		) {
 			throw error;
 		}

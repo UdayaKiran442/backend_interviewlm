@@ -86,3 +86,14 @@ export type IInsertValidationInDB = {
 	notes: string | null;
 	status: string;
 };
+
+export type IUpdateValidationInDB = {
+	validationId: string;
+	reviewerId?: string | null;
+	interviewId?: string;
+	jobId?: string;
+	roundId?: string;
+	roundResultId?: string;
+	notes?: string | null;
+	status?: string;
+};

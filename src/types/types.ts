@@ -42,6 +42,7 @@ export type ICreateInterviewInDB = {
 	applicationId: string;
 	roundId: string;
 	roundResultsId: string | null;
+	jobId: string;
 	status: string;
 	jobDescription: string;
 	resumeText: string;
@@ -74,4 +75,14 @@ export type IUpdateUserInDB = {
 	userId: string;
 	email?: string;
 	roles?: string[];
+};
+
+export type IInsertValidationInDB = {
+	reviewerId: string | null;
+	interviewId: string;
+	jobId: string;
+	roundId: string;
+	roundResultId: string;
+	notes: string | null;
+	status: string;
 };

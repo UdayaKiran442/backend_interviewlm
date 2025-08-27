@@ -225,6 +225,13 @@
       "when": 1756206113198,
       "tag": "0031_lazy_bill_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1756211060664,
+      "tag": "0032_complete_rafael_vega",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ import { AddApplicationTimelineToDBError } from "../../exceptions/applicationTim
 import { GetQuestionsByInterviewIdFromDBError } from "../../exceptions/question.exceptions";
 import { GenerateInterviewFeedbackServiceError } from "../../exceptions/openai.exceptions";
 import { NotFoundError } from "../../exceptions/common.exceptions";
+import { InsertValidationInDBError } from "../../exceptions/validationsTable.exceptions";
 
 const interviewRoute = new Hono();
 
@@ -79,7 +80,16 @@ interviewRoute.post("/submit", async (c) => {
 			const errMessage = JSON.parse(error.message);
 			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
 		}
-		if (error instanceof GetQuestionsByInterviewIdFromDBError || error instanceof GenerateInterviewFeedbackServiceError || error instanceof SubmitInterviewError) {
+		if (
+			error instanceof GetQuestionsByInterviewIdFromDBError ||
+			error instanceof NotFoundError ||
+			error instanceof GenerateInterviewFeedbackServiceError ||
+			error instanceof GetInterviewByIdFromDBError ||
+			error instanceof AddApplicationTimelineToDBError ||
+			error instanceof UpdateInterviewInDBError ||
+			error instanceof InsertValidationInDBError ||
+			error instanceof SubmitInterviewError
+		) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
 		}
 		if (error instanceof NotFoundError) {

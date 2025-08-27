@@ -25,22 +25,26 @@ import { GetJobByIdFromDBError, UpdateJobInDBError } from "../exceptions/job.exc
 import { NotFoundError } from "../exceptions/common.exceptions";
 import type { IGenerateInterviewFeedbackService } from "../types/prompt.types";
 import { insertRoundResultsToDB } from "../repository/roundResults/roundResults.repository";
+import { insertValidationInDB } from "../repository/validationsTable/validationsTable.repository";
+import { ValidationTableStatus } from "../constants/validationTable.constants";
+import { InsertValidationInDBError } from "../exceptions/validationsTable.exceptions";
 
-export async function createAIInterview(payload: { applicationId: string; difficulty: string | null; questionType: string | null; jobDescription: string }) {
+export async function createAIInterview(payload: { applicationId: string; difficulty: string | null; questionType: string | null; jobDescription: string; roundId: string }) {
 	try {
 		const result = await db.transaction(async (tx: dbTx) => {
-			const [application] = await Promise.all([getApplicationByIdFromDB(payload.applicationId, tx)]);
+			const [application] = await Promise.all([getApplicationByIdFromDB(payload.applicationId)]);
 			// create interview
 			const interview = await createInterviewInDB(
 				{
 					applicationId: payload.applicationId,
 					difficulty: payload.difficulty,
 					questionType: payload.questionType,
-					roundId: application[0].currentRound,
+					roundId: payload.roundId,
 					roundResultsId: null,
 					status: InterviewStatus.PENDING,
 					jobDescription: payload.jobDescription,
 					resumeText: application[0].resumeText,
+					jobId: application[0].jobId,
 				},
 				tx,
 			);
@@ -63,7 +67,7 @@ export async function createAIInterview(payload: { applicationId: string; diffic
 			await addApplicationTimelineToDB(
 				{
 					applicationId: payload.applicationId,
-					roundId: application[0].currentRound,
+					roundId: payload.roundId,
 					title: "Interview Created",
 					status: ApplicationTimelineStatus.PENDING,
 					description: "Interview created successfully",
@@ -134,6 +138,7 @@ export async function submitInterview(payload: ISubmitInterviewSchema) {
 		const llmPayload: IGenerateInterviewFeedbackService = questions.map((question) => {
 			return {
 				questionText: question.question,
+				answerText: question.answer ?? "",
 				feedback: question.feedback ?? "",
 			};
 		});
@@ -143,12 +148,13 @@ export async function submitInterview(payload: ISubmitInterviewSchema) {
 		// store feedback in round results table
 		// add to application timeline, update status in interview table and add to validations table.
 
+		const roundResults = await insertRoundResultsToDB({
+			applicationId: interview[0].applicationId,
+			roundId: interview[0].roundId,
+			feedback: feedback.response,
+		});
+
 		await Promise.all([
-			insertRoundResultsToDB({
-				applicationId: interview[0].applicationId,
-				roundId: interview[0].roundId,
-				feedback: feedback.response,
-			}),
 			addApplicationTimelineToDB({
 				applicationId: interview[0].applicationId,
 				roundId: interview[0].roundId,
@@ -159,11 +165,28 @@ export async function submitInterview(payload: ISubmitInterviewSchema) {
 			updateInterviewInDB({
 				interviewId: payload.interviewId,
 				status: InterviewStatus.VERDICT_PENDING,
+				roundResultsId: roundResults.roundResultId,
 			}),
-			// TODO: Add to validations table
+			insertValidationInDB({
+				interviewId: payload.interviewId,
+				jobId: interview[0].jobId,
+				reviewerId: "reviewer-UtO-IdOjltDKD3T4XLVl8",
+				roundId: interview[0].roundId,
+				roundResultId: roundResults.roundResultId,
+				status: ValidationTableStatus.PENDING,
+				notes: null,
+			}),
 		]);
 	} catch (error) {
-		if (error instanceof GetQuestionsByInterviewIdFromDBError || error instanceof NotFoundError || error instanceof GenerateInterviewFeedbackServiceError) {
+		if (
+			error instanceof GetQuestionsByInterviewIdFromDBError ||
+			error instanceof NotFoundError ||
+			error instanceof GenerateInterviewFeedbackServiceError ||
+			error instanceof GetInterviewByIdFromDBError ||
+			error instanceof AddApplicationTimelineToDBError ||
+			error instanceof UpdateInterviewInDBError ||
+			error instanceof InsertValidationInDBError
+		) {
 			throw error;
 		}
 		throw new SubmitInterviewError("Failed to submit interview", { cause: (error as Error).message });

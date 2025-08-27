@@ -139,6 +139,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 						difficulty: nextRound[0].difficulty,
 						questionType: nextRound[0].questionType,
 						jobDescription: job[0].jobDescription,
+						roundId: nextRound[0].roundId,
 					});
 				}
 			}

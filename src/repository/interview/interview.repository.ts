@@ -18,6 +18,7 @@ export async function createInterviewInDB(payload: ICreateInterviewInDB, tx?: db
 			resumeText: payload.resumeText,
 			questionType: payload.questionType,
 			difficulty: payload.difficulty,
+			jobId: payload.jobId,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

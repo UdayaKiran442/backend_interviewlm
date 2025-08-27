@@ -195,6 +195,7 @@ export const roundResults = pgTable("round_results", {
 export const interview = pgTable("interview", {
 	interviewId: varchar("interviewId").primaryKey(),
 	applicationId: varchar("applicationId").notNull(),
+	jobId: varchar("jobId").notNull(),
 	roundId: varchar("roundId").notNull(),
 	roundResultsId: varchar("roundResultsId"),
 	status: varchar("status").notNull(), // enum -> PENDING, IN_PROGRESS, COMPLETED

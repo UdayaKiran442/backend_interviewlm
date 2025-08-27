@@ -1,3 +1,5 @@
+import type { IGenerateInterviewFeedbackService } from "../types/prompt.types";
+
 export function generateQuestionsPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string }) {
 	return `
 				You are a technical interviewer.
@@ -122,17 +124,32 @@ Return ONLY the feedback in the following strict JSON format:
 [CACHE_BYPASS]: ${Date.now()}`;
 }
 
-export function generateInterviewFeedbackPrompt(payload: { questionText: string; feedback: string }[]) {
+export function generateInterviewFeedbackPrompt(payload: IGenerateInterviewFeedbackService) {
 	return `
 		You are a technical interviewer.
-		Based on the following questions and feedback, generate a valid interview feedback summary.
+		Based on the following questions and feedback, generate a valid interview feedback.
+
+		 In feedback, include the following:
+                - Clarity of explanation
+                - Technical accuracy and depth
+                - Communication
+                - Areas to improve if any
+                - Any other relevant points you think are important
+                - Vertict on whether to qualify candidate to next round or not
 
 		### Input:
-		${payload.map(item => `Question: ${item.questionText}\nFeedback: ${item.feedback}`).join("\n\n")}
+		${payload.map((item) => `Question: ${item.questionText}\nAnswer: ${item.answerText}\nFeedback: ${item.feedback}`).join("\n\n")}
 
 		### Output:
-		{
-			"summary": "string" 
-		}
+		 {
+            "response": {
+                "feedback": "An overall summary on candidate performance",
+                "qualify": true/false,
+                "aiScore": 0-100,
+                "keyPoints"(strenghts of candidate): ["point1", "point2", "point3"],
+                "concerns"(weaknesses of candidate): ["concern1", "concern2", "concern3"],
+                "verdictReason":"Short reason for the verdict"
+            } 
+        }
 	`;
 }

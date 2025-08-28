@@ -18,14 +18,14 @@ const QualifyCandidateSchema = z.object({
 	roundId: z.string(),
 	jobId: z.string(),
 	screeningId: z.string().optional(),
-    validationId: z.string().nullable(),
-    notes: z.string().nullable(),
+	validationId: z.string().optional(),
+	notes: z.string().optional(),
 	isQualified: z.boolean(),
 });
 
 export type IQualifyCandidateSchema = z.infer<typeof QualifyCandidateSchema> & {
 	hrId: string;
-    reviewerId: string;
+	reviewerId: string;
 };
 
 roundRouter.post("/qualify/candidate", async (c) => {
@@ -45,7 +45,7 @@ roundRouter.post("/qualify/candidate", async (c) => {
 		const payload = {
 			...validation.data,
 			hrId: "VofeF3rFUHbcjVZeTamp8",
-            reviewerId: ""
+			reviewerId: "reviewer-UtO-IdOjltDKD3T4XLVl8",
 		};
 		await qualifyCandidate(payload);
 		return c.json({ success: true, message: "Candidate qualified/rejected" }, 200);

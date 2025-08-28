@@ -143,6 +143,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 						validationId: payload.validationId,
 						status: ValidationTableStatus.COMPLETED,
 						notes: payload.notes,
+						reviewerId: payload.reviewerId
 					}),
 					// if nextRound present update application table with next round
 					nextRound[0] &&

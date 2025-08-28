@@ -120,7 +120,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 						status: payload.isQualified ? ApplicationTimelineStatus.QUALIFIED : ApplicationTimelineStatus.REJECTED,
 						title: "Validation Completed",
 						description: "Your validation has been completed.",
-					}),
+					}, tx),
 					// update jobs table, if rejected increment rejected and decrement inProgress
 					nextRound[0]
 						? !payload.isQualified &&
@@ -128,7 +128,7 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 								jobId: job[0].jobId,
 								rejected: job[0].rejected + 1,
 								inProgress: job[0].inProgress - 1,
-							})
+							}, tx)
 						: payload.isQualified
 							? updateJobInDB({
 									jobId: job[0].jobId,
@@ -137,28 +137,28 @@ export async function qualifyCandidate(payload: IQualifyCandidateSchema) {
 							: updateJobInDB({
 									jobId: job[0].jobId,
 									rejected: job[0].rejected + 1,
-								}),
+								}, tx),
 					// update validations table with status completed
 					updateValidationInDB({
 						validationId: payload.validationId,
 						status: ValidationTableStatus.COMPLETED,
 						notes: payload.notes,
 						reviewerId: payload.reviewerId
-					}),
+					}, tx),
 					// if nextRound present update application table with next round
 					nextRound[0] &&
 						payload.isQualified &&
 						updateApplicationInDB({
 							applicationId: payload.applicationId,
 							currentRound: nextRound[0].roundId,
-						}),
+						}, tx),
 					// update round results table
 					updateRoundResultInDB({
 						roundId: payload.roundId,
 						applicationId: payload.applicationId,
 						verdictBy: payload.reviewerId,
 						isQualified: payload.isQualified,
-					}),
+					}, tx),
 				]);
 			}
 			// if next is interview round and is taken by ai then create interview for the candidate

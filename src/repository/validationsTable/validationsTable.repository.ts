@@ -4,6 +4,7 @@ import type { IInsertValidationInDB, IUpdateValidationInDB } from "../../types/t
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { validationTable } from "../schema";
+import type { dbTx } from "../db.types";
 
 export async function insertValidationInDB(payload: IInsertValidationInDB) {
 	try {
@@ -22,13 +23,14 @@ export async function insertValidationInDB(payload: IInsertValidationInDB) {
 	}
 }
 
-export async function updateValidationInDB(payload: IUpdateValidationInDB) {
+export async function updateValidationInDB(payload: IUpdateValidationInDB, tx?: dbTx) {
 	try {
+		const dbConnection = tx || db;
 		const updatedPayload = {
 			...payload,
 			updatedAt: new Date(),
 		};
-		await db.update(validationTable).set(updatedPayload).where(eq(validationTable.validationId, payload.validationId));
+		await dbConnection.update(validationTable).set(updatedPayload).where(eq(validationTable.validationId, payload.validationId));
 	} catch (error) {
 		throw new UpdateValidationInDBError("Failed to update validation in DB", { cause: (error as Error).message });
 	}

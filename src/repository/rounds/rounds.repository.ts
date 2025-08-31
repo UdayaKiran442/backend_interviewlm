@@ -2,9 +2,9 @@ import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { rounds } from "../schema";
 import { CreateRoundInDBError, GetRoundByIdFromDBError, GetRoundsByJobIdFromDBError } from "../../exceptions/round.exceptions";
-import { ICreatRoundInDB } from "../../types/types";
+import type { ICreatRoundInDB } from "../../types/types";
 import { and, eq } from "drizzle-orm";
-import { dbTx } from "../db.types";
+import type { dbTx } from "../db.types";
 
 export async function createRoundInDB(payload: ICreatRoundInDB, tx?: dbTx) {
     try {
@@ -14,6 +14,7 @@ export async function createRoundInDB(payload: ICreatRoundInDB, tx?: dbTx) {
                 roundId: `round-${generateNanoId()}`,
                 jobId: round.jobId,
                 roundNumber: round.roundNumber,
+                roundName: round.roundName,
                 roundType: round.roundType,
                 questionType: round.questionType,
                 duration: round.duration,

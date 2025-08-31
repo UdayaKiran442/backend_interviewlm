@@ -27,7 +27,7 @@ export async function createJob(payload: ICreateJobSchema) {
 				maximumApplications: payload.maximumApplications,
 				package: payload.package,
 				location: payload.location,
-				jobReviewers: payload.jobReviewers
+				jobReviewers: payload.jobReviewers,
 			});
 			upsertVectorEmbeddingsWorker.postMessage({
 				indexName: ActiveConfig.JD_INDEX,
@@ -44,6 +44,7 @@ export async function createJob(payload: ICreateJobSchema) {
 					return {
 						jobId: newJob.jobId,
 						roundNumber: round.roundNumber,
+						roundName: round.roundName,
 						roundType: round.roundType,
 						questionType: round.questionType,
 						duration: round.duration,

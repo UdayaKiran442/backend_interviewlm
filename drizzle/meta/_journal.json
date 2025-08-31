@@ -232,6 +232,20 @@
       "when": 1756211060664,
       "tag": "0032_complete_rafael_vega",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1756651435885,
+      "tag": "0033_misty_red_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1756651543087,
+      "tag": "0034_slim_absorbing_man",
+      "breakpoints": true
     }
   ]
 }

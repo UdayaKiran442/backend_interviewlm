@@ -56,6 +56,7 @@ export const rounds = pgTable(
 		roundId: varchar("roundId").primaryKey(),
 		jobId: varchar("jobId").notNull(),
 		roundNumber: integer("roundNumber").notNull(),
+		roundName: varchar("roundName").notNull(),
 		roundType: varchar("roundType").notNull(),
 		questionType: varchar("questionType"),
 		duration: integer("duration"),

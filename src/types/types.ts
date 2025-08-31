@@ -7,6 +7,7 @@
 export type ICreatRoundInDB = {
 	jobId: string;
 	roundNumber: number;
+	roundName: string;
 	roundType: string;
 	questionType: string | undefined;
 	duration: number | undefined;

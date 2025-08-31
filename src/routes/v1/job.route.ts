@@ -22,6 +22,7 @@ const CreateJobSchema = z.object({
 		z.object({
 			roundNumber: z.number(),
 			roundType: z.string(),
+			roundName: z.string(),
 			questionType: z.string().optional(),
 			duration: z.number().positive().optional(),
 			difficulty: z.string().optional(),

@@ -14,10 +14,10 @@ const CreateJobSchema = z.object({
 	jobTitle: z.string(),
 	jobDescription: z.string(),
 	department: z.string(),
-	package: z.string().optional(),
-	location: z.string().optional(),
-	maximumApplications: z.number().optional(),
-	jobReviewers: z.array(z.string()).nullable(),
+	package: z.string().nullish(),
+	location: z.string().nullish(),
+	maximumApplications: z.number().nullish(),
+	jobReviewers: z.array(z.string()).optional(),
 	rounds: z.array(
 		z.object({
 			roundNumber: z.number(),

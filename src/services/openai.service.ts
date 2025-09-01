@@ -134,7 +134,7 @@ Resume Content: ${payload.resumeText}
 	}
 }
 
-export async function generateQuestionsService(payload: { resumeText: string; jobDescription: string; questionType: string; difficulty: string }) {
+export async function generateQuestionsService(payload: { resumeText: string; jobDescription: string; questionType: string; difficulty: string; roundDescription?: string }) {
 	try {
 		let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined;
 		switch (payload.questionType) {
@@ -142,7 +142,12 @@ export async function generateQuestionsService(payload: { resumeText: string; jo
 				message = [
 					{
 						role: "system",
-						content: generateQuestionsPromptForJDandResume({ resumeText: payload.resumeText, jobDescription: payload.jobDescription, difficulty: payload.difficulty }),
+						content: generateQuestionsPromptForJDandResume({
+							resumeText: payload.resumeText,
+							jobDescription: payload.jobDescription,
+							difficulty: payload.difficulty,
+							roundDescription: payload.roundDescription,
+						}),
 					},
 				];
 				break;
@@ -150,7 +155,7 @@ export async function generateQuestionsService(payload: { resumeText: string; jo
 				message = [
 					{
 						role: "system",
-						content: generateQuestionsPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty }),
+						content: generateQuestionsPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty, roundDescription: payload.roundDescription }),
 					},
 				];
 				break;
@@ -171,7 +176,14 @@ export async function generateQuestionsService(payload: { resumeText: string; jo
 	}
 }
 
-export async function generateFollowUpQuestionService(payload: { userResponse: string; jobDescription: string; resumeText: string; questionType: string; difficulty: string }) {
+export async function generateFollowUpQuestionService(payload: {
+	userResponse: string;
+	jobDescription: string;
+	resumeText: string;
+	questionType: string;
+	difficulty: string;
+	roundDescription?: string;
+}) {
 	try {
 		let message: OpenAI.Chat.Completions.ChatCompletionMessageParam[] | undefined;
 		switch (payload.questionType) {
@@ -184,6 +196,7 @@ export async function generateFollowUpQuestionService(payload: { userResponse: s
 							jobDescription: payload.jobDescription,
 							difficulty: payload.difficulty,
 							response: payload.userResponse,
+							roundDescription: payload.roundDescription,
 						}),
 					},
 				];
@@ -192,7 +205,12 @@ export async function generateFollowUpQuestionService(payload: { userResponse: s
 				message = [
 					{
 						role: "system",
-						content: generateFollowUpQuestionPromptForJD({ jobDescription: payload.jobDescription, difficulty: payload.difficulty, response: payload.userResponse }),
+						content: generateFollowUpQuestionPromptForJD({
+							jobDescription: payload.jobDescription,
+							difficulty: payload.difficulty,
+							response: payload.userResponse,
+							roundDescription: payload.roundDescription,
+						}),
 					},
 				];
 				break;
@@ -205,6 +223,7 @@ export async function generateFollowUpQuestionService(payload: { userResponse: s
 							jobDescription: payload.jobDescription,
 							difficulty: payload.difficulty,
 							response: payload.userResponse,
+							roundDescription: payload.roundDescription,
 						}),
 					},
 				];

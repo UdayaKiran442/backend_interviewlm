@@ -1,12 +1,14 @@
 import type { IGenerateInterviewFeedbackService } from "../types/prompt.types";
 
-export function generateQuestionsPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string }) {
+export function generateQuestionsPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string; roundDescription?: string }) {
 	return `
 				You are a technical interviewer.
 
 				Given the following candidate resume and job description, generate exactly 3 unique interview questions. Each question should:
 				- Be relevant to the candidate's resume and/or the job description.
 				- At least one question must focus solely on required skills from the job description, even if not present in the resume.
+
+				${payload.roundDescription ? `- Follow round description(if relevant) while generating questions: "${payload.roundDescription}".` : ""}
 
 				Return ONLY the questions in the following strict JSON format:
 				{
@@ -26,12 +28,14 @@ export function generateQuestionsPromptForJDandResume(payload: { resumeText: str
 				`;
 }
 
-export function generateQuestionsPromptForJD(payload: { jobDescription: string; difficulty: string }) {
+export function generateQuestionsPromptForJD(payload: { jobDescription: string; difficulty: string; roundDescription?: string }) {
 	return `
 				You are a technical interviewer.
 
 				Given the following job description, generate exactly 3 unique interview questions. Each question should:
 				- Be relevant to the job description.
+
+				${payload.roundDescription ? `- Follow round description(if relevant) while generating questions: "${payload.roundDescription}".` : ""}
 
 				Return ONLY the questions in the following strict JSON format:
 				{
@@ -48,7 +52,7 @@ export function generateQuestionsPromptForJD(payload: { jobDescription: string; 
 				`;
 }
 
-export function generateFollowUpQuestionPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string; response: string }) {
+export function generateFollowUpQuestionPromptForJDandResume(payload: { resumeText: string; jobDescription: string; difficulty: string; response: string; roundDescription?: string }) {
 	return `
 	You are acting as a **technical interviewer**.  
 	Your task is to generate exactly **one follow-up question** based on the candidate’s resume, the job description, and their previous response. \n
@@ -59,6 +63,8 @@ export function generateFollowUpQuestionPromptForJDandResume(payload: { resumeTe
 	3. Match the difficulty level provided: "${payload.difficulty}".  
 	4. Avoid open-ended or generic questions — keep them precise, technical, and measurable.  
 	5. Return the result in **valid JSON** only. No explanations, no additional text.
+	${payload.roundDescription ? `- Follow round description(if relevant) while generating question: "${payload.roundDescription}".` : ""}
+
 
 	### Output JSON format:
 	{
@@ -76,7 +82,7 @@ export function generateFollowUpQuestionPromptForJDandResume(payload: { resumeTe
 	`;
 }
 
-export function generateFollowUpQuestionPromptForJD(payload: { jobDescription: string; difficulty: string; response: string }) {
+export function generateFollowUpQuestionPromptForJD(payload: { jobDescription: string; difficulty: string; response: string; roundDescription?: string }) {
 	return `
 	You are acting as a **technical interviewer**.  
 	Your task is to generate exactly **one follow-up question** based on the job description, and their previous response. \n
@@ -87,6 +93,7 @@ export function generateFollowUpQuestionPromptForJD(payload: { jobDescription: s
 	3. Match the difficulty level provided: "${payload.difficulty}".  
 	4. Avoid open-ended or generic questions — keep them precise, technical, and measurable.  
 	5. Return the result in **valid JSON** only. No explanations, no additional text.
+	${payload.roundDescription ? `- Follow round description(if relevant) while generating question: "${payload.roundDescription}".` : ""}
 
 	### Output JSON format:
 	{

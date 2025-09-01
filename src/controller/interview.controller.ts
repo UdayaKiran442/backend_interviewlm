@@ -29,7 +29,7 @@ import { insertValidationInDB } from "../repository/validationsTable/validations
 import { ValidationTableStatus } from "../constants/validationTable.constants";
 import { InsertValidationInDBError } from "../exceptions/validationsTable.exceptions";
 
-export async function createAIInterview(payload: { applicationId: string; difficulty: string | null; questionType: string | null; jobDescription: string; roundId: string }) {
+export async function createAIInterview(payload: { applicationId: string; difficulty: string | null; questionType: string | null; jobDescription: string; roundId: string; roundDescription?: string }) {
 	try {
 		const result = await db.transaction(async (tx: dbTx) => {
 			const [application] = await Promise.all([getApplicationByIdFromDB(payload.applicationId)]);
@@ -54,6 +54,7 @@ export async function createAIInterview(payload: { applicationId: string; diffic
 				difficulty: payload.difficulty ?? "",
 				jobDescription: payload.jobDescription,
 				questionType: payload.questionType ?? "",
+				roundDescription: payload.roundDescription,
 			});
 
 			// insert questions in db

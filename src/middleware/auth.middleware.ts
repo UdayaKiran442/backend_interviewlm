@@ -8,6 +8,7 @@ export interface AuthUser {
 	userId: string;
 	hrId: string;
 	role: string;
+	companyId: string;
 }
 
 declare module "hono" {
@@ -36,7 +37,7 @@ export const authMiddleware = async (c: Context, next: () => Promise<void>) => {
 		if (decodedToken.sub) {
 			if (userRole === UserRoles.HR) {
 				const hr = await getHRByUserIdFromDB(decodedToken.sub);
-				c.set("user", { userId: hr[0].userId, hrId: hr[0].hrId, role: userRole });
+				c.set("user", { userId: hr[0].userId, hrId: hr[0].hrId, role: userRole, companyId: hr[0].companyId });
 			}
 			if (userRole === UserRoles.REVIEWER) {
 				// TODO: Implement reviewer authentication

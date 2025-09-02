@@ -1,5 +1,12 @@
 import { Hono } from "hono";
-import { generateEmbeddingsService, generateFeedbackToQuestionService, generateFollowUpQuestionService, generateQuestionsService, generateResumeFeedbackService, generateResumeSkills } from "../../services/openai.service";
+import {
+	generateEmbeddingsService,
+	generateFeedbackToQuestionService,
+	generateFollowUpQuestionService,
+	generateQuestionsService,
+	generateResumeFeedbackService,
+	generateResumeSkills,
+} from "../../services/openai.service";
 import { queryVectorEmbeddingsService, upsertVectorEmbeddingsService } from "../../services/pinecone.service";
 import { ActiveConfig } from "../../utils/config.utils";
 import { generateNanoId } from "../../utils/nanoid.utils";
@@ -10,12 +17,13 @@ import { getRoundByIdFromDB, getRoundsByJobIdFromDB } from "../../repository/rou
 import { getJobByIdFromDB } from "../../repository/job/job.repository";
 import { getApplicationByIdFromDB } from "../../repository/application/application.repository";
 import { getInterviewByIdFromDB } from "../../repository/interview/interview.repository";
+import { getReviewersByCompanyId } from "../../controller/reviewer.controller";
 
-const testRouter = new Hono()
+const testRouter = new Hono();
 
-testRouter.get('/', async (c) => {
-    try {
-        const resumeText = `Udaya Kiran Gonuguntla
+testRouter.get("/", async (c) => {
+	try {
+		const resumeText = `Udaya Kiran Gonuguntla
 Software Engineer | Node.js, React.js, SQL, LLMs, AI Integration
 919160891919 gudaya2002@gmail.com linkedin.com/in/gonuguntla-udaya-kiran/ Vijayawada
 Summary
@@ -69,20 +77,17 @@ Bus Booking API                                                                 
 Education
 Bachelor of Technology - Computer Science
 BML Munjal University, Gurugram`;
-        const job = await getJobByIdFromDB("job-NCqzLLGua6ny4x46y3xQS")
-        const feedback = await generateResumeFeedbackService({
-            jobDescription: job[0].jobDescription ?? "",
-            resumeText: resumeText
-        })
-        return c.json({ feedback })
-    } catch (error) {
+		const job = await getJobByIdFromDB("job-NCqzLLGua6ny4x46y3xQS");
+		const feedback = await generateResumeFeedbackService({
+			jobDescription: job[0].jobDescription ?? "",
+			resumeText: resumeText,
+		});
+		return c.json({ feedback });
+	} catch (error) {}
+});
 
-    }
-})
-
-
-testRouter.get('/v1', async (c) => {
-    const resumeText = `Udaya Kiran Gonuguntla
+testRouter.get("/v1", async (c) => {
+	const resumeText = `Udaya Kiran Gonuguntla
 Software Engineer | Node.js, React.js, SQL, LLMs, AI Integration
 919160891919 gudaya2002@gmail.com linkedin.com/in/gonuguntla-udaya-kiran/ Vijayawada
 Summary
@@ -136,99 +141,105 @@ Bus Booking API                                                                 
 Education
 Bachelor of Technology - Computer Science
 BML Munjal University, Gurugram`;
-    try {
-        const resumeSummary = await generateResumeSkills(resumeText)
-        const resumeEmbeddings = await generateEmbeddingsService(resumeSummary.summary)
-        await upsertVectorEmbeddingsService({
-            indexName: ActiveConfig.RESUME_INDEX,
-            vector: resumeEmbeddings ?? [],
-            metadata: {
-                resumeText,
-                summary: resumeSummary.summary,
-                skills: resumeSummary.skills,
-                jobId: "job-zJJY0YDDg79Ee6185PR0Y",
-                applicationId: "application-lQgZ8rWeDHKJZz_iK2qDk"
-            }
-        })
-        return c.json({ message: "Resume embeddings created successfully" })
-        // const prompt = "Experience in Nodejs, LLMs, AI Integration";
-        // const promptEmbeddings = await generateEmbeddings(prompt);
-        // const queryResponse = await queryVectorEmbeddings({
-        //     indexName: ActiveConfig.RESUME_INDEX,
-        //     vector: promptEmbeddings ?? [],
-        //     jobId: "job-zJJY0YDDg79Ee6185PR0Y",
-        // })
-        // return c.json({ queryResponse })
-    } catch (error) {
+	try {
+		const resumeSummary = await generateResumeSkills(resumeText);
+		const resumeEmbeddings = await generateEmbeddingsService(resumeSummary.summary);
+		await upsertVectorEmbeddingsService({
+			indexName: ActiveConfig.RESUME_INDEX,
+			vector: resumeEmbeddings ?? [],
+			metadata: {
+				resumeText,
+				summary: resumeSummary.summary,
+				skills: resumeSummary.skills,
+				jobId: "job-zJJY0YDDg79Ee6185PR0Y",
+				applicationId: "application-lQgZ8rWeDHKJZz_iK2qDk",
+			},
+		});
+		return c.json({ message: "Resume embeddings created successfully" });
+		// const prompt = "Experience in Nodejs, LLMs, AI Integration";
+		// const promptEmbeddings = await generateEmbeddings(prompt);
+		// const queryResponse = await queryVectorEmbeddings({
+		//     indexName: ActiveConfig.RESUME_INDEX,
+		//     vector: promptEmbeddings ?? [],
+		//     jobId: "job-zJJY0YDDg79Ee6185PR0Y",
+		// })
+		// return c.json({ queryResponse })
+	} catch (error) {}
+});
 
-    }
-})
+testRouter.get("/v2", async (c) => {
+	try {
+		const res = `applicationTimeline-${generateNanoId()}`;
+		return c.json({ success: true, message: "Applications fetched", res }, 200);
+	} catch (error) {
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
 
-testRouter.get('/v2', async (c) => {
-    try {
-        const res = `applicationTimeline-${generateNanoId()}`
-        return c.json({ success: true, message: 'Applications fetched', res }, 200)
-    } catch (error) {
+testRouter.get("/v3", async (c) => {
+	try {
+		const res = await parsePDFLangchainService("https://storage.googleapis.com/resumes_candidates/4Nrdyrmr7xn2FCFDolNkk.pdf");
+		console.log(res);
+		return c.json({ success: true, message: "Applications fetched", res }, 200);
+	} catch (error) {
+		console.log(error);
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
 
-        return c.json({ success: false, message: 'Something went wrong' }, 500)
-    }
-})
+testRouter.get("/v4", async (c) => {
+	try {
+		const round = await getRoundByIdFromDB("round-XgtV3bjA_EpobubKIvTmL");
+		console.log(round);
+		const nextRound = await getRoundsByJobIdFromDB(round[0].jobId, round[0].roundNumber + 1);
+		console.log(nextRound);
+		return c.json({ success: true, message: "Applications fetched", nextRound }, 200);
+	} catch (error) {
+		console.log(error);
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
 
+testRouter.get("/v5", async (c) => {
+	try {
+		const interview = await getInterviewByIdFromDB("interview-7nn3ZiWADBILVGp8K76yY");
+		const response = await generateFollowUpQuestionService({
+			difficulty: interview[0].difficulty ?? "",
+			jobDescription: interview[0].jobDescription,
+			questionType: interview[0].questionType ?? "",
+			resumeText: interview[0].resumeText,
+			userResponse: "Utilised pinecone vector db for contextual memory and search",
+		});
+		return c.json({ success: true, message: "Applications fetched", response }, 200);
+	} catch (error) {
+		console.log(error);
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
 
-testRouter.get('/v3', async (c) => {
-    try {
-        const res = await parsePDFLangchainService("https://storage.googleapis.com/resumes_candidates/4Nrdyrmr7xn2FCFDolNkk.pdf")
-        console.log(res)
-        return c.json({ success: true, message: 'Applications fetched', res }, 200)
-    } catch (error) {
-        console.log(error)
-        return c.json({ success: false, message: 'Something went wrong' }, 500)
-    }
-})
+testRouter.get("/v6", async (c) => {
+	try {
+		const interview = await getInterviewByIdFromDB("interview-7nn3ZiWADBILVGp8K76yY");
+		const response = await generateFeedbackToQuestionService({
+			answerText: "Using vector similar search I had performed a search query to retrieve the similar context of the query and passed it to prompt for contextual understanding and knowledge",
+			questionText: "Can you explain how the integration of Pinecone vector databases improved the performance of your AI chatbot in the Budget Buddy project?",
+			resumeText: interview[0].resumeText,
+		});
+		return c.json({ success: true, message: "Applications fetched", response }, 200);
+	} catch (error) {
+		console.log(error);
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
 
-testRouter.get('/v4', async (c) => {
-    try {
-        const round = await getRoundByIdFromDB("round-XgtV3bjA_EpobubKIvTmL");
-        console.log(round)
-        const nextRound = await getRoundsByJobIdFromDB(round[0].jobId, round[0].roundNumber + 1);
-        console.log(nextRound)
-        return c.json({ success: true, message: 'Applications fetched', nextRound }, 200)
-    } catch (error) {
-        console.log(error)
-        return c.json({ success: false, message: 'Something went wrong' }, 500)
-    }
-})
-
-testRouter.get('/v5', async (c) => {
-    try {
-        const interview = await getInterviewByIdFromDB("interview-7nn3ZiWADBILVGp8K76yY");
-        const response = await generateFollowUpQuestionService({
-            difficulty: interview[0].difficulty ?? '',
-            jobDescription: interview[0].jobDescription,
-            questionType: interview[0].questionType ?? '',
-            resumeText: interview[0].resumeText,
-            userResponse: "Utilised pinecone vector db for contextual memory and search"
-        })
-        return c.json({ success: true, message: 'Applications fetched', response }, 200)
-    } catch (error) {
-        console.log(error)
-        return c.json({ success: false, message: 'Something went wrong' }, 500)
-    }
-})
-
-testRouter.get('/v6', async (c) => {
-    try {
-        const interview = await getInterviewByIdFromDB("interview-7nn3ZiWADBILVGp8K76yY");
-        const response = await generateFeedbackToQuestionService({
-            answerText: "Using vector similar search I had performed a search query to retrieve the similar context of the query and passed it to prompt for contextual understanding and knowledge",
-            questionText: "Can you explain how the integration of Pinecone vector databases improved the performance of your AI chatbot in the Budget Buddy project?",
-            resumeText: interview[0].resumeText
-        })
-        return c.json({ success: true, message: 'Applications fetched', response }, 200)
-    } catch (error) {
-        console.log(error)
-        return c.json({ success: false, message: 'Something went wrong' }, 500)
-    }
-})
+testRouter.get("/v7", async (c) => {
+	try {
+		const reviewer = await getReviewersByCompanyId("aD9XDQ53i-LGZ50SSJAKw");
+		return c.json({ success: true, message: "Applications fetched", reviewer }, 200);
+	} catch (error) {
+		console.log(error);
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
 
 export default testRouter;

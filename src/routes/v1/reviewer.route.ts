@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import z from "zod";
-import { searchReviewer } from "../../controller/reviewer.controller";
-import { SearchReviewerError, SearchReviewerInDBError } from "../../exceptions/reviewer.exceptions";
+import { getReviewersByCompanyId, searchReviewer } from "../../controller/reviewer.controller";
+import { GetReviewersByCompanyIdError, GetReviewersByCompanyIdFromDBError, SearchReviewerError, SearchReviewerInDBError } from "../../exceptions/reviewer.exceptions";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 const reviewerRoute = new Hono();
 
@@ -28,6 +29,19 @@ reviewerRoute.post("/search", async (c) => {
 			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 401);
 		}
 		if (error instanceof SearchReviewerError || error instanceof SearchReviewerInDBError) {
+			return c.json({ success: false, error: error.message, message: error.message }, 400);
+		}
+		return c.json({ success: false, error: "Internal Server Error", message: "An unexpected error occurred" }, 500);
+	}
+});
+
+reviewerRoute.get("/", authMiddleware, async (c) => {
+	try {
+		const companyId = c.get("user").companyId;
+		const response = await getReviewersByCompanyId(companyId);
+		return c.json({ success: true, response });
+	} catch (error) {
+		if (error instanceof GetReviewersByCompanyIdFromDBError || error instanceof GetReviewersByCompanyIdError) {
 			return c.json({ success: false, error: error.message, message: error.message }, 400);
 		}
 		return c.json({ success: false, error: "Internal Server Error", message: "An unexpected error occurred" }, 500);

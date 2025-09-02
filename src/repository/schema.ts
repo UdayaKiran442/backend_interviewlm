@@ -226,30 +226,40 @@ export const questions = pgTable(
 	}),
 );
 
-export const reviewer = pgTable("reviewer", {
-	reviewerId: varchar("reviewerId").primaryKey(),
-	companyId: varchar("companyId").notNull(),
-	name: varchar("name").notNull(),
-	email: varchar("email").notNull().unique(),
-	phone: varchar("phone"),
-	jobTitle: varchar("jobTitle").notNull(),
-	createdAt: timestamp("createdAt").notNull().defaultNow(),
-	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-},
-(reviewer) => ({
-	nameIdx: index("reviewer_name_idx").on(reviewer.name),
-	emailIdx: index("reviewer_email_idx").on(reviewer.email),
-}));
+export const reviewer = pgTable(
+	"reviewer",
+	{
+		reviewerId: varchar("reviewerId").primaryKey(),
+		companyId: varchar("companyId").notNull(),
+		name: varchar("name").notNull(),
+		email: varchar("email").notNull().unique(),
+		phone: varchar("phone"),
+		jobTitle: varchar("jobTitle").notNull(),
+		createdAt: timestamp("createdAt").notNull().defaultNow(),
+		updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+	},
+	(reviewer) => ({
+		nameIdx: index("reviewer_name_idx").on(reviewer.name),
+		emailIdx: index("reviewer_email_idx").on(reviewer.email),
+		companyIdIdx: index("reviewer_company_id_idx").on(reviewer.companyId),
+	}),
+);
 
-export const validationTable = pgTable("validations_table", {
-	validationId: varchar("validationId").primaryKey(),
-	reviewerId: varchar("reviewerId"),
-	interviewId: varchar("interviewId").notNull(),
-	jobId: varchar("jobId").notNull(),
-	roundId: varchar("roundId").notNull(),
-	roundResultId: varchar("roundResultId").notNull(),
-	notes: varchar("notes"),
-	status: varchar("status").notNull().default("PENDING"), // enum -> pending, completed
-	createdAt: timestamp("createdAt").notNull().defaultNow(),
-	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
+export const validationTable = pgTable(
+	"validations_table",
+	{
+		validationId: varchar("validationId").primaryKey(),
+		reviewerId: varchar("reviewerId"),
+		interviewId: varchar("interviewId").notNull(),
+		jobId: varchar("jobId").notNull(),
+		roundId: varchar("roundId").notNull(),
+		roundResultId: varchar("roundResultId").notNull(),
+		notes: varchar("notes"),
+		status: varchar("status").notNull().default("PENDING"), // enum -> pending, completed
+		createdAt: timestamp("createdAt").notNull().defaultNow(),
+		updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+	},
+	(validationTable) => ({
+		reviewerIdIdx: index("validation_reviewer_id_idx").on(validationTable.reviewerId),
+	}),
+);

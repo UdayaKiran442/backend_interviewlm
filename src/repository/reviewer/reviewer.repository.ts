@@ -1,10 +1,10 @@
 import { eq, sql } from "drizzle-orm";
 
-import { CreateReviewerInDBError, GetReviewerByEmailFromDBError, SearchReviewerInDBError } from "../../exceptions/reviewer.exceptions";
+import { CreateReviewerInDBError, GetReviewerByEmailFromDBError, GetReviewersByCompanyIdFromDBError, SearchReviewerInDBError } from "../../exceptions/reviewer.exceptions";
 import type { ICreateReviewerSchema } from "../../routes/v1/hr.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
-import { reviewer } from "../schema";
+import { jobs, reviewer, validationTable } from "../schema";
 import type { ISearchReviewerSchema } from "../../routes/v1/reviewer.route";
 
 export async function createReviewerInDB(payload: ICreateReviewerSchema) {
@@ -42,5 +42,28 @@ export async function searchReviewerInDB(payload: ISearchReviewerSchema) {
 			.where(sql`lower(${reviewer.name}) LIKE ${`%${payload.searchName.toLowerCase()}%`}`);
 	} catch (error) {
 		throw new SearchReviewerInDBError("Failed to search reviewer in DB", { cause: (error as Error).message });
+	}
+}
+
+export async function getReviewersByCompanyIdFromDB(companyId: string) {
+	try {
+		return await db
+			.select({
+				reviewerId: reviewer.reviewerId,
+				name: reviewer.name,
+				email: reviewer.email,
+				phone: reviewer.phone,
+				reviewerJobTitle: reviewer.jobTitle,
+				createdAt: reviewer.createdAt,
+				updatedAt: reviewer.updatedAt,
+				jobId: jobs.jobId,
+				jobTitle: jobs.jobTitle,
+			})
+			.from(reviewer)
+			.where(eq(reviewer.companyId, companyId))
+			.leftJoin(validationTable, eq(reviewer.reviewerId, validationTable.reviewerId))
+			.leftJoin(jobs, eq(validationTable.jobId, jobs.jobId));
+	} catch (error) {
+		throw new GetReviewersByCompanyIdFromDBError("Failed to get reviewers by company ID from DB", { cause: (error as Error).message });
 	}
 }

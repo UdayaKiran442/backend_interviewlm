@@ -4,7 +4,7 @@ import { CreateReviewerInDBError, GetReviewerByEmailFromDBError, GetReviewersByC
 import type { ICreateReviewerSchema } from "../../routes/v1/hr.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
-import { jobs, reviewer, validationTable } from "../schema";
+import { reviewer } from "../schema";
 import type { ISearchReviewerSchema } from "../../routes/v1/reviewer.route";
 
 export async function createReviewerInDB(payload: ICreateReviewerSchema) {
@@ -47,22 +47,26 @@ export async function searchReviewerInDB(payload: ISearchReviewerSchema) {
 
 export async function getReviewersByCompanyIdFromDB(companyId: string) {
 	try {
-		return await db
-			.select({
-				reviewerId: reviewer.reviewerId,
-				name: reviewer.name,
-				email: reviewer.email,
-				phone: reviewer.phone,
-				reviewerJobTitle: reviewer.jobTitle,
-				createdAt: reviewer.createdAt,
-				updatedAt: reviewer.updatedAt,
-				jobId: jobs.jobId,
-				jobTitle: jobs.jobTitle,
-			})
-			.from(reviewer)
-			.where(eq(reviewer.companyId, companyId))
-			.leftJoin(validationTable, eq(reviewer.reviewerId, validationTable.reviewerId))
-			.leftJoin(jobs, eq(validationTable.jobId, jobs.jobId));
+		const reviewers = await db.execute(sql`
+			SELECT 
+			r."reviewerId",
+   	 		r."name",
+    		r."email",
+    		r."phone",
+    		r."jobTitle" as "reviewerJobTitle",
+    		json_agg(
+				json_build_object(
+        			'jobId', j."jobId",
+        			'jobTitle', j."jobTitle"
+      			)
+    		) as jobs
+  FROM reviewer r
+  JOIN validations_table v ON v."reviewerId" = r."reviewerId"
+  JOIN jobs j ON j."jobId" = v."jobId"
+  WHERE r."companyId" = ${companyId}
+  GROUP BY r."reviewerId", r."name", r."email", r."phone", r."jobTitle"
+`);
+		return reviewers.rows;
 	} catch (error) {
 		throw new GetReviewersByCompanyIdFromDBError("Failed to get reviewers by company ID from DB", { cause: (error as Error).message });
 	}

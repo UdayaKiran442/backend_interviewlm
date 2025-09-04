@@ -38,8 +38,8 @@ reviewerRoute.post("/search", async (c) => {
 reviewerRoute.get("/", authMiddleware, async (c) => {
 	try {
 		const companyId = c.get("user").companyId;
-		const response = await getReviewersByCompanyId(companyId);
-		return c.json({ success: true, response });
+		const reviewers = await getReviewersByCompanyId(companyId);
+		return c.json({ success: true, reviewers });
 	} catch (error) {
 		if (error instanceof GetReviewersByCompanyIdFromDBError || error instanceof GetReviewersByCompanyIdError) {
 			return c.json({ success: false, error: error.message, message: error.message }, 400);

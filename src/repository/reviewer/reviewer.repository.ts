@@ -61,8 +61,8 @@ export async function getReviewersByCompanyIdFromDB(companyId: string) {
       			)
     		) as jobs
   FROM reviewer r
-  JOIN validations_table v ON v."reviewerId" = r."reviewerId"
-  JOIN jobs j ON j."jobId" = v."jobId"
+  LEFT JOIN validations_table v ON v."reviewerId" = r."reviewerId"
+  LEFT JOIN jobs j ON j."jobId" = v."jobId"
   WHERE r."companyId" = ${companyId}
   GROUP BY r."reviewerId", r."name", r."email", r."phone", r."jobTitle"
 `);

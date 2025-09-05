@@ -233,7 +233,7 @@ export const reviewer = pgTable(
 		companyId: varchar("companyId").notNull(),
 		name: varchar("name").notNull(),
 		email: varchar("email").notNull().unique(),
-		phone: varchar("phone"),
+		phone: varchar("phone").notNull(),
 		jobTitle: varchar("jobTitle").notNull(),
 		createdAt: timestamp("createdAt").notNull().defaultNow(),
 		updatedAt: timestamp("updatedAt").notNull().defaultNow(),

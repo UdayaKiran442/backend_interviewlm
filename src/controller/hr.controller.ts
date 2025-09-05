@@ -1,10 +1,10 @@
 import { UserRoles } from "../constants/user.constants";
 import { CreateUserInClerkServiceError } from "../exceptions/clerk.exceptions";
 import { AssignReviewerToJobError, CreateReviewerError, GetJobsByHRError } from "../exceptions/hr.exceptions";
-import { CreateReviewerInDBError } from "../exceptions/reviewer.exceptions";
+import { CreateReviewerInDBError, GetReviewerByEmailFromDBError } from "../exceptions/reviewer.exceptions";
 import { GetJobByIdFromDBError, GetJobsByHRFromDBError, UpdateJobInDBError } from "../exceptions/job.exceptions";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../exceptions/user.exceptions";
-import { createReviewerInDB } from "../repository/reviewer/reviewer.repository";
+import { createReviewerInDB, getReviewerByEmailFromDB } from "../repository/reviewer/reviewer.repository";
 import { getJobByIdFromDB, getJobsByHRFromDB, updateJobInDB } from "../repository/job/job.repository";
 import { addUserInDB, getUserByEmailFromDB, updateUserInDB } from "../repository/users/users.repository";
 import type { ICreateReviewerSchema, IAssignReviewerToJobSchema } from "../routes/v1/hr.route";
@@ -24,6 +24,10 @@ export async function getJobsByHR(hrId: string) {
 
 export async function createReviewer(payload: ICreateReviewerSchema) {
 	try {
+		const reviewer = await getReviewerByEmailFromDB(payload.email);
+		if (reviewer.length > 0) {
+			return;
+		}
 		// check if user is present in user table by email
 		const user = await getUserByEmailFromDB(payload.email);
 
@@ -51,7 +55,7 @@ export async function createReviewer(payload: ICreateReviewerSchema) {
 			// TODO: Send email invitation to user with password
 		}
 	} catch (error) {
-		if (error instanceof CreateReviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError) {
+		if (error instanceof CreateReviewerInDBError || error instanceof UpdateUserInDBError || error instanceof GetUserByEmailFromDBError || error instanceof CreateUserInClerkServiceError || error instanceof GetReviewerByEmailFromDBError) {
 			throw error;
 		}
 		throw new CreateReviewerError("Failed to assign reviewer", { cause: (error as Error).message });

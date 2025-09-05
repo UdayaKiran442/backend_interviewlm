@@ -7,7 +7,7 @@ import { CreateReviewerError, GetJobsByHRError } from "../../exceptions/hr.excep
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../../exceptions/user.exceptions";
 import { CreateUserInClerkServiceError } from "../../exceptions/clerk.exceptions";
-import { CreateReviewerInDBError } from "../../exceptions/reviewer.exceptions";
+import { CreateReviewerInDBError, GetReviewerByEmailFromDBError } from "../../exceptions/reviewer.exceptions";
 import { NotFoundError } from "../../exceptions/common.exceptions";
 
 const hrRoute = new Hono();
@@ -26,27 +26,29 @@ hrRoute.get("/jobs", authMiddleware, async (c) => {
 });
 
 const CreateReviewerSchema = z.object({
-	companyId: z.string(),
 	name: z.string().min(2).max(100),
 	email: z.email(),
-	phone: z.string().min(10).max(10).optional(),
+	phone: z.string().min(10).max(10),
 	jobTitle: z.string(),
 });
 
-export type ICreateReviewerSchema = z.infer<typeof CreateReviewerSchema> & { hrId: string };
+export type ICreateReviewerSchema = z.infer<typeof CreateReviewerSchema> & { hrId: string; companyId: string };
 
-hrRoute.post("/create/reviewer", async (c) => {
+hrRoute.post("/create/reviewer", authMiddleware, async (c) => {
 	try {
+		const hrId = c.get("user").hrId;
+		const companyId = c.get("user").companyId;
 		const validation = CreateReviewerSchema.safeParse(await c.req.json());
 		if (!validation.success) {
 			throw validation.error;
 		}
 		const payload = {
 			...validation.data,
-			hrId: "VofeF3rFUHbcjVZeTamp8",
+			hrId,
+			companyId,
 		};
-		const response = await createReviewer(payload);
-		return c.json({ success: true, message: "Reviewer invited successfully", response }, 200);
+		await createReviewer(payload);
+		return c.json({ success: true, message: "Reviewer invited successfully" }, 200);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const errMessage = JSON.parse(error.message);
@@ -57,7 +59,8 @@ hrRoute.post("/create/reviewer", async (c) => {
 			error instanceof CreateReviewerInDBError ||
 			error instanceof UpdateUserInDBError ||
 			error instanceof GetUserByEmailFromDBError ||
-			error instanceof CreateUserInClerkServiceError
+			error instanceof CreateUserInClerkServiceError ||
+			error instanceof GetReviewerByEmailFromDBError
 		) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
 		}

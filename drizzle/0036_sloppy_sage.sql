@@ -1,0 +1,1 @@
+ALTER TABLE "reviewer" ALTER COLUMN "phone" SET NOT NULL;

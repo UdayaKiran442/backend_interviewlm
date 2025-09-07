@@ -7,7 +7,7 @@ import { authMiddleware } from "../../middleware/auth.middleware";
 const reviewerRoute = new Hono();
 
 const SearchReviewerSchema = z.object({
-	searchName: z.string().min(3).max(100),
+	searchName: z.string(),
 });
 
 export type ISearchReviewerSchema = z.infer<typeof SearchReviewerSchema>;
@@ -21,8 +21,8 @@ reviewerRoute.post("/search", async (c) => {
 		const payload = {
 			...validation.data,
 		};
-		const response = await searchReviewer(payload);
-		return c.json({ success: true, response });
+		const reviewers = await searchReviewer(payload);
+		return c.json({ success: true, reviewers });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const errMessage = JSON.parse(error.message);

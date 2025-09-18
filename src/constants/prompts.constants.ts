@@ -160,3 +160,24 @@ export function generateInterviewFeedbackPrompt(payload: IGenerateInterviewFeedb
         }
 	`;
 }
+
+export function generateJobDescriptionSummaryPrompt(payload: { jobDescription: string }) {
+	return `
+	You are an expert technical summarizer.
+	Given the job description below, generate a **concise semantic-search-friendly summary**.
+
+	Requirements:
+	1. Preserve key **technical terms, skills, and tools** exactly as written (e.g., keep "Pinecone", "Express.js").
+	2. Remove boilerplate or generic filler text (e.g., company culture blurbs).
+	3. Limit summary to **2–4 sentences (~100 words)**.
+	4. Keep wording clear and specific to support vector-based semantic search.
+
+	### Input JD:
+	${payload.jobDescription}
+
+	### Output (valid JSON only):
+	{
+		"summary": ""
+	}
+	`;
+}

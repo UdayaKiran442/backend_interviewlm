@@ -5,6 +5,7 @@ import {
 	GenerateFeedbackToQuestionServiceError,
 	GenerateFollowUpQuestionServiceError,
 	GenerateInterviewFeedbackServiceError,
+	GenerateJobDescriptionSummaryServiceError,
 	GenerateQuestionsServiceError,
 	GenerateResumeFeedbackServiceError,
 	GenerateResumeSkillsServiceError,
@@ -14,6 +15,7 @@ import {
 	generateFollowUpQuestionPromptForJD,
 	generateFollowUpQuestionPromptForJDandResume,
 	generateInterviewFeedbackPrompt,
+	generateJobDescriptionSummaryPrompt,
 	generateQuestionsPromptForJD,
 	generateQuestionsPromptForJDandResume,
 } from "../constants/prompts.constants";
@@ -278,5 +280,24 @@ export async function generateInterviewFeedbackService(payload: IGenerateIntervi
 		return JSON.parse(response.choices[0].message.content ?? "");
 	} catch (error) {
 		throw new GenerateInterviewFeedbackServiceError("Failed to generate interview feedback from llm", { cause: (error as Error).cause });
+	}
+}
+
+export async function generateJobDescriptionSummary(payload: { jobDescription: string }) {
+	try {
+		const response = await openai.chat.completions.create({
+			model: "gpt-4o-mini-2024-07-18",
+			messages: [
+				{
+					role: "system",
+					content: generateJobDescriptionSummaryPrompt(payload),
+				},
+			],
+			temperature: 0.5,
+			top_p: 1,
+		});
+		return JSON.parse(response.choices[0].message.content ?? "");
+	} catch (error) {
+		throw new GenerateJobDescriptionSummaryServiceError("Failed to generate job description summary from llm", { cause: (error as Error).cause });
 	}
 }

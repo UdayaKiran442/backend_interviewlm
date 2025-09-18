@@ -12,28 +12,33 @@ import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from 
 import { GenerateEmbeddingsServiceError } from "../exceptions/openai.exceptions";
 import db from "../repository/db";
 import type { dbTx } from "../repository/db.types";
+import { generateJobDescriptionSummary } from "../services/openai.service";
 
 export async function createJob(payload: ICreateJobSchema) {
 	const upsertVectorEmbeddingsWorker = new Worker(path.resolve(__dirname, "../worker/upsertVectorEmbeddings.worker.ts"));
 	try {
 		// create job and generate embeddings for job description
 		const result = db.transaction(async (tx: dbTx) => {
-			const newJob = await createJobInDB({
-				companyId: payload.companyId,
-				department: payload.department,
-				hrId: payload.hrId,
-				jobDescription: payload.jobDescription,
-				jobTitle: payload.jobTitle,
-				maximumApplications: payload.maximumApplications,
-				package: payload.package,
-				location: payload.location,
-				jobReviewers: payload.jobReviewers,
-			});
+			const [newJob, jdSummary] = await Promise.all([
+				createJobInDB({
+					companyId: payload.companyId,
+					department: payload.department,
+					hrId: payload.hrId,
+					jobDescription: payload.jobDescription,
+					jobTitle: payload.jobTitle,
+					maximumApplications: payload.maximumApplications,
+					package: payload.package,
+					location: payload.location,
+					jobReviewers: payload.jobReviewers,
+				}),
+				generateJobDescriptionSummary({ jobDescription: payload.jobDescription }),
+			]);
 			upsertVectorEmbeddingsWorker.postMessage({
 				indexName: ActiveConfig.JD_INDEX,
-				text: payload.jobDescription,
+				text: jdSummary.summary,
 				metadata: {
 					jobId: newJob.jobId,
+					summary: jdSummary.summary,
 				},
 			});
 

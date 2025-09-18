@@ -14,9 +14,9 @@ const CreateJobSchema = z.object({
 	jobTitle: z.string(),
 	jobDescription: z.string(),
 	department: z.string(),
-	package: z.string().nullish(),
-	location: z.string().nullish(),
-	maximumApplications: z.number().nullish(),
+	package: z.string().nullable(),
+	location: z.string().nullable(),
+	maximumApplications: z.number().nullable(),
 	jobReviewers: z.array(z.string()).optional(),
 	rounds: z.array(
 		z.object({

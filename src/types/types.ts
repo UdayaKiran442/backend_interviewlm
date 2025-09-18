@@ -26,11 +26,11 @@ export type ICreatJobInDB = {
 	jobTitle: string;
 	jobDescription: string;
 	department: string;
-	package: string | undefined;
-	maximumApplications: number | undefined;
+	package: string | null;
+	maximumApplications: number | null;
 	companyId: string;
-	location: string | undefined;
-	jobReviewers: string[] | null;
+	location: string | null;
+	jobReviewers: string[] | undefined;
 };
 
 export type ICreateQuestionInDB = {

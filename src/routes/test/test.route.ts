@@ -234,7 +234,7 @@ testRouter.get("/v6", async (c) => {
 
 testRouter.get("/v7", async (c) => {
 	try {
-		const reviewer = await getReviewersByCompanyId("aD9XDQ53i-LGZ50SSJAKw");
+		const reviewer = await generateNanoId();
 		return c.json({ success: true, message: "Applications fetched", reviewer }, 200);
 	} catch (error) {
 		console.log(error);

@@ -98,10 +98,14 @@ export async function getApplicationsByJobIdFromDB(jobId: string) {
                             'applicationId', rr."applicationId",
                             'isQualified', rr."isQualified",
                             'feedback', rr."feedback",
-                            'verdictBy', rr."verdictBy"
+                            'verdictBy', rr."verdictBy",
+                            'roundType', r."roundType",
+                            'roundName', r."roundName",
+                            'roundNumber', r."roundNumber"
                         )), '[]')
-                        FROM round_results rr
-                        WHERE rr."applicationId" = ${applications.applicationId}
+                        FROM rounds r
+                        LEFT JOIN round_results rr ON r."roundId" = rr."roundId"
+                        WHERE rr."applicationId" = ${applications.applicationId} OR r."jobId" = ${jobId}
                     )
                 `.as("roundResults"),
 			})

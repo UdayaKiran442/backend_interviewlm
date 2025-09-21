@@ -12,10 +12,11 @@ import { addApplicationToDB, checkCandidateAppliedInDB, getApplicationsByJobIdFr
 import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { getCandidateByIDFromDB, updateCandidateJobsInDB } from "../repository/candidate/candidate.repository";
 import db from "../repository/db";
+import type { dbTx } from "../repository/db.types";
 import { closeJobInDB, getJobByIdFromDB, updateJobApplicationsCountInDB } from "../repository/job/job.repository";
 import { insertScreeningResultsToDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
-import { IApplyJobSchema, IGetApplicationsForJobSchema } from "../routes/v1/applicatons.route";
+import type { IApplyJobSchema, IGetApplicationsForJobSchema } from "../routes/v1/applicatons.route";
 import { generateResumeSkills } from "../services/openai.service";
 import { queryVectorEmbeddingsService } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
@@ -23,7 +24,7 @@ import { upsertVectorEmbeddings } from "../utils/upsertVectorDb.utils";
 
 export async function applyJob(payload: IApplyJobSchema) {
     try {
-        const result = db.transaction(async (tx: any) => {
+        const result = db.transaction(async (tx: dbTx) => {
             const [job, rounds, application, resumeSkills, candidate] = await Promise.all([
                 getJobByIdFromDB(payload.jobId),
                 getRoundsByJobIdFromDB(payload.jobId),

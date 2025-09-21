@@ -2,7 +2,7 @@ import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplication
 import { ApplyJobError, JobAlreadyAppliedError } from "../exceptions/applications.exceptions";
 import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { UpdateCandidateJobsInDBError } from "../exceptions/candidate.exceptions";
-import { NotFoundError } from "../exceptions/common.exceptions";
+import { NotFoundError, UnauthorizedError } from "../exceptions/common.exceptions";
 import { CloseJobInDBError, GetJobByIdFromDBError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../exceptions/job.exceptions";
 import { GenerateEmbeddingsServiceError, GenerateResumeSkillsServiceError } from "../exceptions/openai.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
@@ -149,8 +149,15 @@ export async function applyJob(payload: IApplyJobSchema) {
 
 export async function getApplicationsForJob(payload: IGetApplicationsForJobSchema) {
 	try {
-		const [applications] = await getApplicationsByJobIdFromDB(payload.jobId);
-		return { applications };
+		// check if job is added by logged in hr
+		const job = await getJobByIdFromDB(payload.jobId);
+		if (job.length === 0) {
+			throw new NotFoundError("Job not found");
+		}
+		if (job[0].hrId !== payload.hrId) {
+			throw new UnauthorizedError("You are not authorized to view applications for this job");
+		}
+		return await getApplicationsByJobIdFromDB(payload.jobId);
 	} catch (error) {
 		if (error instanceof GetApplicationsByJobIdFromDBError || error instanceof GetRoundsByJobIdFromDBError) {
 			throw error;

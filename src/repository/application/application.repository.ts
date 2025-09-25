@@ -95,7 +95,7 @@ export async function getApplicationsByJobIdFromDB(jobId: string) {
                     (
                         SELECT COALESCE(json_agg(json_build_object(
                             'roundResultId', rr."roundResultId",
-                            'roundId', rr."roundId",
+                            'roundId', r."roundId",
                             'applicationId', rr."applicationId",
                             'isQualified', rr."isQualified",
                             'feedback', rr."feedback",

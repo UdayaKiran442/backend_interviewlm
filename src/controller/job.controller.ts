@@ -1,7 +1,7 @@
 import * as path from "path";
-import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdFromDBError, CloseJobError } from "../exceptions/job.exceptions";
+import { CreateJobInDBError, CreateJobError, CloseJobInDBError, GetJobByIdFromDBError, CloseJobError, GetJobByIdError } from "../exceptions/job.exceptions";
 import { closeJobInDB, createJobInDB, getJobByIdFromDB } from "../repository/job/job.repository";
-import type { ICloseJobSchema, ICreateJobSchema } from "../routes/v1/job.route";
+import type { ICloseJobSchema, ICreateJobSchema, IGetJobByIdSchema } from "../routes/v1/job.route";
 import { createRoundInDB } from "../repository/rounds/rounds.repository";
 import { CreateRoundInDBError } from "../exceptions/round.exceptions";
 import { getHRFromDB } from "../repository/hr/hr.repository";
@@ -102,5 +102,25 @@ export async function closeJob(payload: ICloseJobSchema) {
 			throw error;
 		}
 		throw new CloseJobError("Failed to close job", { cause: (error as Error).message });
+	}
+}
+
+export async function getJobById(payload: IGetJobByIdSchema) {
+	try {
+		const job = await getJobByIdFromDB(payload.jobId);
+
+		if (job.length === 0) {
+			throw new NotFoundError("Job not found");
+		}
+
+		if (job[0].hrId !== payload.hrId) {
+			throw new UnauthorizedError("You are not authorized to view this job");
+		}
+		return job[0];
+	} catch (error) {
+		if (error instanceof GetJobByIdFromDBError || error instanceof NotFoundError || error instanceof UnauthorizedError) {
+			throw error;
+		}
+		throw new GetJobByIdError("Failed to get job by id", { cause: (error as Error).message });
 	}
 }

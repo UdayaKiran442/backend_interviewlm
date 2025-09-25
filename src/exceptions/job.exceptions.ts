@@ -87,3 +87,13 @@ export class GetJobsByHRFromDBError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+
+export class GetJobByIdError extends Error {
+    public cause?: unknown;
+    constructor(message: string, options?: { cause?: unknown }) {
+        super(message);
+        this.name = "GetJobByIdError";
+        if (options?.cause) this.cause = options.cause;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}

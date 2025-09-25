@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import z from "zod";
-import { CloseJobError, CloseJobInDBError, CreateJobError, CreateJobInDBError } from "../../exceptions/job.exceptions";
+import { CloseJobError, CloseJobInDBError, CreateJobError, CreateJobInDBError, GetJobByIdError } from "../../exceptions/job.exceptions";
 import { CreateRoundInDBError } from "../../exceptions/round.exceptions";
-import { closeJob, createJob } from "../../controller/job.controller";
+import { closeJob, createJob, getJobById } from "../../controller/job.controller";
 import { NotFoundError, UnauthorizedError } from "../../exceptions/common.exceptions";
 import { UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError } from "../../exceptions/openai.exceptions";
@@ -99,6 +99,45 @@ jobRoute.post("/close", async (c) => {
 			return c.json({ success: false, message: error.message, error: error.cause }, 401);
 		}
 		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
+
+const GetJobByIdSchema = z.object({
+	jobId: z.string(),
+});
+
+export type IGetJobByIdSchema = z.infer<typeof GetJobByIdSchema> & { hrId: string, fields: string[] };
+
+jobRoute.post("/fetch", async (c) => {
+	try {
+		const validation = GetJobByIdSchema.safeParse(await c.req.json());
+		const queryParams = await c.req.query();
+		const fields = queryParams.fields.split(",");
+		console.log("fields", fields);
+		if (!validation.success) {
+			throw validation.error;
+		}
+		const payload = {
+			...validation.data,
+			hrId: "VofeF3rFUHbcjVZeTamp8",
+			fields,
+		};
+		const res = await getJobById(payload);
+		return c.json({ success: true, message: "Job fetched", res }, 200);
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
+		if (error instanceof GetJobByIdError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 400);
+		}
+		if (error instanceof UnauthorizedError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 401);
+		}
+		if (error instanceof NotFoundError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 404);
+		}
 	}
 });
 

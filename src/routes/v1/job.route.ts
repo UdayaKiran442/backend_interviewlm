@@ -106,24 +106,20 @@ const GetJobByIdSchema = z.object({
 	jobId: z.string(),
 });
 
-export type IGetJobByIdSchema = z.infer<typeof GetJobByIdSchema> & { hrId: string, fields: string[] };
+export type IGetJobByIdSchema = z.infer<typeof GetJobByIdSchema> & { hrId: string };
 
 jobRoute.post("/fetch", async (c) => {
 	try {
 		const validation = GetJobByIdSchema.safeParse(await c.req.json());
-		const queryParams = await c.req.query();
-		const fields = queryParams.fields.split(",");
-		console.log("fields", fields);
 		if (!validation.success) {
 			throw validation.error;
 		}
 		const payload = {
 			...validation.data,
 			hrId: "VofeF3rFUHbcjVZeTamp8",
-			fields,
 		};
-		const res = await getJobById(payload);
-		return c.json({ success: true, message: "Job fetched", res }, 200);
+		const job = await getJobById(payload);
+		return c.json({ success: true, message: "Job fetched", job }, 200);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const errMessage = JSON.parse(error.message);

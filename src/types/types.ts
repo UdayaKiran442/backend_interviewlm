@@ -9,10 +9,10 @@ export type ICreatRoundInDB = {
 	roundNumber: number;
 	roundName: string;
 	roundType: string;
-	questionType: string | undefined;
-	duration: number | undefined;
-	difficulty: string | undefined;
-	roundDescription: string | undefined;
+	questionType: string | null;
+	duration: number | null;
+	difficulty: string | null;
+	roundDescription: string | null;
 	isAI: boolean;
 }[];
 

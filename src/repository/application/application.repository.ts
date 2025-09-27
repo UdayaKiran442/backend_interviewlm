@@ -90,6 +90,8 @@ export async function getApplicationsByJobIdFromDB(jobId: string) {
 				location: candidates.location,
 				jobId: applications.jobId,
 				status: applications.status,
+				resumeLink: applications.resumeLink,
+				coverLetterLink: applications.coverLetterLink,
 				appliedAt: applications.createdAt,
 				roundResults: sql`
                     (

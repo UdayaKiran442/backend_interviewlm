@@ -23,12 +23,12 @@ export const authMiddleware = async (c: Context, next: () => Promise<void>) => {
 		const authHeader = c.req.header("Authorization");
 		const userRole = c.req.header("X-User-Role");
 		if (!authHeader) {
-			throw new UnauthorizedError("No token provided");
+			throw new UnauthorizedError("Login to access this resource");
 		}
 
 		const token = authHeader;
 		if (!token) {
-			throw new UnauthorizedError("No token provided");
+			throw new UnauthorizedError("Login to access this resource");
 		}
 
 		const decodedToken = jwtDecode(token);

@@ -15,7 +15,7 @@ app.get("/", (c) => {
 app.use(
 	"/*",
 	cors({
-		origin: ["http://localhost:3001"],
+		origin: ["http://localhost:3001", "https://interviewlm-frontend.vercel.app/"],
 	}),
 );
 // v1 router

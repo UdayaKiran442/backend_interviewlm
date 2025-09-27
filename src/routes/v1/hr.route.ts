@@ -8,7 +8,7 @@ import { authMiddleware } from "../../middleware/auth.middleware";
 import { GetUserByEmailFromDBError, UpdateUserInDBError } from "../../exceptions/user.exceptions";
 import { CreateUserInClerkServiceError } from "../../exceptions/clerk.exceptions";
 import { CreateReviewerInDBError, GetReviewerByEmailFromDBError } from "../../exceptions/reviewer.exceptions";
-import { NotFoundError } from "../../exceptions/common.exceptions";
+import { NotFoundError, UnauthorizedError } from "../../exceptions/common.exceptions";
 
 const hrRoute = new Hono();
 
@@ -20,6 +20,9 @@ hrRoute.get("/jobs", authMiddleware, async (c) => {
 	} catch (error) {
 		if (error instanceof GetJobsByHRFromDBError || error instanceof GetJobsByHRError) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
+		}
+		if (error instanceof UnauthorizedError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 401);
 		}
 		return c.json({ success: false, message: "Failed to fetch jobs", error: error }, 500);
 	}

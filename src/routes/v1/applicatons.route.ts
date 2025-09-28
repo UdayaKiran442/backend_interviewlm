@@ -1,9 +1,16 @@
 import { Hono } from "hono";
 import z from "zod";
-import { applyJob, getApplicationsForJob } from "../../controller/application.controller";
+import { applyJob, getApplicationDetailsById, getApplicationsForJob } from "../../controller/application.controller";
 import { NotFoundError, UnauthorizedError } from "../../exceptions/common.exceptions";
 import { CloseJobInDBError, GetJobByIdFromDBError, JobClosedError, UpdateJobApplicationsCountInDBError } from "../../exceptions/job.exceptions";
-import { ApplyJobError, GetApplicationsByJobIdFromDBError, GetApplicationsForJobError, JobAlreadyAppliedError } from "../../exceptions/applications.exceptions";
+import {
+	ApplyJobError,
+	GetApplicationDetailsByIdError,
+	GetApplicationDetailsByIdFromDBError,
+	GetApplicationsByJobIdFromDBError,
+	GetApplicationsForJobError,
+	JobAlreadyAppliedError,
+} from "../../exceptions/applications.exceptions";
 import { AddApplicationToDBError, CheckCandidateAppliedInDBError } from "../../exceptions/applications.exceptions";
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../../exceptions/pinecone.exceptions";
 import { GenerateEmbeddingsServiceError, GenerateResumeSkillsServiceError } from "../../exceptions/openai.exceptions";
@@ -106,6 +113,37 @@ applicationsRoute.post("/job", async (c) => {
 			return c.json({ success: false, message: error.message, error: error.cause }, 400);
 		}
 
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
+
+const GetApplicationDetailsByIdSchema = z.object({
+	applicationId: z.string(),
+	jobId: z.string(),
+});
+
+export type IGetApplicationDetailsByIdSchema = z.infer<typeof GetApplicationDetailsByIdSchema> & { hrId: string };
+
+applicationsRoute.post("/", async (c) => {
+	try {
+		const validation = GetApplicationDetailsByIdSchema.safeParse(await c.req.json());
+		if (!validation.success) {
+			throw validation.error;
+		}
+		const payload = {
+			...validation.data,
+			hrId: "VofeF3rFUHbcjVZeTamp8",
+		};
+		const application = await getApplicationDetailsById(payload);
+		return c.json({ success: true, message: "Application details fetched", application }, 200);
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
+		if (error instanceof GetApplicationDetailsByIdFromDBError || error instanceof GetApplicationDetailsByIdError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 400);
+		}
 		return c.json({ success: false, message: "Something went wrong" }, 500);
 	}
 });

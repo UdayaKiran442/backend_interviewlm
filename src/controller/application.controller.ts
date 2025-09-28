@@ -1,4 +1,11 @@
-import { AddApplicationToDBError, CheckCandidateAppliedInDBError, GetApplicationsByJobIdFromDBError, GetApplicationsForJobError } from "../exceptions/applications.exceptions";
+import {
+	AddApplicationToDBError,
+	CheckCandidateAppliedInDBError,
+	GetApplicationDetailsByIdError,
+	GetApplicationDetailsByIdFromDBError,
+	GetApplicationsByJobIdFromDBError,
+	GetApplicationsForJobError,
+} from "../exceptions/applications.exceptions";
 import { ApplyJobError, JobAlreadyAppliedError } from "../exceptions/applications.exceptions";
 import { AddApplicationTimelineToDBError } from "../exceptions/applicationTimeline.exceptions";
 import { UpdateCandidateJobsInDBError } from "../exceptions/candidate.exceptions";
@@ -8,7 +15,7 @@ import { GenerateEmbeddingsServiceError, GenerateResumeSkillsServiceError } from
 import { QueryVectorEmbeddingsServiceError, UpsertVectorEmbeddingsError, UpsertVectorEmbeddingsServiceError } from "../exceptions/pinecone.exceptions";
 import { GetRoundsByJobIdFromDBError } from "../exceptions/round.exceptions";
 import { InsertScreeningResultsToDBError } from "../exceptions/screening.exceptions";
-import { addApplicationToDB, checkCandidateAppliedInDB, getApplicationsByJobIdFromDB } from "../repository/application/application.repository";
+import { addApplicationToDB, checkCandidateAppliedInDB, getApplicationDetailsByIdFromDB, getApplicationsByJobIdFromDB } from "../repository/application/application.repository";
 import { addApplicationTimelineToDB } from "../repository/applicationTimeline/applicationTimeline.repository";
 import { getCandidateByIDFromDB, updateCandidateJobsInDB } from "../repository/candidate/candidate.repository";
 import db from "../repository/db";
@@ -16,7 +23,7 @@ import type { dbTx } from "../repository/db.types";
 import { closeJobInDB, getJobByIdFromDB, updateJobApplicationsCountInDB } from "../repository/job/job.repository";
 import { insertScreeningResultsToDB } from "../repository/resumeScreening/resumeScreening.repository";
 import { getRoundsByJobIdFromDB } from "../repository/rounds/rounds.repository";
-import type { IApplyJobSchema, IGetApplicationsForJobSchema } from "../routes/v1/applicatons.route";
+import type { IApplyJobSchema, IGetApplicationDetailsByIdSchema, IGetApplicationsForJobSchema } from "../routes/v1/applicatons.route";
 import { generateResumeSkills } from "../services/openai.service";
 import { queryVectorEmbeddingsService } from "../services/pinecone.service";
 import { ActiveConfig } from "../utils/config.utils";
@@ -163,5 +170,16 @@ export async function getApplicationsForJob(payload: IGetApplicationsForJobSchem
 			throw error;
 		}
 		throw new GetApplicationsForJobError("Failed to get applications for job", { cause: (error as Error).message });
+	}
+}
+
+export async function getApplicationDetailsById(payload: IGetApplicationDetailsByIdSchema) {
+	try {
+		return await getApplicationDetailsByIdFromDB(payload);
+	} catch (error) {
+		if (error instanceof GetApplicationDetailsByIdFromDBError) {
+			throw error;
+		}
+		throw new GetApplicationDetailsByIdError("Failed to get application details by id", { cause: (error as Error).message });
 	}
 }

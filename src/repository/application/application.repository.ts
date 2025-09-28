@@ -1,4 +1,4 @@
-import type { IApplyJobSchema } from "../../routes/v1/applicatons.route";
+import type { IApplyJobSchema, IGetApplicationDetailsByIdSchema } from "../../routes/v1/applicatons.route";
 import { generateNanoId } from "../../utils/nanoid.utils";
 import db from "../db";
 import { applications, candidates } from "../schema";
@@ -7,6 +7,7 @@ import {
 	AddApplicationToDBError,
 	CheckCandidateAppliedInDBError,
 	GetApplicationByIdFromDBError,
+	GetApplicationDetailsByIdFromDBError,
 	GetApplicationsByJobIdFromDBError,
 	UpdateApplicationInDBError,
 } from "../../exceptions/applications.exceptions";
@@ -126,5 +127,55 @@ export async function getApplicationByIdFromDB(applicationId: string, tx?: dbTx)
 		return await dbConnection.select().from(applications).where(eq(applications.applicationId, applicationId));
 	} catch (error) {
 		throw new GetApplicationByIdFromDBError("Failed to get application by id from DB", { cause: (error as Error).message });
+	}
+}
+
+export async function getApplicationDetailsByIdFromDB(payload: IGetApplicationDetailsByIdSchema) {
+	try {
+		const application = await db
+			.select({
+				applicationId: applications.applicationId,
+				candidateId: candidates.candidateId,
+				currentRound: applications.currentRound,
+				firstName: candidates.firstName,
+				middleName: candidates.middleName,
+				lastName: candidates.lastName,
+				totalExperience: candidates.totalExperience,
+				email: candidates.email,
+				phone: candidates.phone,
+				location: candidates.location,
+				jobId: applications.jobId,
+				status: applications.status,
+				resumeLink: applications.resumeLink,
+				coverLetterLink: applications.coverLetterLink,
+				resumeText: applications.resumeText,
+				coverLetterText: applications.coverLetterText,
+				appliedAt: applications.createdAt,
+				roundResults: sql`
+                    (
+                        SELECT COALESCE(json_agg(json_build_object(
+                            'roundResultId', rr."roundResultId",
+                            'roundId', r."roundId",
+                            'applicationId', rr."applicationId",
+                            'isQualified', rr."isQualified",
+                            'feedback', rr."feedback",
+                            'verdictBy', rr."verdictBy",
+                            'roundType', r."roundType",
+                            'roundName', r."roundName",
+                            'roundNumber', r."roundNumber"
+                        )), '[]')
+                        FROM rounds r
+                        LEFT JOIN round_results rr ON r."roundId" = rr."roundId"
+						WHERE rr."applicationId" = ${applications.applicationId} OR r."jobId" = ${payload.jobId}
+
+                    )
+                `.as("roundResults"),
+			})
+			.from(applications)
+			.where(eq(applications.applicationId, payload.applicationId))
+			.leftJoin(candidates, eq(applications.candidateId, candidates.candidateId));
+		return application[0];
+	} catch (error) {
+		throw new GetApplicationDetailsByIdFromDBError("Failed to get application details by id from DB", { cause: (error as Error).message });
 	}
 }

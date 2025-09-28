@@ -242,4 +242,14 @@ testRouter.get("/v7", async (c) => {
 	}
 });
 
+testRouter.get("/v8", async (c) => {
+	try {
+		const reviewer = await getApplicationByIdFromDB("application-S5iSTxOJOxvgQL1SLcK9Q")
+		return c.json({ success: true, message: "Applications fetched", reviewer }, 200);
+	} catch (error) {
+		console.log(error);
+		return c.json({ success: false, message: "Something went wrong" }, 500);
+	}
+});
+
 export default testRouter;

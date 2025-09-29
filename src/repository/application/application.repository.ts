@@ -148,8 +148,6 @@ export async function getApplicationDetailsByIdFromDB(payload: IGetApplicationDe
 				status: applications.status,
 				resumeLink: applications.resumeLink,
 				coverLetterLink: applications.coverLetterLink,
-				resumeText: applications.resumeText,
-				coverLetterText: applications.coverLetterText,
 				appliedAt: applications.createdAt,
 				roundResults: sql`
                     (
